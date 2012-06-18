@@ -1,0 +1,9 @@
+---
+common:
+  ldap:
+    host: ## ip address or hostname
+    encryption: ## blank or :start_tls
+    base: ## baseDN for ldap auth, eg dc=redhat,dc=com
+    group_base: ##baseDN for your ldap groups, eg ou=Groups,dc=redhat,dc=com
+    server_type: ## type of server. default == posix. :active_directory, :posix, :free_ipa
+    ad_domain: ## domain for your users if using active directory, eg redhat.com
