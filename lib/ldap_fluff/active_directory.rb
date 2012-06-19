@@ -23,10 +23,6 @@ class LdapConnection::ActiveDirectory
     @ad_domain = AppConfig.ldap.ad_domain
     @bind_user = AppConfig.ldap.service_user
     @bind_pass = AppConfig.ldap.service_pass
-    # return string will be something like 
-    # CN=bros,OU=bropeeps,DC=jomara,DC=redhat,DC=com
-    # AD group proc from http://erniemiller.org/2008/04/04/simplified-active-directory-authentication/
-    @group_proc = Proc.new {|g| g.sub(/.*?CN=(.*?),.*/, '\1')}
   end
 
   def bind?(uid=nil, password=nil)
@@ -43,7 +39,7 @@ class LdapConnection::ActiveDirectory
     member = @ldap.search(:filter => filter, :base => @group_base).first
     groups = []
     if member != nil && member.attribute_names.include?(:memberof)
-      groups = member[:memberof].collect(&@group_proc)
+      groups = group_names_from_cn(member) 
       groups += group_parents(groups)
     end
     groups
@@ -56,11 +52,20 @@ class LdapConnection::ActiveDirectory
       group_filter = Net::LDAP::Filter.eq("cn", g)
       member = @ldap.search(:filter => class_filter & group_filter, :base => @group_base).first
       if member != nil && member.attribute_names.include?(:memberof)
-        parents += member[:memberof].collect(&@group_proc)
+        parents += group_names_from_cn(member) 
         parents += group_parents(parents)
       end
     end
     return parents
+  end
+
+  # extract the group names from the LDAP style response,
+  # return string will be something like 
+  # CN=bros,OU=bropeeps,DC=jomara,DC=redhat,DC=com
+  # AD group proc from http://erniemiller.org/2008/04/04/simplified-active-directory-authentication/
+  def group_names_from_cn(member)
+    p = Proc.new { |g| g.sub(/.*?CN=(.*?),.*/, '\1')} }
+    member[:memberof].collect(&p)
   end
 
   # AD generally does not support un-authenticated searching
