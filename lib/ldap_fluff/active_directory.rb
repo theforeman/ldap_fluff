@@ -63,4 +63,15 @@ class LdapConnection::ActiveDirectory
     return parents
   end
 
+  # AD generally does not support un-authenticated searching
+  # Typically AD admins configure a public user for searching
+  def service_bind
+    @ldap.auth "#{@bind_user}@#{@ad_domain}", @bind_pass
+    unless (@ldap.bind || AppConfig.ldap.ad_anon)
+      Rails.logger.error "Your Active Directory service user is not correctly configured"
+      Rails.logger.error "Unless you have anonymous queries configured, this will probably not work as expected"
+      Rails.logger.error "Please configure ldap service user or set anonymous mode"
+    end
+  end
+
 end
