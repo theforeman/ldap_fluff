@@ -1,9 +1,9 @@
 require 'rake/clean'
 require 'rake/testtask'
-require 'rake/rdoctask'
+require 'rdoc/task'
 begin
   require 'rubygems'
-  require 'rake/gempackagetask'
+  require 'rubygems/package_task'
 rescue Exception
   nil
 end
@@ -62,7 +62,7 @@ Simple library for binding & group querying on top of various ldap implementatio
   end
 
   namespace 'ldap_fluff' do 
-    Rake::GemPackageTask.new(spec) do |t| 
+    Gem::PackageTask.new(spec) do |t|
       t.need_tar = true 
     end 
   end
