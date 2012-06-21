@@ -11,15 +11,13 @@
 
 class LdapConnection::Posix
   def initialize(config={})
-    encryption = AppConfig.ldap.encryption
-    if encryption.respond_to? :to_sym
-      @ldap = Net::LDAP.new(:encryption => encryption.to_sym)
-    else
-      @ldap = Net::LDAP.new()
-    end
-    @ldap.host = @host = AppConfig.ldap.host
-    @base = AppConfig.ldap.base
-    @group_base = AppConfig.ldap.group_base
+    config ||= LdapFluff::Config.instance
+    @ldap = Net::LDAP.new :host => config.host
+                         :base => config.base_dn
+                         :port => config.port
+                         :encryption => config.encryption
+    @group_base = config.group_base
+    @group_base ||= config.base
   end
 
   def bind?(uid=nil, password=nil)
@@ -34,16 +32,16 @@ class LdapConnection::Posix
     # group base name must be preconfigured
     treebase = @group_base
     groups = []
-    # groups filtering will work w/ group common names 
+    # groups filtering will work w/ group common names
     @ldap.search(:base => treebase, :filter => filter) do |entry|
       groups << entry[:cn][0]
     end
     groups
   end
-      
+
   # returns whether a user is a member of ALL or ANY particular groups
   # note: this method is much faster than groups_for_uid
-  # 
+  #
   # gids should be an array of group common names
   #
   # returns true if owner is in ALL of the groups if all=true, otherwise

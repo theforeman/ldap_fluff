@@ -12,20 +12,30 @@ module LdapFluff
   class Config
     include Singleton
     attr_accessor :host,
+                  :port,
                   :encryption,
-                  :base,
+                  :base_dn,
                   :group_base,
+                  :server_type,
                   :ad_domain,
-                  :server_type
+                  :ad_service_user,
+                  :ad_service_pass
 
     def initialize
       begin
         config = YAML.load_file(LdapFluff::CONFIG)
         @host = config["host"]
-        @encryption = config["encryption"]
-        @base = config["base"]
+        @port = config["port"]
+        if config["encryption"].respond_to? :to_sym
+          @encryption = config["encryption"].to_sym
+        else
+          @encryption = nil
+        end
+        @base_dn = config["base_dn"]
         @group_base = config["group_base"]
         @ad_domain = config["ad_domain"]
+        @ad_service_user = config["ad_service_user"]
+        @ad_service_pass = config["ad_service_pass"]
         @server_type = config["server_type"]
       rescue Errno::ENOENT
         $stderr.puts("The #{LdapFluff::CONFIG} config file you specified was not found")

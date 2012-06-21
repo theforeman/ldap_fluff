@@ -10,31 +10,6 @@
 # http://www.gnu.org/licenses/old-licenses/gpl-2.0.txt.
 
 class LdapConnection
-  attr_reader :ldap, :host, :base, :group_base, :ad_domain
-
-  def initialize(config={})
-    type = AppConfig.ldap.server_type
-    if type.respond_to? :to_sym
-      if type == :posix
-        @ldap = LdapConnection::Posix.new(config)
-      elsif type == :active_directory
-        @ldap = LdapConnection::ActiveDirectory.new(config)
-      end
-    end
-  end
-
-  def bind?(uid=nil, password=nil)
-    @ldap.bind? uid, password
-  end
-
-  def groups_for_uid(uid=nil)
-    @ldap.groups_for_uid uid
-  end
-
-  def is_in_groups(uid, gids = [], all = false)
-    @ldap.is_in_groups uid, gids, all
-  end
-
   # AND or OR all of the filters together
   def merge_filters(filters = [], all=false)
     if filters.size > 1

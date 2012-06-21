@@ -11,34 +11,32 @@
 
 class LdapConnection::ActiveDirectory
 
-  attr_reader :ad_domain, :group_proc, :group_base
-
   def initialize(config={})
-    @ldap = Net::LDAP.new :host => AppConfig.ldap.host,
-                         :base => AppConfig.ldap.base,
-                         :port => AppConfig.ldap.port
-    @group_base = AppConfig.ldap.group_base
-    @group_base ||= AppConfig.ldap.base
-    @ad_domain = AppConfig.ldap.ad_domain
-    @bind_user = AppConfig.ldap.service_user
-    @bind_pass = AppConfig.ldap.service_pass
+    config ||= LdapFluff::Config.instance
+    @ldap = Net::LDAP.new :host => config.host
+                         :base => config.base_dn
+                         :port => config.port
+    @group_base = config.group_base
+    @group_base ||= config.base
+    @ad_domain = config.ad_domain
+    @bind_user = config.ad_service_user
+    @bind_pass = config.ad_service_pass
   end
 
   def bind?(uid=nil, password=nil)
-    puts "Authing #{uid} @ #{@ad_domain}..."
     @ldap.auth "#{uid}@#{@ad_domain}", password
     @ldap.bind
   end
 
   # returns the list of groups to which a user belongs
-  # this query is simpler in active directory 
+  # this query is simpler in active directory
   def groups_for_uid(uid)
     service_bind
     filter = Net::LDAP::Filter.eq("samaccountname",uid)
     member = @ldap.search(:filter => filter, :base => @group_base).first
     groups = []
     if member != nil && member.attribute_names.include?(:memberof)
-      groups = group_names_from_cn(member) 
+      groups = group_names_from_cn(member)
       groups += group_parents(groups)
     end
     groups
@@ -54,7 +52,7 @@ class LdapConnection::ActiveDirectory
       group_filter = Net::LDAP::Filter.eq("cn", g)
       member = @ldap.search(:filter => class_filter & group_filter, :base => @group_base).first
       if member != nil && member.attribute_names.include?(:memberof)
-        parents += group_names_from_cn(member) 
+        parents += group_names_from_cn(member)
         parents += group_parents(parents)
       end
     end
@@ -74,9 +72,14 @@ class LdapConnection::ActiveDirectory
   end
 
   # extract the group names from the LDAP style response,
-  # return string will be something like 
+  # return string will be something like
   # CN=bros,OU=bropeeps,DC=jomara,DC=redhat,DC=com
-  # AD group proc from http://erniemiller.org/2008/04/04/simplified-active-directory-authentication/
+  #
+  # AD group proc from
+  # http://erniemiller.org/2008/04/04/simplified-active-directory-authentication/
+  #
+  # I think we would normally want to just do the collect at the end,
+  # but we need the individual names for recursive queries
   def group_names_from_cn(member)
     p = Proc.new { |g| g.sub(/.*?CN=(.*?),.*/, '\1')} }
     member[:memberof].collect(&p)

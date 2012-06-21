@@ -32,7 +32,7 @@ end
 
 PKG_FILES = FileList[
   'etc/**/*.yml',
-  'lib/**/*.rb', 
+  'lib/**/*.rb',
   'test/**/*.rb',
   'scripts/**/*.rb'
 ]
@@ -41,7 +41,7 @@ if ! defined?(Gem)
   puts "Package Target requires RubyGEMs"
 else
   spec = Gem::Specification.new do |s|
-    
+
     #### Basic information.
 
     s.name = 'ldap_fluff'
@@ -53,9 +53,9 @@ Simple library for binding & group querying on top of various ldap implementatio
     s.homepage = "http://www.redhat.com"
     s.files = PKG_FILES.to_a
     s.require_path = 'lib'
-    
+
     s.test_files = PKG_FILES.select { |fn| fn =~ /^test\/test/ }
-    
+
     s.has_rdoc = true
     s.author = "Jordan OMara"
     s.email = "jomara@redhat.com"
@@ -64,13 +64,12 @@ Simple library for binding & group querying on top of various ldap implementatio
     s.gem.add_dependency('net-ldap')
     # testing deps
     s.gem_add_development_dependency('minitest')
-    s.gem_add_development_dependency('factory_girl')
   end
 
-  namespace 'ldap_fluff' do 
+  namespace 'ldap_fluff' do
     Gem::PackageTask.new(spec) do |t|
-      t.need_tar = true 
-    end 
+      t.need_tar = true
+    end
   end
 
   task :package => ['ldap_fluff:package']

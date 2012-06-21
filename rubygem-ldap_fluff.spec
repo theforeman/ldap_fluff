@@ -15,6 +15,7 @@ BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 Requires: rubygems
 Requires: rubygem-net-ldap
 BuildRequires: rubygems
+BuildRequires: rubygem-devel
 BuildRequires: rubygem-rake
 BuildArch: noarch
 Provides: rubygem(%{gemname}) = %{version}

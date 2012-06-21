@@ -12,18 +12,31 @@
 require 'net/ldap'
 
 class Ldap
-  def self.valid_ldap_authentication?(uid, password)
-    ldap = LdapConnection.new
-    ldap.bind? uid, password
+
+  attr_accessor :ldap
+
+  def initialize(config = {})
+    type = AppConfig.ldap.server_type
+    if type.respond_to? :to_sym
+      if type == :posix
+        @ldap = LdapConnection::Posix.new(config)
+      elsif type == :active_directory
+        @ldap = LdapConnection::ActiveDirectory.new(config)
+      else
+        raise Exception, "Unsupported connection type. Supported types = :active_directory, :posix"
+      end
+    end
   end
 
-  def self.ldap_groups(uid)
-    ldap = LdapConnection.new
-    ldap.groups_for_uid(uid)
+  def valid_ldap_authentication?(uid, password)
+    @ldap.bind? uid, password
   end
 
-  def self.is_in_groups(uid, grouplist)
-    ldap = LdapConnection.new
-    ldap.is_in_groups(uid, grouplist, true)
+  def ldap_groups(uid)
+    @ldap.groups_for_uid(uid)
+  end
+
+  def is_in_groups(uid, grouplist)
+    @ldap.is_in_groups(uid, grouplist, true)
   end
 end
