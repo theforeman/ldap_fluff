@@ -27,11 +27,26 @@ class LdapConnection
     @ldap.bind? uid, password
   end
 
-  def groups_for_uuid(uid=nil)
+  def groups_for_uid(uid=nil)
     @ldap.groups_for_uid uid
   end
 
   def is_in_groups(uid, gids = [], all = false)
     @ldap.is_in_groups uid, gids, all
   end
+
+  # AND or OR all of the filters together
+  def merge_filters(filters = [], all=false)
+    if filters.size > 1
+      filter = filters[0]
+      filters[1..filters.size-1].each do |gfilter|
+        if all
+          filter = filter & gfilter
+        else
+          filter = filter | gfilter
+        end
+      end
+    end
+  end
+
 end

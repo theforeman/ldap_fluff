@@ -59,23 +59,11 @@ class LdapConnection::Posix
     gids.each do |group_cn|
       group_filters << Net::LDAP::Filter.eq("cn", group_cn)
     end
-    if group_filters.size >= 1
-      # OR the group filters together
-      group_filter = group_filters[0]
-      if group_filters.size > 1
-        group_filters[1..group_filters.size-1].each do |gfilter|
-          if all
-            group_filter = group_filter & gfilter
-          else 
-            group_filter = group_filter | gfilter
-          end
-        end
-      end
-      # AND the set of group filters w/ base filter
-      filter = filter & group_filter
-      @ldap.search(:base => treebase, :filter => filter) do |entry|
-        matches = matches + 1
-      end
+    group_filters = merge_filters(group_filters, all)
+    # AND the set of group filters w/ base filter
+    filter = filter & group_filters
+    @ldap.search(:base => treebase, :filter => filter) do |entry|
+      matches = matches + 1
     end
 
     return matches > 0

@@ -17,7 +17,6 @@ class LdapConnection::ActiveDirectory
     @ldap = Net::LDAP.new :host => AppConfig.ldap.host,
                          :base => AppConfig.ldap.base,
                          :port => AppConfig.ldap.port
-    # apply custom group base filter
     @group_base = AppConfig.ldap.group_base
     @group_base ||= AppConfig.ldap.base
     @ad_domain = AppConfig.ldap.ad_domain
@@ -45,6 +44,9 @@ class LdapConnection::ActiveDirectory
     groups
   end
 
+  # active directory can have nested groups. thus, a user's group
+  # membership is his "member_of" groups + all of their parents,
+  # their parents parents, and so on
   def group_parents(groups=[])
     class_filter = Net::LDAP::Filter.eq("objectclass","group")
     parents = []
@@ -57,6 +59,18 @@ class LdapConnection::ActiveDirectory
       end
     end
     return parents
+  end
+
+  # active directory stores group membership on a users model
+  # so we can query i
+  def is_in_groups(uid, gids = [], all = false)
+    user_groups = groups_for_uid(uid)
+    intersection = gids & user_groups
+    if all
+      return intersection == gids
+    else
+      return intersection.size > 0
+    end
   end
 
   # extract the group names from the LDAP style response,
@@ -72,11 +86,9 @@ class LdapConnection::ActiveDirectory
   # Typically AD admins configure a public user for searching
   def service_bind
     @ldap.auth "#{@bind_user}@#{@ad_domain}", @bind_pass
-    unless (@ldap.bind || AppConfig.ldap.ad_anon)
-      Rails.logger.error "Your Active Directory service user is not correctly configured"
-      Rails.logger.error "Unless you have anonymous queries configured, this will probably not work as expected"
-      Rails.logger.error "Please configure ldap service user or set anonymous mode"
-    end
+    raise UnauthenticatedActiveDirectoryException, "Could not bind to AD Service User" unless (@ldap.bind || AppConfig.ldap.ad_anon)
   end
 
+  class UnauthenticatedActiveDirectoryException < StandardError
+  end
 end

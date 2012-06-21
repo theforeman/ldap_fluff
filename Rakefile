@@ -59,6 +59,12 @@ Simple library for binding & group querying on top of various ldap implementatio
     s.has_rdoc = true
     s.author = "Jordan OMara"
     s.email = "jomara@redhat.com"
+
+    # deps
+    s.gem.add_dependency('net-ldap')
+    # testing deps
+    s.gem_add_development_dependency('minitest')
+    s.gem_add_development_dependency('factory_girl')
   end
 
   namespace 'ldap_fluff' do 
