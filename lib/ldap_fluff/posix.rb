@@ -19,6 +19,7 @@ class LdapConnection::Posix
                          :encryption => config.encryption
     @group_base = config.group_base
     @group_base ||= config.base
+    @base = config.base_dn
   end
 
   def bind?(uid=nil, password=nil)

@@ -22,7 +22,7 @@ task :default => :test_all
 # Test Tasks ---------------------------------------------------------
 
 Rake::TestTask.new("test_units") do |t|
-  t.test_files = FileList['test/*_test.rb']
+  t.test_files = FileList['test/lib/*.rb', 'test/*.rb']
   t.verbose = false
 end
 
