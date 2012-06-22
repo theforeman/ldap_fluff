@@ -11,6 +11,8 @@
 
 class LdapConnection::ActiveDirectory
 
+  attr_accessor :ldap
+
   def initialize(config={})
     @ldap = Net::LDAP.new :host => config.host,
                          :base => config.base_dn,
