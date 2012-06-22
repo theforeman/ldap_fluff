@@ -9,6 +9,20 @@ class TestAD < MiniTest::Unit::TestCase
     @ldap = MiniTest::Mock.new
   end
 
+  # default setup for service bind users
+  def service_bind
+    @ldap.expect(:auth, nil, ["service@internet.com","pass"])
+    @ldap.expect(:bind, true)
+    @ad.ldap = @ldap
+  end
+
+  def basic_user
+    m = OpenStruct.new(:groups => ['bros'])
+    @md = MiniTest::Mock.new
+    @md.expect(:find_user, m, ["john"])
+    @ad.member_service = @md
+  end
+
   def test_good_bind
     @ldap.expect(:auth, nil, ["internet@internet.com","password"])
     @ldap.expect(:bind, true)
@@ -25,22 +39,54 @@ class TestAD < MiniTest::Unit::TestCase
     @ldap.verify
   end
 
-  def test_no_groups
-    @ldap.expect(:auth, nil, ["service@internet.com","pass"])
-    @ldap.expect(:bind, true)
-    m = MiniTest::Mock.new
-    m.expect(:groups, [])
-    LdapConnection::ActiveDirectory::Member.stub :new, m do
-      #assert_equal @ad.groups_for_uid('john'), []
-    end
-  end
-
   def test_groups
-    @ldap.expect(:search, @user, [:filter=>ad_name_filter("john"),:base=>@group_base])
-    # mocks for parent query
-    @ldap.expect(:search, [],[:filter => (group_filter("group") & @class_filter), :base=>@group_base])
-    @ad.ldap = @ldap
-    #assert_equal @ad.groups_for_uid('john'), ['group']
+    service_bind
+    m = OpenStruct.new(:groups => ['bros'])
+    @md = MiniTest::Mock.new
+    @md.expect(:find_user, m, ["john"])
+    @ad.member_service = @md
+    assert_equal @ad.groups_for_uid('john'), ['bros']
   end
 
+  def test_bad_user
+    service_bind
+    @md = MiniTest::Mock.new
+    @md.expect(:find_user, nil, ["john"])
+    def @md.find_user(*args)
+      raise LdapConnection::ActiveDirectory::MemberService::UIDNotFoundException
+    end
+    @ad.member_service = @md
+    assert_equal @ad.groups_for_uid('john'), []
+  end
+
+  def test_bad_service_user
+    @ldap.expect(:auth, nil, ["service@internet.com","pass"])
+    @ldap.expect(:bind, false)
+    @ad.ldap = @ldap
+    assert_raises(LdapConnection::ActiveDirectory::UnauthenticatedActiveDirectoryException) { @ad.groups_for_uid('john') }
+  end
+
+  def test_is_in_groups
+    service_bind
+    basic_user
+    assert_equal @ad.is_in_groups("john",["bros"],false), true
+  end
+
+  def test_is_some_groups
+    service_bind
+    basic_user
+    assert_equal @ad.is_in_groups("john",["bros","buds"],false), true
+  end
+
+  def test_isnt_in_all_groups
+    service_bind
+    basic_user
+    assert_equal @ad.is_in_groups("john",["bros","buds"],true), false
+  end
+
+  def test_isnt_in_groups
+    service_bind
+    basic_user
+    assert_equal @ad.is_in_groups("john", ["broskies"],false), false
+  end
 end
