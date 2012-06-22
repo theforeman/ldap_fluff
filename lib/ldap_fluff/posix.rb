@@ -10,11 +10,12 @@
 # http://www.gnu.org/licenses/old-licenses/gpl-2.0.txt.
 
 class LdapConnection::Posix
+
+  attr_accessor :ldap
   def initialize(config={})
-    config ||= LdapFluff::Config.instance
-    @ldap = Net::LDAP.new :host => config.host
-                         :base => config.base_dn
-                         :port => config.port
+    @ldap = Net::LDAP.new :host => config.host,
+                         :base => config.base_dn,
+                         :port => config.port,
                          :encryption => config.encryption
     @group_base = config.group_base
     @group_base ||= config.base

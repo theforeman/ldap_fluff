@@ -61,9 +61,9 @@ Simple library for binding & group querying on top of various ldap implementatio
     s.email = "jomara@redhat.com"
 
     # deps
-    s.gem.add_dependency('net-ldap')
+    s.add_dependency('net-ldap')
     # testing deps
-    s.gem_add_development_dependency('minitest')
+    s.add_development_dependency('minitest')
   end
 
   namespace 'ldap_fluff' do

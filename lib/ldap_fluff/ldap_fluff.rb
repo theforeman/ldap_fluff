@@ -8,15 +8,15 @@
 # NON-INFRINGEMENT, or FITNESS FOR A PARTICULAR PURPOSE. You should
 # have received a copy of GPLv2 along with this software; if not, see
 # http://www.gnu.org/licenses/old-licenses/gpl-2.0.txt.
-
 require 'net/ldap'
 
-class Ldap
+class LdapFluff
 
-  attr_accessor :ldap
+  attr_reader :ldap
 
-  def initialize(config = {})
-    type = AppConfig.ldap.server_type
+  def initialize(config={})
+    config ||= LdapFluff::CONFIG.instance
+    type = config.server_type
     if type.respond_to? :to_sym
       if type == :posix
         @ldap = LdapConnection::Posix.new(config)

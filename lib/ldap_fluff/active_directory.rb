@@ -12,9 +12,8 @@
 class LdapConnection::ActiveDirectory
 
   def initialize(config={})
-    config ||= LdapFluff::Config.instance
-    @ldap = Net::LDAP.new :host => config.host
-                         :base => config.base_dn
+    @ldap = Net::LDAP.new :host => config.host,
+                         :base => config.base_dn,
                          :port => config.port
     @group_base = config.group_base
     @group_base ||= config.base
@@ -60,7 +59,7 @@ class LdapConnection::ActiveDirectory
   end
 
   # active directory stores group membership on a users model
-  # so we can query i
+  # TODO query by group individually not like this
   def is_in_groups(uid, gids = [], all = false)
     user_groups = groups_for_uid(uid)
     intersection = gids & user_groups
@@ -81,7 +80,7 @@ class LdapConnection::ActiveDirectory
   # I think we would normally want to just do the collect at the end,
   # but we need the individual names for recursive queries
   def group_names_from_cn(member)
-    p = Proc.new { |g| g.sub(/.*?CN=(.*?),.*/, '\1')} }
+    p = Proc.new { |g| g.sub(/.*?CN=(.*?),.*/, '\1') }
     member[:memberof].collect(&p)
   end
 

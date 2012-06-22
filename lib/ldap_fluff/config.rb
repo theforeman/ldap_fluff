@@ -1,7 +1,7 @@
 require 'singleton'
 require 'yaml'
 
-module LdapFluff
+class LdapFluff
   ####################################################################
   # Module constants
   ####################################################################
