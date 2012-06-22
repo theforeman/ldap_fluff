@@ -1,6 +1,6 @@
 require 'net-ldap'
 
-class LdapConnection::ActiveDirectory::MemberService
+class LdapFluff::ActiveDirectory::MemberService
 
   def initialize(ldap,config={})
     @ldap = ldap
@@ -10,7 +10,7 @@ class LdapConnection::ActiveDirectory::MemberService
     name_filter = Net::LDAP::Filter.eq("samaccountname",uid)
     @data = @ldap.search(:filter => @name_filter)
     raise UIDNotFoundException if @data == nil
-    LdapConnection::ActiveDirectory::Member.new(@ldap,@data)
+    LdapFluff::ActiveDirectory::Member.new(@ldap,@data)
   end
 
   class UIDNotFoundException < StandardError

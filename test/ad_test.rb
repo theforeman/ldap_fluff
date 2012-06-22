@@ -5,7 +5,7 @@ class TestAD < MiniTest::Unit::TestCase
 
   def setup
     config
-    @ad = LdapConnection::ActiveDirectory.new(@config)
+    @ad = LdapFluff::ActiveDirectory.new(@config)
     @ldap = MiniTest::Mock.new
   end
 
@@ -53,7 +53,7 @@ class TestAD < MiniTest::Unit::TestCase
     @md = MiniTest::Mock.new
     @md.expect(:find_user, nil, ["john"])
     def @md.find_user(*args)
-      raise LdapConnection::ActiveDirectory::MemberService::UIDNotFoundException
+      raise LdapFluff::ActiveDirectory::MemberService::UIDNotFoundException
     end
     @ad.member_service = @md
     assert_equal @ad.groups_for_uid('john'), []
@@ -63,7 +63,7 @@ class TestAD < MiniTest::Unit::TestCase
     @ldap.expect(:auth, nil, ["service@internet.com","pass"])
     @ldap.expect(:bind, false)
     @ad.ldap = @ldap
-    assert_raises(LdapConnection::ActiveDirectory::UnauthenticatedActiveDirectoryException) { @ad.groups_for_uid('john') }
+    assert_raises(LdapFluff::ActiveDirectory::UnauthenticatedActiveDirectoryException) { @ad.groups_for_uid('john') }
   end
 
   def test_is_in_groups

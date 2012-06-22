@@ -5,7 +5,7 @@ class TestPosix < MiniTest::Unit::TestCase
 
   def setup
     config
-    @posix = LdapConnection::Posix.new(@config)
+    @posix = LdapFluff::Posix.new(@config)
     @ldap = MiniTest::Mock.new
   end
 

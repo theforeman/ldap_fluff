@@ -1,6 +1,6 @@
 require 'net-ldap'
 
-class LdapConnection::ActiveDirectory::Member
+class LdapFluff::ActiveDirectory::Member
   attr_accessor :ldap
 
   def initialize(ldap, data)

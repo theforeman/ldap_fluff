@@ -19,9 +19,9 @@ class LdapFluff
     type = config.server_type
     if type.respond_to? :to_sym
       if type == :posix
-        @ldap = LdapConnection::Posix.new(config)
+        @ldap = Posix.new(config)
       elsif type == :active_directory
-        @ldap = LdapConnection::ActiveDirectory.new(config)
+        @ldap = ActiveDirectory.new(config)
       else
         raise Exception, "Unsupported connection type. Supported types = :active_directory, :posix"
       end
@@ -38,5 +38,19 @@ class LdapFluff
 
   def is_in_groups(uid, grouplist)
     @ldap.is_in_groups(uid, grouplist, true)
+  end
+
+  # AND or OR all of the filters together
+  def self.merge_filters(filters = [], all=false)
+    if filters.size > 1
+      filter = filters[0]
+      filters[1..filters.size-1].each do |gfilter|
+        if all
+          filter = filter & gfilter
+        else
+          filter = filter | gfilter
+        end
+      end
+    end
   end
 end

@@ -16,13 +16,13 @@ class ConfigTest < MiniTest::Unit::TestCase
   def test_load_posix
     @config.server_type = :posix
     l = LdapFluff.new(@config)
-    assert_instance_of LdapConnection::Posix, l.ldap
+    assert_instance_of LdapFluff::Posix, l.ldap
   end
 
   def test_load_ad
     @config.server_type = :active_directory
     l = LdapFluff.new(@config)
-    assert_instance_of LdapConnection::ActiveDirectory, l.ldap
+    assert_instance_of LdapFluff::ActiveDirectory, l.ldap
   end
 
 end
