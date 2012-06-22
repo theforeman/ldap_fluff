@@ -1,7 +1,7 @@
 require 'net-ldap'
 
 class LdapFluff::ActiveDirectory::Member
-  attr_accessor :ldap
+  attr_accessor :ldap, :data
 
   def initialize(ldap, data)
     @ldap, @data = ldap, data
@@ -9,7 +9,6 @@ class LdapFluff::ActiveDirectory::Member
 
   # return the :memberof attrs + parents, recursively
   def self.groups
-    puts "TOOT!"
     total_groups = Group.group_names_from_cn(@data[:memberof])
     first_level = total_groups
     first_level.each do |g|
