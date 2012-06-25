@@ -1,17 +1,19 @@
-require 'net-ldap'
+require 'net/ldap'
 
 class LdapFluff::Posix::MemberService
 
   attr_accessor :ldap
 
   def initialize(ldap,group_base)
-    @ldap, @group_base = ldap, group_base
+    @ldap = ldap
+    @group_base = group_base
   end
 
   # return an ldap user with groups attached
   # note : this method is not particularly fast for large ldap systems
   def find_user(uid)
     groups = []
+    puts "Expecting #{name_filter(uid)} : #{@group_base}"
     @ldap.search(:filter => name_filter(uid), :base => @group_base) do |entry|
       groups << entry[:cn][0]
     end

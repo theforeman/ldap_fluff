@@ -4,7 +4,6 @@ require 'ostruct'
 module LdapTestHelper
   attr_accessor :group_base, :class_filter, :user
 
-
   def config
     @config = OpenStruct.new(
         :host => "internet.com",
@@ -30,7 +29,11 @@ module LdapTestHelper
     Net::LDAP::Filter.eq("objectclass","group")
   end
 
-  def ldap_user_payload
+  def ad_user_payload
     [{ :memberof => "CN=group,dc=internet,dc=com" }]
+  end
+
+  def posix_user_payload
+    [{:cn => ["bros"]}]
   end
 end

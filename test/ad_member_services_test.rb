@@ -5,12 +5,12 @@ class TestADMemberService < MiniTest::Unit::TestCase
 
   def setup
     config
-    @adms = LdapFluff::ActiveDirectory::MemberService.new(@config)
     @ldap = MiniTest::Mock.new
+    @adms = LdapFluff::ActiveDirectory::MemberService.new(@ldap,@config)
   end
 
   def test_find_user
-    user = ldap_user_payload
+    user = ad_user_payload
     @ldap.expect(:search, user, [:filter => ad_name_filter("john")])
     @adms.ldap = @ldap
     assert_equal LdapFluff::ActiveDirectory::Member.new(@ldap, user.first).data, @adms.find_user("john").data
