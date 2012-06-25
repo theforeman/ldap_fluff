@@ -41,10 +41,7 @@ class TestAD < MiniTest::Unit::TestCase
 
   def test_groups
     service_bind
-    m = OpenStruct.new(:groups => ['bros'])
-    @md = MiniTest::Mock.new
-    @md.expect(:find_user, m, ["john"])
-    @ad.member_service = @md
+    basic_user
     assert_equal @ad.groups_for_uid('john'), ['bros']
   end
 

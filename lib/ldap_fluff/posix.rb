@@ -11,7 +11,8 @@
 
 class LdapFluff::Posix
 
-  attr_accessor :ldap
+  attr_accessor :ldap, :member_service
+
   def initialize(config={})
     @ldap = Net::LDAP.new :host => config.host,
                          :base => config.base_dn,
@@ -20,6 +21,7 @@ class LdapFluff::Posix
     @group_base = config.group_base
     @group_base ||= config.base
     @base = config.base_dn
+    @member_service = MemberService.new(@ldap,@group_base)
   end
 
   def bind?(uid=nil, password=nil)
@@ -27,18 +29,9 @@ class LdapFluff::Posix
     @ldap.bind
   end
 
-  # returns a list of ldap groups to which a user belongs
-  # note : this method is not particularly fast for large ldap systems
   def groups_for_uid(uid)
-    filter = Net::LDAP::Filter.eq("memberUid", uid)
-    # group base name must be preconfigured
-    treebase = @group_base
-    groups = []
-    # groups filtering will work w/ group common names
-    @ldap.search(:base => treebase, :filter => filter) do |entry|
-      groups << entry[:cn][0]
-    end
-    groups
+    member = @member_service.find_user(uid)
+    member.groups
   end
 
   # returns whether a user is a member of ALL or ANY particular groups
@@ -48,25 +41,8 @@ class LdapFluff::Posix
   #
   # returns true if owner is in ALL of the groups if all=true, otherwise
   # returns true if owner is in ANY of the groups
-  def is_in_groups(uid, gids = [], all=false)
-    return true if gids.empty?
-    filter = Net::LDAP::Filter.eq("memberUid", uid)
-    treebase = @group_base
-    raise _("group_base was not set in katello.yml") if not treebase
-    group_filters = []
-    matches = 0
-    # we need a new filter for each group cn
-    gids.each do |group_cn|
-      group_filters << Net::LDAP::Filter.eq("cn", group_cn)
-    end
-    group_filters = merge_filters(group_filters, all)
-    # AND the set of group filters w/ base filter
-    filter = filter & group_filters
-    @ldap.search(:base => treebase, :filter => filter) do |entry|
-      matches = matches + 1
-    end
-
-    return matches > 0
+  def is_in_groups(uid, gids = [], all=true)
+    (gids.empty? || @member_service.times_in_groups(uid, gids, all) > 0)
   end
 
 end
