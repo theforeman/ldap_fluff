@@ -37,4 +37,18 @@ class LdapFluff::Posix::MemberService
   def group_filter(cn)
     Net::LDAP::Filter.eq("cn", cn)
   end
+
+  # AND or OR all of the filters together
+  def merge_filters(filters = [], all=false)
+    if filters.size > 1
+      filter = filters[0]
+      filters[1..filters.size-1].each do |gfilter|
+        if all
+          filter = filter & gfilter
+        else
+          filter = filter | gfilter
+        end
+      end
+    end
+  end
 end

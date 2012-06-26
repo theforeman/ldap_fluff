@@ -12,7 +12,7 @@ require 'net/ldap'
 
 class LdapFluff
 
-  attr_reader :ldap
+  attr_accessor :ldap
 
   def initialize(config={})
     config ||= LdapFluff::CONFIG.instance
@@ -28,29 +28,21 @@ class LdapFluff
     end
   end
 
-  def valid_ldap_authentication?(uid, password)
+  # return true if the user password combination
+  # authenticates the user, otherwise false
+  def authenticate?(uid, password)
     @ldap.bind? uid, password
   end
 
-  def ldap_groups(uid)
+  # return a list[] of groups for a given uid
+  def group_list(uid)
     @ldap.groups_for_uid(uid)
   end
 
-  def is_in_groups(uid, grouplist)
+  # return true if a user is in all of the groups
+  # in grouplist
+  def is_in_groups?(uid, grouplist)
     @ldap.is_in_groups(uid, grouplist, true)
   end
 
-  # AND or OR all of the filters together
-  def self.merge_filters(filters = [], all=false)
-    if filters.size > 1
-      filter = filters[0]
-      filters[1..filters.size-1].each do |gfilter|
-        if all
-          filter = filter & gfilter
-        else
-          filter = filter | gfilter
-        end
-      end
-    end
-  end
 end
