@@ -5,7 +5,7 @@
 
 Summary: LDAP integration for Active Directory, Free IPA and posix  
 Name: rubygem-%{gemname}
-Version: 0.0.4
+Version: 0.0.5
 Release: 1%{?dist}
 Group: Development/Languages
 License: GPLv2+ or Ruby
@@ -56,6 +56,9 @@ rm -rf %{buildroot}
 
 
 %changelog
+* Tue Jun 26 2012 Jordan OMara <jomara@redhat.com> 0.0.5-1
+- Forgot to remove obsolete files from lib (jomara@redhat.com)
+
 * Tue Jun 26 2012 Jordan OMara <jomara@redhat.com> 0.0.4-1
 - rdoc/task -> rake/rdoctask for older rpm support (jomara@redhat.com)
 - Updating readme (jomara@redhat.com)
