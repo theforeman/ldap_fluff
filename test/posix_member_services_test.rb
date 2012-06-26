@@ -11,18 +11,16 @@ class TestPosixMemberService < MiniTest::Unit::TestCase
 
   def test_find_user
     user = posix_user_payload
-    expected_filter = @ms.name_filter('john')
-    puts "Expecting #{expected_filter} : #{@group_base}"
     @ldap.expect(:search,
                  user,
                  [
                    :filter => @ms.name_filter('john'),
-                  :base =>@group_base
+                  :base =>config.group_base
                  ]
                 )
     @ms.ldap = @ldap
     m = LdapFluff::Posix::Member.new(['bros'])
-    assert_equal m, @ms.find_user('john')
+    assert_equal m.groups, @ms.find_user('john').groups
     @ldap.verify
   end
 end

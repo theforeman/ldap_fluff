@@ -13,8 +13,7 @@ class LdapFluff::Posix::MemberService
   # note : this method is not particularly fast for large ldap systems
   def find_user(uid)
     groups = []
-    puts "Expecting #{name_filter(uid)} : #{@group_base}"
-    @ldap.search(:filter => name_filter(uid), :base => @group_base) do |entry|
+    @ldap.search(:filter => name_filter(uid), :base => @group_base).each do |entry|
       groups << entry[:cn][0]
     end
     LdapFluff::Posix::Member.new(groups)
