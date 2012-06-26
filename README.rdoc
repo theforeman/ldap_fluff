@@ -1,6 +1,8 @@
 = LDAP Fluff 
 
-Provides multiple implementations of LDAP queries for various backends 
+Provides multiple implementations of LDAP queries for various backends
+
+Currently supports Active Directory and posix-style LDAP. FreeIPA coming soon
 
 == Installation
 
@@ -17,26 +19,26 @@ There are quite a few parameters to configure to get this gem set up with your
 LDAP server correctly
 
 It exposes 3 methods: 
-  valid_ldap_authentication(username, password)
+  authenticate?(username, password)
     returns true if the username & password combo bind correctly
 
-  ldap_groups(uid)
+  group_list(uid)
     returns the set of ldap groups a user belongs to in a string list
 
-  is_in_groups(uid, grouplist)
-    returns true if the user provided is in any of the groups listed in grouplist
+  is_in_groups?(uid, grouplist)
+    returns true if the user provided is in all of the groups listed in grouplist
     
 These methods are handy for using LDAP for both authentication and authorization.
 
-This gem integrates with warden quite nicely.
+This gem integrates with warden/devise quite nicely.
 
 Your global configuration must provide information about your LDAP host to function properly.
 
-  common:
-    ldap:
-      host: hostname or ip address of your LDAP host (192.168.1.1)
-      encryption: the encryption type, as a symbol (nil, :start_tls)
-      base: base DN for users (dc=redhat,dc=com)
-      group_base: base DN for groups (ou=Groups,dc=redhat,dc=com)
-      ad_domain: domain for active directory users (redhat.com)
-      server_type: type of LDAP backend (:posix, :active_directory, :free_ipa)
+host: ## ip address or hostname
+encryption: ## blank or :start_tls
+base_dn: ## baseDN for ldap auth, eg dc=redhat,dc=com
+group_base: ##baseDN for your ldap groups, eg ou=Groups,dc=redhat,dc=com
+server_type: ## type of server. default == posix. :active_directory, :posix, :free_ipa
+ad_domain: ## domain for your users if using active directory, eg redhat.com
+ad_service_user: ## service account for authenticating ldap calls in active directory 
+ad_service_pass: ## service password for authenticating ldap calls in active directory 
