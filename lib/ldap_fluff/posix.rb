@@ -19,8 +19,7 @@ class LdapFluff::Posix
   end
 
   def groups_for_uid(uid)
-    member = @member_service.find_user(uid)
-    member.groups
+    @member_service.find_user_groups(uid)
   end
 
   # returns whether a user is a member of ALL or ANY particular groups

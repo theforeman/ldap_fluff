@@ -17,9 +17,8 @@ class TestAD < MiniTest::Unit::TestCase
   end
 
   def basic_user
-    m = OpenStruct.new(:groups => ['bros'])
     @md = MiniTest::Mock.new
-    @md.expect(:find_user, m, ["john"])
+    @md.expect(:find_user_groups, ['bros'], ["john"])
     @ad.member_service = @md
   end
 
@@ -48,8 +47,8 @@ class TestAD < MiniTest::Unit::TestCase
   def test_bad_user
     service_bind
     @md = MiniTest::Mock.new
-    @md.expect(:find_user, nil, ["john"])
-    def @md.find_user(*args)
+    @md.expect(:find_user_groups, nil, ["john"])
+    def @md.find_user_groups(*args)
       raise LdapFluff::ActiveDirectory::MemberService::UIDNotFoundException
     end
     @ad.member_service = @md

@@ -13,7 +13,7 @@ class LdapFluff::ActiveDirectory
     @bind_pass = config.ad_service_pass
     @anon = config.ad_anon_queries
 
-    @member_service = MemberService.new(@ldap,config)
+    @member_service = MemberService.new(@ldap,@group_base)
   end
 
   def bind?(uid=nil, password=nil)
@@ -34,22 +34,27 @@ class LdapFluff::ActiveDirectory
   def groups_for_uid(uid)
     service_bind
     begin
-      member = @member_service.find_user(uid)
+      @member_service.find_user_groups(uid)
     rescue MemberService::UIDNotFoundException
       return []
     end
-    member.groups
   end
 
   # active directory stores group membership on a users model
   # TODO query by group individually not like this
   def is_in_groups(uid, gids = [], all = false)
-    user_groups = groups_for_uid(uid)
-    intersection = gids & user_groups
-    if all
-      return intersection == gids
-    else
-      return intersection.size > 0
+    service_bind
+    return true if gids == []
+    begin
+      groups = @member_service.find_user_groups(uid)
+      intersection = gids & groups
+      if all
+        return intersection == gids
+      else
+        return intersection.size > 0
+      end
+    rescue MemberService::UIDNotFoundException
+      return false
     end
   end
 

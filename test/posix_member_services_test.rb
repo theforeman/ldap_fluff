@@ -19,8 +19,7 @@ class TestPosixMemberService < MiniTest::Unit::TestCase
                  ]
                 )
     @ms.ldap = @ldap
-    m = LdapFluff::Posix::Member.new(['bros'])
-    assert_equal m.groups, @ms.find_user('john').groups
+    assert_equal ['bros'], @ms.find_user_groups('john')
     @ldap.verify
   end
 end

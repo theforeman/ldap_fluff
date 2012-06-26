@@ -1,5 +1,6 @@
 require 'net/ldap'
 
+# handles the naughty bits of posix ldap
 class LdapFluff::Posix::MemberService
 
   attr_accessor :ldap
@@ -11,12 +12,12 @@ class LdapFluff::Posix::MemberService
 
   # return an ldap user with groups attached
   # note : this method is not particularly fast for large ldap systems
-  def find_user(uid)
+  def find_user_groups(uid)
     groups = []
     @ldap.search(:filter => name_filter(uid), :base => @group_base).each do |entry|
       groups << entry[:cn][0]
     end
-    LdapFluff::Posix::Member.new(groups)
+    groups
   end
 
   def times_in_groups(uid, gids, all)

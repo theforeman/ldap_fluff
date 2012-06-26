@@ -30,7 +30,11 @@ module LdapTestHelper
   end
 
   def ad_user_payload
-    [{ :memberof => "CN=group,dc=internet,dc=com" }]
+    [{ :memberof => ["CN=group,dc=internet,dc=com"] }]
+  end
+
+  def ad_parent_payload(num)
+    [{ :memberof => ["CN=bros#{num},dc=internet,dc=com"] }]
   end
 
   def posix_user_payload

@@ -10,9 +10,8 @@ class TestPosix < MiniTest::Unit::TestCase
   end
 
   def basic_user
-    m = OpenStruct.new(:groups => ['bros'])
     @md = MiniTest::Mock.new
-    @md.expect(:find_user, m, ["john"])
+    @md.expect(:find_user_groups, ['bros'], ["john"])
     @posix.member_service = @md
   end
 
@@ -23,8 +22,7 @@ class TestPosix < MiniTest::Unit::TestCase
 
   def test_missing_user
     @md = MiniTest::Mock.new
-    user = LdapFluff::Posix::Member.new
-    @md.expect(:find_user, user, ['john'])
+    @md.expect(:find_user_groups, [], ['john'])
     @posix.member_service = @md
     assert_equal [], @posix.groups_for_uid('john')
   end
