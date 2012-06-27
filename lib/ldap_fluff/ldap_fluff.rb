@@ -4,13 +4,13 @@ class LdapFluff
 
   attr_accessor :ldap
 
-  def initialize(config={})
-    config ||= LdapFluff::CONFIG.instance
+  def initialize(config=nil)
+    config ||= LdapFluff::Config.instance
     type = config.server_type
     if type.respond_to? :to_sym
-      if type == :posix
+      if type.to_sym == :posix
         @ldap = Posix.new(config)
-      elsif type == :active_directory
+      elsif type.to_sym == :active_directory
         @ldap = ActiveDirectory.new(config)
       else
         raise Exception, "Unsupported connection type. Supported types = :active_directory, :posix"
