@@ -26,8 +26,8 @@ class LdapFluff::Posix::MemberService
     gids.each do |cn|
       filters << group_filter(cn)
     end
-    group_filters = merge_filters(group_filters,all)
-    filter = name_filter(uid) & filters
+    group_filters = merge_filters(filters,all)
+    filter = name_filter(uid) & group_filters
     @ldap.search(:base => @group_base, :filter => filter).size
   end
 
@@ -41,7 +41,7 @@ class LdapFluff::Posix::MemberService
 
   # AND or OR all of the filters together
   def merge_filters(filters = [], all=false)
-    if filters.size > 1
+    if filters != nil && filters.size >= 1
       filter = filters[0]
       filters[1..filters.size-1].each do |gfilter|
         if all
@@ -50,6 +50,7 @@ class LdapFluff::Posix::MemberService
           filter = filter | gfilter
         end
       end
+      return filter
     end
   end
 end
