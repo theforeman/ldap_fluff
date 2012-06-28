@@ -19,7 +19,8 @@ class LdapFluff
                   :server_type,
                   :ad_domain,
                   :ad_service_user,
-                  :ad_service_pass
+                  :ad_service_pass,
+                  :ad_anon_queries
 
     def initialize
       begin
@@ -36,6 +37,7 @@ class LdapFluff
         @ad_domain = config["ad_domain"]
         @ad_service_user = config["ad_service_user"]
         @ad_service_pass = config["ad_service_pass"]
+        @ad_anon_queries = config["ad_anon_queries"]
         @server_type = config["server_type"]
       rescue Errno::ENOENT
         $stderr.puts("The #{LdapFluff::CONFIG} config file you specified was not found")

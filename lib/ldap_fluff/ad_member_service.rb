@@ -21,12 +21,9 @@ class LdapFluff::ActiveDirectory::MemberService
 
   # return the :memberof attrs + parents, recursively
   def _groups_from_ldap_data(payload)
-    total_groups = _group_names_from_cn(payload[:memberof])
-    first_level = total_groups
-    first_level.each do |g|
-      total_groups += _walk_group_ancestry([g])
-    end
-    total_groups.uniq
+    first_level = _group_names_from_cn(payload[:memberof])
+    total_groups = _walk_group_ancestry([first_level])
+    (first_level + total_groups).uniq
   end
 
   # recursively loop over the parent list
@@ -34,13 +31,12 @@ class LdapFluff::ActiveDirectory::MemberService
     set = []
     gids.each do |g|
       filter = group_filter(g) & class_filter
-      group = @ldap.search(:filter => filter, :base => @group_base).first
       begin
+        group = @ldap.search(:filter => filter, :base => @group_base).first
         set += _group_names_from_cn(group[:memberof])
+        set += _walk_group_ancestry(set)
       rescue Exception
-        return []
       end
-      set += _walk_group_ancestry(set)
     end
     set
   end
