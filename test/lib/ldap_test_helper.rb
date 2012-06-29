@@ -37,6 +37,10 @@ module LdapTestHelper
     [{ :memberof => ["CN=bros#{num},dc=internet,dc=com"] }]
   end
 
+  def ad_double_payload(num)
+    [{ :memberof => ["CN=bros#{num},dc=internet,dc=com", "CN=broskies#{num},dc=internet,dc=com"] }]
+  end
+
   def posix_user_payload
     [{:cn => ["bros"]}]
   end
