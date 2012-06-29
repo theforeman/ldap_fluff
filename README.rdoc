@@ -34,11 +34,12 @@ This gem integrates with warden/devise quite nicely.
 
 Your global configuration must provide information about your LDAP host to function properly.
 
-host: ## ip address or hostname
-encryption: ## blank or :start_tls
-base_dn: ## baseDN for ldap auth, eg dc=redhat,dc=com
-group_base: ##baseDN for your ldap groups, eg ou=Groups,dc=redhat,dc=com
-server_type: ## type of server. default == posix. :active_directory, :posix, :free_ipa
-ad_domain: ## domain for your users if using active directory, eg redhat.com
-ad_service_user: ## service account for authenticating ldap calls in active directory 
-ad_service_pass: ## service password for authenticating ldap calls in active directory 
+  host: ## ip address or hostname
+  encryption: ## blank or :start_tls
+  base_dn: ## baseDN for ldap auth, eg dc=redhat,dc=com
+  group_base: ##baseDN for your ldap groups, eg ou=Groups,dc=redhat,dc=com
+  server_type: ## type of server. default == posix. :active_directory, :posix, :free_ipa
+  ad_anon_queries: false by default, true if you don't want to use the service user
+  ad_domain: ## domain for your users if using active directory, eg redhat.com
+  ad_service_user: ## service account for authenticating ldap calls in active directory 
+  ad_service_pass: ## service password for authenticating ldap calls in active directory 
