@@ -5,7 +5,7 @@
 
 Summary: LDAP integration for Active Directory, Free IPA and posix  
 Name: rubygem-%{gemname}
-Version: 0.0.5
+Version: 0.0.6
 Release: 1%{?dist}
 Group: Development/Languages
 License: GPLv2+ or Ruby
@@ -56,6 +56,14 @@ rm -rf %{buildroot}
 
 
 %changelog
+* Fri Jun 29 2012 Jordan OMara <jomara@redhat.com> 0.0.6-1
+- Adding some heavy recursive tests (jomara@redhat.com)
+- Updating README to fix formatting (jsomara@gmail.com)
+- Adding anon_queries to AD config; Fixing AD recursive group walk
+  (jomara@redhat.com)
+- Fixing a posix merge_filter bug. NEEDS SOME TESTS (jomara@redhat.com)
+- Fixing a few minor bugs (jomara@redhat.com)
+
 * Tue Jun 26 2012 Jordan OMara <jomara@redhat.com> 0.0.5-1
 - Forgot to remove obsolete files from lib (jomara@redhat.com)
 
