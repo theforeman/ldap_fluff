@@ -35,6 +35,7 @@ This gem integrates with warden/devise quite nicely.
 Your global configuration must provide information about your LDAP host to function properly.
 
   host: ## ip address or hostname
+  port: ## port
   encryption: ## blank or :start_tls
   base_dn: ## baseDN for ldap auth, eg dc=redhat,dc=com
   group_base: ##baseDN for your ldap groups, eg ou=Groups,dc=redhat,dc=com

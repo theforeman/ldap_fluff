@@ -71,4 +71,15 @@ class TestADMemberService < MiniTest::Unit::TestCase
     @ldap.verify
   end
 
+  def test_nil_payload
+    assert_equal [], @adms._groups_from_ldap_data(nil)
+  end
+
+  def test_empty_user
+    @ldap.expect(:search, [], [:filter => ad_name_filter("john")])
+    @adms.ldap = @ldap
+    assert_raises(LdapFluff::ActiveDirectory::MemberService::UIDNotFoundException) { @adms.find_user_groups("john").data }
+    @ldap.verify
+  end
+
 end

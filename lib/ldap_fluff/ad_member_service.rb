@@ -15,15 +15,19 @@ class LdapFluff::ActiveDirectory::MemberService
   def find_user_groups(uid)
     name_filter = Net::LDAP::Filter.eq("samaccountname",uid)
     @data = @ldap.search(:filter => name_filter)
-    raise UIDNotFoundException if @data == nil
+    raise UIDNotFoundException if (@data == nil || @data.empty?)
     _groups_from_ldap_data(@data.first)
   end
 
   # return the :memberof attrs + parents, recursively
   def _groups_from_ldap_data(payload)
-    first_level = _group_names_from_cn(payload[:memberof])
-    total_groups = _walk_group_ancestry(first_level)
-    (first_level + total_groups).uniq
+    data = []
+    if payload != nil
+      first_level = _group_names_from_cn(payload[:memberof])
+      total_groups = _walk_group_ancestry(first_level)
+      data = (first_level + total_groups).uniq
+    end
+    data
   end
 
   # recursively loop over the parent list
