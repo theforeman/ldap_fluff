@@ -13,10 +13,9 @@ class LdapFluff::ActiveDirectory::MemberService
   # get a list [] of ldap groups for a given user
   # in active directory, this means a recursive lookup
   def find_user_groups(uid)
-    name_filter = Net::LDAP::Filter.eq("samaccountname",uid)
-    @data = @ldap.search(:filter => name_filter)
-    raise UIDNotFoundException if (@data == nil || @data.empty?)
-    _groups_from_ldap_data(@data.first)
+    data = @ldap.search(:filter => name_filter(uid))
+    raise UIDNotFoundException if (data == nil || data.empty?)
+    _groups_from_ldap_data(data.first)
   end
 
   # return the :memberof attrs + parents, recursively
@@ -51,6 +50,10 @@ class LdapFluff::ActiveDirectory::MemberService
 
   def class_filter
     Net::LDAP::Filter.eq("objectclass","group")
+  end
+
+  def name_filter(uid)
+    Net::LDAP::Filter.eq("samaccountname",uid)
   end
 
   # extract the group names from the LDAP style response,

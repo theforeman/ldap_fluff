@@ -21,6 +21,10 @@ module LdapTestHelper
     Net::LDAP::Filter.eq("samaccountname",name)
   end
 
+  def ipa_name_filter(name)
+    Net::LDAP::Filter.eq("uid",name)
+  end
+
   def group_filter(g)
     Net::LDAP::Filter.eq("cn", g)
   end
@@ -43,5 +47,9 @@ module LdapTestHelper
 
   def posix_user_payload
     [{:cn => ["bros"]}]
+  end
+
+  def ipa_user_payload
+    [{:cn => 'user'},{:memberof => ['cn=group,dc=internet,dc=com','cn=bros,dc=internet,dc=com']}]
   end
 end
