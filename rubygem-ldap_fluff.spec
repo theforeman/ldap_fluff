@@ -5,7 +5,7 @@
 
 Summary: LDAP integration for Active Directory, Free IPA and posix  
 Name: rubygem-%{gemname}
-Version: 0.0.6
+Version: 0.1.0
 Release: 1%{?dist}
 Group: Development/Languages
 License: GPLv2+ or Ruby
@@ -56,6 +56,13 @@ rm -rf %{buildroot}
 
 
 %changelog
+* Fri Jul 06 2012 Jordan OMara <jomara@redhat.com> 0.1.0-1
+- Adding the rest of free ipa support - testing, configuration
+  (jomara@redhat.com)
+- Adding FreeIPA support (jomara@redhat.com)
+- Fix for empty set return for missing ldap user (jomara@redhat.com)
+- Removing files that shouldnt have been committed (jomara@redhat.com)
+
 * Fri Jun 29 2012 Jordan OMara <jomara@redhat.com> 0.0.6-1
 - Adding some heavy recursive tests (jomara@redhat.com)
 - Updating README to fix formatting (jsomara@gmail.com)
