@@ -8,9 +8,9 @@ class LdapFluff::ActiveDirectory
                          :encryption => config.encryption
     @group_base = config.group_base
     @group_base ||= config.base_dn
-    @ad_domain = config.ad_domain
-    @bind_user = config.ad_service_user
-    @bind_pass = config.ad_service_pass
+    @ad_domain = config.domain
+    @bind_user = config.service_user
+    @bind_pass = config.service_pass
     @anon = config.ad_anon_queries
 
     @member_service = MemberService.new(@ldap,@group_base)

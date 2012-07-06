@@ -11,9 +11,9 @@ module LdapTestHelper
         :encryption => :start_tls,
         :base_dn => "dc=internet,dc=com",
         :group_base => "ou=group,dc=internet,dc=com",
-        :ad_service_user => "service",
-        :ad_service_pass => "pass",
-        :ad_domain => "internet.com"
+        :service_user => "service",
+        :service_pass => "pass",
+        :domain => "internet.com"
       )
   end
 
@@ -31,6 +31,10 @@ module LdapTestHelper
 
   def group_class_filter
     Net::LDAP::Filter.eq("objectclass","group")
+  end
+
+  def ipa_user_bind(uid)
+    "uid=#{uid},#{@config.base_dn}"
   end
 
   def ad_user_payload

@@ -10,9 +10,9 @@ class LdapFluff::FreeIPA
     @group_base = config.group_base
     @group_base ||= config.base
     @base = config.base_dn
-    @bind_user = config.ipa_service_user
-    @bind_pass = config.ipa_service_pass
-    @anon = config.ipa_anon_queries
+    @bind_user = config.service_user
+    @bind_pass = config.service_pass
+    @anon = config.anon_queries
 
     @member_service = MemberService.new(@ldap,@group_base)
   end
@@ -54,7 +54,7 @@ class LdapFluff::FreeIPA
     if all
       return groups == gids
     else
-      return groups & gids != nil
+      return groups & gids != []
     end
   end
 

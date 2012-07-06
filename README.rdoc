@@ -2,7 +2,7 @@
 
 Provides multiple implementations of LDAP queries for various backends
 
-Currently supports Active Directory and posix-style LDAP. FreeIPA coming soon
+Currently supports Active Directory, FreeIPA and posix-style LDAP
 
 == Installation
 
@@ -40,7 +40,7 @@ Your global configuration must provide information about your LDAP host to funct
   base_dn: ## baseDN for ldap auth, eg dc=redhat,dc=com
   group_base: ##baseDN for your ldap groups, eg ou=Groups,dc=redhat,dc=com
   server_type: ## type of server. default == posix. :active_directory, :posix, :free_ipa
-  ad_anon_queries: false by default, true if you don't want to use the service user
   ad_domain: ## domain for your users if using active directory, eg redhat.com
-  ad_service_user: ## service account for authenticating ldap calls in active directory 
-  ad_service_pass: ## service password for authenticating ldap calls in active directory 
+  service_user: ## service account for authenticating ldap calls in active directory or freeipa. required unless you enable anon 
+  service_pass: ## service password for authenticating ldap calls in active directory or freeipa. required unless you enable anon
+  anon_queries: ## false by default, true if you don't want to use the service user

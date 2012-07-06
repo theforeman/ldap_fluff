@@ -25,4 +25,10 @@ class ConfigTest < MiniTest::Unit::TestCase
     assert_instance_of LdapFluff::ActiveDirectory, l.ldap
   end
 
+  def test_load_ad
+    @config.server_type = "free_ipa"
+    l = LdapFluff.new(@config)
+    assert_instance_of LdapFluff::FreeIPA, l.ldap
+  end
+
 end

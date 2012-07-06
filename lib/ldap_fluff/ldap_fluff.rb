@@ -12,8 +12,10 @@ class LdapFluff
         @ldap = Posix.new(config)
       elsif type.to_sym == :active_directory
         @ldap = ActiveDirectory.new(config)
+      elsif type.to_sym == :free_ipa
+        @ldap = FreeIPA.new(config)
       else
-        raise Exception, "Unsupported connection type. Supported types = :active_directory, :posix"
+        raise Exception, "Unsupported connection type. Supported types = :active_directory, :posix, :free_ipa"
       end
     end
   end
