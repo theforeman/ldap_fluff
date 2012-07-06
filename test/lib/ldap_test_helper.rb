@@ -34,7 +34,7 @@ module LdapTestHelper
   end
 
   def ipa_user_bind(uid)
-    "uid=#{uid},#{@config.base_dn}"
+    "uid=#{uid},cn=users,cn=accounts,#{@config.base_dn}"
   end
 
   def ad_user_payload

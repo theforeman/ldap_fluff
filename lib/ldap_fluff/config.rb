@@ -35,9 +35,9 @@ class LdapFluff
         @base_dn = config["base_dn"]
         @group_base = config["group_base"]
         @ad_domain = config["ad_domain"]
-        @service_user = config["ad_service_user"]
-        @service_pass = config["ad_service_pass"]
-        @anon_queries = config["ad_anon_queries"]
+        @service_user = config["service_user"]
+        @service_pass = config["service_pass"]
+        @anon_queries = config["anon_queries"]
         @server_type = config["server_type"]
       rescue Errno::ENOENT
         $stderr.puts("The #{LdapFluff::CONFIG} config file you specified was not found")

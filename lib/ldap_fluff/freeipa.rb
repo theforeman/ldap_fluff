@@ -18,7 +18,7 @@ class LdapFluff::FreeIPA
   end
 
   def bind?(uid=nil, password=nil)
-    @ldap.auth "uid=#{uid},#{@base}", password
+    @ldap.auth "uid=#{uid},cn=users,cn=accounts,#{@base}", password
     @ldap.bind
   end
 
@@ -52,7 +52,7 @@ class LdapFluff::FreeIPA
     service_bind
     groups = @member_service.find_user_groups(uid)
     if all
-      return groups == gids
+      return groups & gids == gids
     else
       return groups & gids != []
     end

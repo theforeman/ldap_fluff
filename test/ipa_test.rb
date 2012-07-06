@@ -22,6 +22,12 @@ class TestIPA < MiniTest::Unit::TestCase
     @ipa.member_service = @md
   end
 
+  def bigtime_user
+    @md = MiniTest::Mock.new
+    @md.expect(:find_user_groups, ['bros','broskies'], ["john"])
+    @ipa.member_service = @md
+  end
+
   def test_good_bind
     @ldap.expect(:auth, nil, [ipa_user_bind('internet'),"password"])
     @ldap.expect(:bind, true)
@@ -84,6 +90,12 @@ class TestIPA < MiniTest::Unit::TestCase
     service_bind
     basic_user
     assert_equal @ipa.is_in_groups("john", ["broskies"],false), false
+  end
+
+  def test_group_subset
+    service_bind
+    bigtime_user
+    assert_equal @ipa.is_in_groups('john',["broskies"],true), true
   end
 end
 
