@@ -6,17 +6,14 @@ Currently supports Active Directory, FreeIPA and posix-style LDAP
 
 == Installation
 
-Installation of this gem should actually be done through the packaged
-RPM or the standard gem installer
+Now available in the rubygems.org repo, https://rubygems.org/gems/ldap_fluff
 
-  $ yum install rubygem-ldap_fluff 
-          | OR |
   $ gem install ldap_fluff
 
 == Rails Application Configuration
 
-There are quite a few parameters to configure to get this gem set up with your
-LDAP server correctly
+You'll have to configure the gem a little bit to get it hooked into your LDAP
+server.
 
 It exposes 3 methods: 
   authenticate?(username, password)
@@ -44,3 +41,16 @@ Your global configuration must provide information about your LDAP host to funct
   service_user: ## service account for authenticating ldap calls in active directory or freeipa. required unless you enable anon 
   service_pass: ## service password for authenticating ldap calls in active directory or freeipa. required unless you enable anon
   anon_queries: ## false by default, true if you don't want to use the service user
+
+=== tls support
+
+ldap_fluff fully supports start_tls encryption, but most likely you'll need to add your
+server's CAs to the local bundle. on a red hat style system, it's probably something like this:
+
+  $ cat ldap_server_ca.crt >> /etc/pki/tls/certs/ca-bundle.crt
+
+=== A note on ActiveDirectory
+
+ldap_fluff currently does not support searching/binding global catalogs
+
+ad_domain, service_user and service_pass OR anon_queries are required for AD support
