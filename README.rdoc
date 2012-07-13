@@ -2,7 +2,7 @@
 
 Provides multiple implementations of LDAP queries for various backends
 
-Currently supports Active Directory, FreeIPA and posix-style LDAP
+Supports Active Directory, FreeIPA and posix-style LDAP
 
 == Installation
 
@@ -51,6 +51,6 @@ server's CAs to the local bundle. on a red hat style system, it's probably somet
 
 === A note on ActiveDirectory
 
-ldap_fluff currently does not support searching/binding global catalogs
+ldap_fluff does not support searching/binding global catalogs
 
 ad_domain, service_user and service_pass OR anon_queries are required for AD support
