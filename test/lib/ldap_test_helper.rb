@@ -13,7 +13,7 @@ module LdapTestHelper
         :group_base => "ou=group,dc=internet,dc=com",
         :service_user => "service",
         :service_pass => "pass",
-        :domain => "internet.com"
+        :ad_domain => "internet.com"
       )
   end
 

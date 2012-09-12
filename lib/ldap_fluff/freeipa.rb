@@ -8,7 +8,7 @@ class LdapFluff::FreeIPA
                          :port => config.port,
                          :encryption => config.encryption
     @group_base = config.group_base
-    @group_base ||= config.base
+    @group_base ||= config.base_dn
     @base = config.base_dn
     @bind_user = config.service_user
     @bind_pass = config.service_pass
