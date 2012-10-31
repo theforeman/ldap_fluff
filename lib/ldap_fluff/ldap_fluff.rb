@@ -23,7 +23,12 @@ class LdapFluff
   # return true if the user password combination
   # authenticates the user, otherwise false
   def authenticate?(uid, password)
-    @ldap.bind? uid, password
+    if password.nil? || password.empty?
+      # protect against passwordless auth from ldap server
+      return false
+    else
+      @ldap.bind? uid, password
+    end
   end
 
   # return a list[] of groups for a given uid
