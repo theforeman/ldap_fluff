@@ -5,7 +5,7 @@
 
 Summary: LDAP integration for Active Directory, Free IPA and posix  
 Name: rubygem-%{gemname}
-Version: 0.1.2
+Version: 0.1.3
 Release: 1%{?dist}
 Group: Development/Languages
 License: GPLv2+ or Ruby
@@ -56,6 +56,10 @@ rm -rf %{buildroot}
 
 
 %changelog
+* Wed Oct 31 2012 Jordan OMara <jomara@redhat.com> 0.1.3-1
+- Protect against passwordless auth in ldap (jomara@redhat.com)
+- Updating tito releasers (jomara@redhat.com)
+
 * Wed Sep 12 2012 Jordan OMara <jomara@redhat.com> 0.1.2-1
 - fixing a couple incorrect config values for AD & freeipa (jomara@redhat.com)
 - readme: Currently is implied. (jbowes@redhat.com)
