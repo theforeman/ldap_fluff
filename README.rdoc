@@ -54,3 +54,8 @@ server's CAs to the local bundle. on a red hat style system, it's probably somet
 ldap_fluff does not support searching/binding global catalogs
 
 ad_domain, service_user and service_pass OR anon_queries are required for AD support
+
+=== A note on FreeIPA
+
+ldap_fluff appends cn=groups,cn=accounts to the beginning of all BIND calls. You do not need to
+include this in your base_dn string
