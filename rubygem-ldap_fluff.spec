@@ -1,70 +1,95 @@
-%define ruby_sitelib %(ruby -rrbconfig -e "puts Config::CONFIG['sitelibdir']")
-%define gemdir %(ruby -rubygems -e 'puts Gem::dir' 2>/dev/null)
-%define gemname ldap_fluff 
-%define geminstdir %{gemdir}/gems/%{gemname}-%{version}
+%global gem_name ldap_fluff
+%if 0%{?rhel} == 6
+%global gem_dir %(ruby -rubygems -e 'puts Gem::dir' 2>/dev/null)
+%global gem_instdir %{gem_dir}/gems/%{gem_name}-%{version}
+%global gem_docdir %{gem_dir}/doc/%{gem_name}-%{version}
+%global gem_cache %{gem_dir}/cache/%{gem_name}-%{version}.gem
+%global gem_spec %{gem_dir}/specifications/%{gem_name}-%{version}.gemspec
+%global gem_libdir %{gem_instdir}/lib
+%endif
 
 Summary: LDAP integration for Active Directory, Free IPA and posix  
-Name: rubygem-%{gemname}
+Name: rubygem-%{gem_name}
 Version: 0.1.3
 Release: 1%{?dist}
 Group: Development/Languages
 License: GPLv2+ or Ruby
-URL: http://www.redhat.com
-Source0: %{name}-%{version}.tar.gz
-BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
+URL: https://github.com/jsomara/ldap_fluff
+Source0: http://rubygems.org/downloads/%{gem_name}-%{version}.gem
 Requires: rubygems
-Requires: rubygem-net-ldap
+Requires: rubygem(net-ldap)
 BuildRequires: rubygems
-BuildRequires: rubygem-rake
+BuildRequires: rubygem(rake)
 BuildArch: noarch
-Provides: rubygem(%{gemname}) = %{version}
-
-# We often develop on Fedora but deploy to RHEL
-%global _binary_filedigest_algorithm 1
-%global _source_filedigest_algorithm 1
-%global _binary_payload w9.gzdio
-%global _source_payload w9.gzdio
+Provides: rubygem(%{gem_name}) = %{version}
+%if 0%{?rhel} == 6 || 0%{?fedora} < 17
+Requires: ruby(abi) = 1.8
+%else
+Requires: ruby(abi) = 1.9.1
+%endif
+%if 0%{?fedora}
+BuildRequires: rubygems-devel
+%endif
 
 %description
-Provides multiple implementations of LDAP queries for various backends 
+Provides multiple implementations of LDAP queries for various backends.
 
+%package doc
+Summary: Documentation for %{name}
+Group: Documentation
+Requires: %{name} = %{version}-%{release}
+BuildArch: noarch
+
+%description doc
+Documentation for %{name}
 
 %prep
-%setup -q
+gem unpack %{SOURCE0}
+%setup -q -D -T -n  %{gem_name}-%{version}
+gem spec %{SOURCE0} -l --ruby > %{gem_name}.gemspec
 
 %build
-rake ldap_fluff:gem
+mkdir -p .%{gem_dir}
+gem build %{gem_name}.gemspec
+#rake ldap_fluff:gem
+
+gem install -V \
+        --local \
+        --install-dir ./%{gem_dir} \
+        --force \
+        --rdoc \
+        %{gem_name}-%{version}.gem
+
+
 %install
-rm -rf %{buildroot}
-mkdir -p %{buildroot}%{gemdir}
-gem install --local --install-dir %{buildroot}%{gemdir} \
-            --force --rdoc ./pkg/%{gemname}-%{version}.gem
+mkdir -p %{buildroot}%{gem_dir}
+cp -a ./%{gem_dir}/* %{buildroot}%{gem_dir}/
 
-mkdir -p %{buildroot}/etc
-cp %{buildroot}%{gemdir}/gems/%{gemname}-%{version}/etc/ldap_fluff.yml %{buildroot}/etc
+mkdir -p %{buildroot}%{_sysconfdir}
+cp -a ./%{_sysconfdir}/ldap_fluff.yml %{buildroot}%{_sysconfdir}/
 
-%clean
-rm -rf %{buildroot}
+rm -rf %{buildroot}%{gem_instdir}/{.yardoc,etc}
 
 %files
-%defattr(-, root, root, -)
-%{gemdir}/gems/%{gemname}-%{version}/
-%doc %{gemdir}/doc/%{gemname}-%{version}
-%{gemdir}/cache/%{gemname}-%{version}.gem
-%{gemdir}/specifications/%{gemname}-%{version}.gemspec
-%config(noreplace) /etc/ldap_fluff.yml
+%dir %{gem_instdir}
+%{gem_libdir}
+%exclude %{gem_cache}
+%{gem_spec}
+%config(noreplace) %{_sysconfdir}/ldap_fluff.yml
 
+%files doc
+%doc %{gem_docdir}
+%{gem_instdir}/test
 
 %changelog
-* Wed Oct 31 2012 Jordan OMara <jomara@redhat.com> 0.1.3-1
-- Protect against passwordless auth in ldap (jomara@redhat.com)
-- Updating tito releasers (jomara@redhat.com)
+* Thu Nov 01 2012 Miroslav Suchý <msuchy@redhat.com> 0.1.3-1
+- update to ldap_fluff-0.1.3.gem and polish the spec (msuchy@redhat.com)
 
-* Wed Sep 12 2012 Jordan OMara <jomara@redhat.com> 0.1.2-1
-- fixing a couple incorrect config values for AD & freeipa (jomara@redhat.com)
-- readme: Currently is implied. (jbowes@redhat.com)
-- Updating sample config file (jomara@redhat.com)
-- Updating readme (jomara@redhat.com)
+* Mon Jul 16 2012 Miroslav Suchý <msuchy@redhat.com> 0.1.1-2
+- cleanup spec file (msuchy@redhat.com)
+
+* Tue Jul 10 2012 Jordan OMara <jomara@redhat.com> 0.1.1-1
+- new package built with tito
 
 * Fri Jul 06 2012 Jordan OMara <jomara@redhat.com> 0.1.1-1
 - A few minor IPA bugs (jomara@redhat.com)
