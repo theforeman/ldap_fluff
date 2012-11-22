@@ -13,7 +13,7 @@ Name: rubygem-%{gem_name}
 Version: 0.1.3
 Release: 1%{?dist}
 Group: Development/Languages
-License: GPLv2+ or Ruby
+License: GPLv2+
 URL: https://github.com/jsomara/ldap_fluff
 Source0: http://rubygems.org/downloads/%{gem_name}-%{version}.gem
 Requires: rubygems
