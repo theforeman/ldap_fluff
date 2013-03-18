@@ -10,7 +10,7 @@ class ConfigTest < MiniTest::Unit::TestCase
 
   def test_unsupported_type
     @config.server_type = "inactive_directory"
-    assert_raises(Exception) { LdapFluff.new(@config) }
+    assert_raises(LdapFluff::ConfigError) { LdapFluff.new(@config) }
   end
 
   def test_load_posix
