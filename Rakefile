@@ -26,6 +26,12 @@ Rake::TestTask.new("test_units") do |t|
   t.verbose = false
 end
 
+Rake::TestTask.new("test_all") do |t|
+  t.test_files = FileList['test/lib/*.rb', 'test/*.rb']
+  t.verbose = true
+end
+
+
 # ====================================================================
 # Create a task that will package the Rake software into distributable
 # gem files.
