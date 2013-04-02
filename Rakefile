@@ -45,7 +45,7 @@ else
     #### Basic information.
 
     s.name = 'ldap_fluff'
-    s.version = `rpm -q --qf "%{version}" --specfile rubygem-ldap_fluff.spec`
+    s.version = ` rpm --qf "%{VERSION}\n" --specfile rubygem-ldap_fluff.spec | head -n 1`
     s.summary = "LDAP Querying tools for Active Directory, FreeIPA and Posix-style"
     s.description = %{\
 Simple library for binding & group querying on top of various ldap implementations
