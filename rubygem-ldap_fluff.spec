@@ -10,7 +10,7 @@
 
 Summary: LDAP integration for Active Directory, Free IPA and posix  
 Name: rubygem-%{gem_name}
-Version: 0.1.3
+Version: 0.1.4
 Release: 1%{?dist}
 Group: Development/Languages
 License: GPLv2+
@@ -82,6 +82,11 @@ rm -rf %{buildroot}%{gem_instdir}/{.yardoc,etc}
 %{gem_instdir}/test
 
 %changelog
+* Tue Apr 02 2013 Jordan OMara <jomara@redhat.com> 0.1.4-1
+- More specific exception for config related errors (ares@igloonet.cz)
+- Remove Ruby from .spec license field. (v.ondruch@tiscali.cz)
+- thanks @msuchy for a MUCH better spec file (jomara@redhat.com)
+
 * Thu Nov 01 2012 Miroslav Suchý <msuchy@redhat.com> 0.1.3-1
 - update to ldap_fluff-0.1.3.gem and polish the spec (msuchy@redhat.com)
 
