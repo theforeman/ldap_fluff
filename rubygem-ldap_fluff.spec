@@ -10,7 +10,7 @@
 
 Summary: LDAP integration for Active Directory, Free IPA and posix  
 Name: rubygem-%{gem_name}
-Version: 0.1.4
+Version: 0.1.5
 Release: 1%{?dist}
 Group: Development/Languages
 License: GPLv2+
@@ -82,6 +82,11 @@ rm -rf %{buildroot}%{gem_instdir}/{.yardoc,etc}
 %{gem_instdir}/test
 
 %changelog
+* Wed Apr 03 2013 Jordan OMara <jomara@redhat.com> 0.1.5-1
+- Adding test all task for travis (jomara@redhat.com)
+- Fixing rakefile to use correct version from spec (jomara@redhat.com)
+- Fixing rdoc task (jomara@redhat.com)
+
 * Tue Apr 02 2013 Jordan OMara <jomara@redhat.com> 0.1.4-1
 - More specific exception for config related errors (ares@igloonet.cz)
 - Remove Ruby from .spec license field. (v.ondruch@tiscali.cz)
