@@ -11,7 +11,7 @@
 Summary: LDAP integration for Active Directory, Free IPA and posix  
 Name: rubygem-%{gem_name}
 Version: 0.1.5
-Release: 2%{?dist}
+Release: 3%{?dist}
 Group: Development/Languages
 License: GPLv2+
 URL: https://github.com/jsomara/ldap_fluff
@@ -82,6 +82,10 @@ rm -rf %{buildroot}%{gem_instdir}/{.yardoc,etc}
 %{gem_instdir}/test
 
 %changelog
+* Thu Apr 04 2013 Jordan OMara <jomara@redhat.com> 0.1.5-3
+- Manually setting version number in 187 branch for rpmbuild reasons
+  (jomara@redhat.com)
+
 * Thu Apr 04 2013 Jordan OMara <jomara@redhat.com> 0.1.5-2
 - 187-specific rakefile fix (jomara@redhat.com)
 
