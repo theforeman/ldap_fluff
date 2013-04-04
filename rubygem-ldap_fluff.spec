@@ -82,6 +82,9 @@ rm -rf %{buildroot}%{gem_instdir}/{.yardoc,etc}
 %{gem_instdir}/test
 
 %changelog
+* Thu Apr 04 2013 Jordan OMara <jomara@redhat.com> 0.1.5-2
+- 187-specific rakefile fix (jomara@redhat.com)
+
 * Wed Apr 03 2013 Jordan OMara <jomara@redhat.com> 0.1.5-1
 - Adding test all task for travis (jomara@redhat.com)
 - Fixing rakefile to use correct version from spec (jomara@redhat.com)
