@@ -33,4 +33,14 @@ class LdapFluff::Posix
     (gids.empty? || @member_service.times_in_groups(uid, gids, all) > 0)
   end
 
+  def user_exists?(uid)
+    user = @member_service.find_user(uid)
+    !(user.nil? || user.empty?)
+  end
+
+  def group_exists?(gid)
+    group = @member_service.find_group(gid)
+    !(group.nil? || group.empty?)
+  end
+
 end

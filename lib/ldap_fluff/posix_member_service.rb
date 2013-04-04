@@ -20,6 +20,12 @@ class LdapFluff::Posix::MemberService
     groups
   end
 
+  def find_user(uid)
+  end
+
+  def find_groups(gid)
+  end
+
   def times_in_groups(uid, gids, all)
     matches = 0
     filters = []

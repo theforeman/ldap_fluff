@@ -1,4 +1,4 @@
-require 'minitest/autorun'
+require_relative './lib/ldap_test_helper'
 
 class TestAD < MiniTest::Unit::TestCase
   include LdapTestHelper
@@ -96,5 +96,43 @@ class TestAD < MiniTest::Unit::TestCase
     service_bind
     bigtime_user
     assert_equal @ad.is_in_groups("john", ["broskies"],true), true
+  end
+
+  def test_user_exists
+    @md = MiniTest::Mock.new
+    @md.expect(:find_user, 'notnilluser', ["john"])
+    @ad.member_service = @md
+    service_bind
+    assert @ad.user_exists?('john')
+  end
+
+  def test_missing_user
+    @md = MiniTest::Mock.new
+    @md.expect(:find_user, nil, ['john'])
+    def @md.find_user uid
+      raise LdapFluff::ActiveDirectory::MemberService::UIDNotFoundException
+    end
+    @ad.member_service = @md
+    service_bind
+    assert !@ad.user_exists?('john')
+  end
+
+  def test_group_exists
+    @md = MiniTest::Mock.new
+    @md.expect(:find_group, 'notnillgroup', ["broskies"])
+    @ad.member_service = @md
+    service_bind
+    assert @ad.group_exists?('broskies')
+  end
+
+  def test_missing_group
+    @md = MiniTest::Mock.new
+    @md.expect(:find_group, nil, ['broskies'])
+    def @md.find_group uid
+      raise LdapFluff::ActiveDirectory::MemberService::GIDNotFoundException
+    end
+    @ad.member_service = @md
+    service_bind
+    assert !@ad.group_exists?('broskies')
   end
 end

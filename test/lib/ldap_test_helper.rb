@@ -1,5 +1,7 @@
-require 'net/ldap'
+require_relative '../../lib/ldap_fluff'
 require 'ostruct'
+require 'net/ldap'
+require 'minitest/autorun'
 
 module LdapTestHelper
   attr_accessor :group_base, :class_filter, :user

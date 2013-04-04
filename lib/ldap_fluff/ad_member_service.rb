@@ -13,9 +13,14 @@ class LdapFluff::ActiveDirectory::MemberService
   # get a list [] of ldap groups for a given user
   # in active directory, this means a recursive lookup
   def find_user_groups(uid)
+    data = find_user(uid)
+    _groups_from_ldap_data(data.first)
+  end
+
+  def find_user(uid)
     data = @ldap.search(:filter => name_filter(uid))
     raise UIDNotFoundException if (data == nil || data.empty?)
-    _groups_from_ldap_data(data.first)
+    data
   end
 
   # return the :memberof attrs + parents, recursively
@@ -71,5 +76,8 @@ class LdapFluff::ActiveDirectory::MemberService
   end
 
   class UIDNotFoundException < StandardError
+  end
+
+  class GIDNotFoundException < StandardError
   end
 end

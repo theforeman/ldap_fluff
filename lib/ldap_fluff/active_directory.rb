@@ -58,6 +58,26 @@ class LdapFluff::ActiveDirectory
     end
   end
 
+  def user_exists?(uid)
+    begin
+      service_bind
+      user = @member_service.find_user(uid)
+    rescue MemberService::UIDNotFoundException
+      return false
+    end
+    return true
+  end
+
+  def group_exists?(gid)
+    begin
+      service_bind
+      group = @member_service.find_group(gid)
+    rescue MemberService::GIDNotFoundException
+      return false
+    end
+    return true
+  end
+
   class UnauthenticatedActiveDirectoryException < StandardError
   end
 end

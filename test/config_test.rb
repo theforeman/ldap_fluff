@@ -1,5 +1,4 @@
-require 'minitest/autorun'
-require 'ldap_fluff'
+require_relative './lib/ldap_test_helper'
 
 class ConfigTest < MiniTest::Unit::TestCase
   include LdapTestHelper

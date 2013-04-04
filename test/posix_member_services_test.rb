@@ -1,4 +1,4 @@
-require 'minitest/autorun'
+require_relative './lib/ldap_test_helper'
 
 class TestPosixMemberService < MiniTest::Unit::TestCase
   include LdapTestHelper

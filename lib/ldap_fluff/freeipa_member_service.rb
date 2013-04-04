@@ -13,15 +13,30 @@ class LdapFluff::FreeIPA::MemberService
   # return an ldap user with groups attached
   # note : this method is not particularly fast for large ldap systems
   def find_user_groups(uid)
-    user = @ldap.search(:filter => name_filter(uid))
-    raise UIDNotFoundException if (user == nil || user.empty?)
+    user = find_user(uid)
     # if group data is missing, they aren't querying with a user
     # with enough privileges
     raise InsufficientQueryPrivilegesException if user.size <= 1
     _group_names_from_cn(user[1][:memberof])
   end
 
+  def find_user(uid)
+    user = @ldap.search(:filter => name_filter(uid))
+    raise UIDNotFoundException if (user == nil || user.empty?)
+    user
+  end
+
+  def find_group(gid)
+    group = @ldap.search(:filter => group_filter(gid))
+    raise GIDNotFoundException if (group == nil || group.empty?)
+    group
+  end
+
   def name_filter(uid)
+    Net::LDAP::Filter.eq("uid",uid)
+  end
+
+  def group_filter(gid)
     Net::LDAP::Filter.eq("uid",uid)
   end
 
@@ -31,6 +46,9 @@ class LdapFluff::FreeIPA::MemberService
   end
 
   class UIDNotFoundException < StandardError
+  end
+
+  class GIDNotFoundException < StandardError
   end
 
   class InsufficientQueryPrivilegesException < StandardError

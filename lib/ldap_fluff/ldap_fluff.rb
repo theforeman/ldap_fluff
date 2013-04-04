@@ -1,3 +1,4 @@
+require 'rubygems'
 require 'net/ldap'
 
 class LdapFluff
@@ -41,6 +42,16 @@ class LdapFluff
   # in grouplist
   def is_in_groups?(uid, grouplist)
     @ldap.is_in_groups(uid, grouplist, true)
+  end
+
+  # return true if uid exists
+  def valid_user?(uid)
+    @ldap.user_exists? uid
+  end
+
+  # return true if group exists
+  def valid_group?(gid)
+    @ldap.group_exists? gid
   end
 
 end
