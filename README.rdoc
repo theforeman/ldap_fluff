@@ -15,7 +15,7 @@ Now available in the rubygems.org repo, https://rubygems.org/gems/ldap_fluff
 You'll have to configure the gem a little bit to get it hooked into your LDAP
 server.
 
-It exposes 3 methods: 
+It exposes these methods:
   authenticate?(username, password)
     returns true if the username & password combo bind correctly
 
@@ -24,6 +24,12 @@ It exposes 3 methods:
 
   is_in_groups?(uid, grouplist)
     returns true if the user provided is in all of the groups listed in grouplist
+  
+  valid_user?(uid)
+    returns true if the user provided exists 
+  
+  valid_group?(uid)
+    returns true if the group provided exists
     
 These methods are handy for using LDAP for both authentication and authorization.
 

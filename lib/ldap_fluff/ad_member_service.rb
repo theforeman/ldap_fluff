@@ -23,6 +23,12 @@ class LdapFluff::ActiveDirectory::MemberService
     data
   end
 
+  def find_group(gid)
+    data = @ldap.search(:filter => group_filter(gid), :base => @group_base)
+    raise GIDNotFoundException if (data == nil || data.empty?)
+    data
+  end
+
   # return the :memberof attrs + parents, recursively
   def _groups_from_ldap_data(payload)
     data = []

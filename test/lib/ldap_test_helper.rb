@@ -23,8 +23,16 @@ module LdapTestHelper
     Net::LDAP::Filter.eq("samaccountname",name)
   end
 
+  def ad_group_filter(name)
+    Net::LDAP::Filter.eq("cn",name)
+  end
+
   def ipa_name_filter(name)
     Net::LDAP::Filter.eq("uid",name)
+  end
+
+  def ipa_group_filter(name)
+    Net::LDAP::Filter.eq("cn",name)
   end
 
   def group_filter(g)
@@ -43,6 +51,10 @@ module LdapTestHelper
     [{ :memberof => ["CN=group,dc=internet,dc=com"] }]
   end
 
+  def ad_group_payload
+    [{:cn => "broze",  :memberof => ["CN=group,dc=internet,dc=com"] }]
+  end
+
   def ad_parent_payload(num)
     [{ :memberof => ["CN=bros#{num},dc=internet,dc=com"] }]
   end
@@ -55,7 +67,15 @@ module LdapTestHelper
     [{:cn => ["bros"]}]
   end
 
+  def posix_group_payload
+    [{:cn => ["broze"]}]
+  end
+
   def ipa_user_payload
-    [{:cn => 'user'},{:memberof => ['cn=group,dc=internet,dc=com','cn=bros,dc=internet,dc=com']}]
+    [{:cn => 'john'},{:memberof => ['cn=group,dc=internet,dc=com','cn=bros,dc=internet,dc=com']}]
+  end
+
+  def ipa_group_payload
+    [{:cn => 'group'},{:memberof => ['cn=group,dc=internet,dc=com','cn=bros,dc=internet,dc=com']}]
   end
 end

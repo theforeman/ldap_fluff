@@ -27,7 +27,7 @@ class LdapFluff::FreeIPA::MemberService
   end
 
   def find_group(gid)
-    group = @ldap.search(:filter => group_filter(gid))
+    group = @ldap.search(:filter => group_filter(gid), :base => @group_base)
     raise GIDNotFoundException if (group == nil || group.empty?)
     group
   end
@@ -37,7 +37,7 @@ class LdapFluff::FreeIPA::MemberService
   end
 
   def group_filter(gid)
-    Net::LDAP::Filter.eq("uid",uid)
+    Net::LDAP::Filter.eq("cn",gid)
   end
 
   def _group_names_from_cn(grouplist)

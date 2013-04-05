@@ -15,6 +15,10 @@ class TestADMemberService < MiniTest::Unit::TestCase
     @ldap.expect(:search, ad_parent_payload(1), [:filter => @gfilter, :base => @config.group_base])
   end
 
+  def basic_group
+    @ldap.expect(:search, ad_group_payload, [:filter => ad_group_filter("broze"), :base => @config.group_base])
+  end
+
   def nest_deep(n)
     # add all the expects
     for i in 1..(n-1)
@@ -80,6 +84,30 @@ class TestADMemberService < MiniTest::Unit::TestCase
     @adms.ldap = @ldap
     assert_raises(LdapFluff::ActiveDirectory::MemberService::UIDNotFoundException) { @adms.find_user_groups("john").data }
     @ldap.verify
+  end
+
+  def test_find_good_user
+    basic_user
+    @adms.ldap = @ldap
+    assert_equal ad_user_payload, @adms.find_user('john')
+  end
+
+  def test_find_missing_user
+    @ldap.expect(:search, nil, [:filter => ad_name_filter("john")])
+    @adms.ldap = @ldap
+    assert_raises(LdapFluff::ActiveDirectory::MemberService::UIDNotFoundException) { @adms.find_user('john') }
+  end
+
+  def test_find_good_group
+    basic_group
+    @adms.ldap = @ldap
+    assert_equal ad_group_payload, @adms.find_group('broze')
+  end
+
+  def test_find_missing_group
+    @ldap.expect(:search, nil, [:filter => ad_group_filter("broze"), :base => @config.group_base])
+    @adms.ldap = @ldap
+    assert_raises(LdapFluff::ActiveDirectory::MemberService::GIDNotFoundException) { @adms.find_group('broze') }
   end
 
 end

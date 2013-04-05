@@ -34,13 +34,21 @@ class LdapFluff::Posix
   end
 
   def user_exists?(uid)
-    user = @member_service.find_user(uid)
-    !(user.nil? || user.empty?)
+    begin
+      user = @member_service.find_user(uid)
+    rescue MemberService::UIDNotFoundException
+      return false
+    end
+    return true
   end
 
   def group_exists?(gid)
-    group = @member_service.find_group(gid)
-    !(group.nil? || group.empty?)
+    begin
+      group = @member_service.find_group(gid)
+    rescue MemberService::GIDNotFoundException
+      return false
+    end
+    return true
   end
 
 end

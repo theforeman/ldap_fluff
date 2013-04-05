@@ -72,6 +72,9 @@ class TestPosix < MiniTest::Unit::TestCase
   def test_missing_user
     @md = MiniTest::Mock.new
     @md.expect(:find_user, nil, ['john'])
+    def @md.find_user uid
+      raise LdapFluff::Posix::MemberService::UIDNotFoundException
+    end
     @posix.member_service = @md
     assert !@posix.user_exists?('john')
   end
@@ -86,6 +89,9 @@ class TestPosix < MiniTest::Unit::TestCase
   def test_missing_group
     @md = MiniTest::Mock.new
     @md.expect(:find_group, nil, ['broskies'])
+    def @md.find_group uid
+      raise LdapFluff::Posix::MemberService::GIDNotFoundException
+    end
     @posix.member_service = @md
     assert !@posix.group_exists?('broskies')
   end

@@ -14,16 +14,22 @@ class LdapFluff::Posix::MemberService
   # note : this method is not particularly fast for large ldap systems
   def find_user_groups(uid)
     groups = []
-    @ldap.search(:filter => name_filter(uid), :base => @group_base).each do |entry|
+    find_user(uid).each do |entry|
       groups << entry[:cn][0]
     end
     groups
   end
 
   def find_user(uid)
+    user = @ldap.search(:filter => name_filter(uid), :base => @group_base)
+    raise UIDNotFoundException if (user == nil || user.empty?)
+    user
   end
 
-  def find_groups(gid)
+  def find_group(gid)
+    group = @ldap.search(:filter => group_filter(gid), :base => @group_base)
+    raise GIDNotFoundException if (group == nil || group.empty?)
+    group
   end
 
   def times_in_groups(uid, gids, all)
@@ -58,5 +64,11 @@ class LdapFluff::Posix::MemberService
       end
       return filter
     end
+  end
+
+  class UIDNotFoundException < StandardError
+  end
+
+  class GIDNotFoundException < StandardError
   end
 end
