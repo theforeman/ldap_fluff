@@ -1,64 +1,60 @@
+%{?scl:%scl_package rubygem-%{gem_name}}
+%{!?scl:%global pkg_name %{name}}
+
 %global gem_name ldap_fluff
-%if 0%{?rhel} == 6
-%global gem_dir %(ruby -rubygems -e 'puts Gem::dir' 2>/dev/null)
-%global gem_instdir %{gem_dir}/gems/%{gem_name}-%{version}
-%global gem_docdir %{gem_dir}/doc/%{gem_name}-%{version}
-%global gem_cache %{gem_dir}/cache/%{gem_name}-%{version}.gem
-%global gem_spec %{gem_dir}/specifications/%{gem_name}-%{version}.gemspec
-%global gem_libdir %{gem_instdir}/lib
-%endif
 
 Summary: LDAP integration for Active Directory, Free IPA and posix  
-Name: rubygem-%{gem_name}
+Name: %{?scl_prefix}rubygem-%{gem_name}
 Version: 0.1.6
 Release: 1%{?dist}
 Group: Development/Languages
-License: GPLv2+
+License: GPLv2+ or Ruby
 URL: https://github.com/jsomara/ldap_fluff
 Source0: http://rubygems.org/downloads/%{gem_name}-%{version}.gem
-Requires: rubygems
-Requires: rubygem(net-ldap)
-BuildRequires: rubygems
-BuildRequires: rubygem(rake)
+Requires: %{?scl_prefix}rubygems
+Requires: %{?scl_prefix}rubygem(net-ldap)
+BuildRequires: %{?scl_prefix}rubygems-devel
+BuildRequires: %{?scl_prefix}rubygem(rake)
 BuildArch: noarch
-Provides: rubygem(%{gem_name}) = %{version}
-%if 0%{?rhel} == 6 || 0%{?fedora} < 17
-Requires: ruby(abi) = 1.8
-%else
-Requires: ruby(abi) = 1.9.1
-%endif
-%if 0%{?fedora}
-BuildRequires: rubygems-devel
-%endif
+Provides: %{?scl_prefix}rubygem(%{gem_name}) = %{version}
+Requires: %{?scl_prefix}ruby(abi) = 1.9.1
 
 %description
 Provides multiple implementations of LDAP queries for various backends.
 
 %package doc
-Summary: Documentation for %{name}
+Summary: Documentation for %{pkg_name}
 Group: Documentation
-Requires: %{name} = %{version}-%{release}
+Requires: %{?scl_prefix}%{pkg_name} = %{version}-%{release}
 BuildArch: noarch
 
 %description doc
-Documentation for %{name}
+Documentation for %{pkg_name}
 
 %prep
+%{?scl:scl enable %{scl} "}
 gem unpack %{SOURCE0}
+%{?scl:"}
 %setup -q -D -T -n  %{gem_name}-%{version}
+%{?scl:scl enable %{scl} "}
 gem spec %{SOURCE0} -l --ruby > %{gem_name}.gemspec
+%{?scl:"}
 
 %build
 mkdir -p .%{gem_dir}
+%{?scl:scl enable %{scl} "}
 gem build %{gem_name}.gemspec
+%{?scl:"}
 #rake ldap_fluff:gem
 
+%{?scl:scl enable %{scl} "}
 gem install -V \
         --local \
         --install-dir ./%{gem_dir} \
         --force \
         --rdoc \
         %{gem_name}-%{version}.gem
+%{?scl:"}
 
 
 %install
@@ -66,7 +62,7 @@ mkdir -p %{buildroot}%{gem_dir}
 cp -a ./%{gem_dir}/* %{buildroot}%{gem_dir}/
 
 mkdir -p %{buildroot}%{_sysconfdir}
-cp -a ./%{_sysconfdir}/ldap_fluff.yml %{buildroot}%{_sysconfdir}/
+cp -a ./%{_root_sysconfdir}/ldap_fluff.yml %{buildroot}%{_sysconfdir}/
 
 rm -rf %{buildroot}%{gem_instdir}/{.yardoc,etc}
 
@@ -82,21 +78,11 @@ rm -rf %{buildroot}%{gem_instdir}/{.yardoc,etc}
 %{gem_instdir}/test
 
 %changelog
-* Wed Apr 10 2013 Jordan OMara <jomara@redhat.com> 0.1.6-1
-- Adding support for posix, ad and IPA member + group searching
-  (jomara@redhat.com)
-- Adding basic methods for finding groups and users for validation; refactoring
-  some tests (jomara@redhat.com)
+* Wed Feb 27 2013 Miroslav Suchý <msuchy@redhat.com> 0.1.3-3
+- correct build directory in SC env
 
-* Wed Apr 03 2013 Jordan OMara <jomara@redhat.com> 0.1.5-1
-- Adding test all task for travis (jomara@redhat.com)
-- Fixing rakefile to use correct version from spec (jomara@redhat.com)
-- Fixing rdoc task (jomara@redhat.com)
-
-* Tue Apr 02 2013 Jordan OMara <jomara@redhat.com> 0.1.4-1
-- More specific exception for config related errors (ares@igloonet.cz)
-- Remove Ruby from .spec license field. (v.ondruch@tiscali.cz)
-- thanks @msuchy for a MUCH better spec file (jomara@redhat.com)
+* Wed Feb 27 2013 Miroslav Suchý <msuchy@redhat.com> 0.1.3-2
+- new package built with tito
 
 * Thu Nov 01 2012 Miroslav Suchý <msuchy@redhat.com> 0.1.3-1
 - update to ldap_fluff-0.1.3.gem and polish the spec (msuchy@redhat.com)
