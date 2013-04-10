@@ -10,7 +10,7 @@
 
 Summary: LDAP integration for Active Directory, Free IPA and posix  
 Name: rubygem-%{gem_name}
-Version: 0.1.5
+Version: 0.1.6
 Release: 1%{?dist}
 Group: Development/Languages
 License: GPLv2+
@@ -82,6 +82,12 @@ rm -rf %{buildroot}%{gem_instdir}/{.yardoc,etc}
 %{gem_instdir}/test
 
 %changelog
+* Wed Apr 10 2013 Jordan OMara <jomara@redhat.com> 0.1.6-1
+- Adding support for posix, ad and IPA member + group searching
+  (jomara@redhat.com)
+- Adding basic methods for finding groups and users for validation; refactoring
+  some tests (jomara@redhat.com)
+
 * Wed Apr 03 2013 Jordan OMara <jomara@redhat.com> 0.1.5-1
 - Adding test all task for travis (jomara@redhat.com)
 - Fixing rakefile to use correct version from spec (jomara@redhat.com)
