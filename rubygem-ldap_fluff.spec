@@ -5,7 +5,7 @@
 
 Summary: LDAP integration for Active Directory, Free IPA and posix  
 Name: %{?scl_prefix}rubygem-%{gem_name}
-Version: 0.1.6
+Version: 0.1.7
 Release: 1%{?dist}
 Group: Development/Languages
 License: GPLv2+ or Ruby
@@ -78,6 +78,9 @@ rm -rf %{buildroot}%{gem_instdir}/{.yardoc,etc}
 %{gem_instdir}/test
 
 %changelog
+* Thu Apr 11 2013 Jordan OMara <jomara@redhat.com> 0.1.7-1
+- new package built with tito
+
 * Wed Feb 27 2013 Miroslav Suchý <msuchy@redhat.com> 0.1.3-3
 - correct build directory in SC env
 
