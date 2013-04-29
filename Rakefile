@@ -4,7 +4,7 @@ require "rdoc/task"
 begin
   require 'rubygems'
   require 'rubygems/package_task'
-rescue Exception
+rescue LoadError
   nil
 end
 
