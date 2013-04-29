@@ -5,8 +5,8 @@ class LdapFluff::Posix::MemberService
 
   attr_accessor :ldap
 
-  def initialize(ldap,group_base)
-    @ldap = ldap
+  def initialize(ldap, group_base)
+    @ldap       = ldap
     @group_base = group_base
   end
 
@@ -38,13 +38,13 @@ class LdapFluff::Posix::MemberService
     gids.each do |cn|
       filters << group_filter(cn)
     end
-    group_filters = merge_filters(filters,all)
-    filter = name_filter(uid) & group_filters
+    group_filters = merge_filters(filters, all)
+    filter        = name_filter(uid) & group_filters
     @ldap.search(:base => @group_base, :filter => filter).size
   end
 
   def name_filter(uid)
-    Net::LDAP::Filter.eq("memberUid",uid)
+    Net::LDAP::Filter.eq("memberUid", uid)
   end
 
   def group_filter(cn)

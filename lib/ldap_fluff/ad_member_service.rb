@@ -5,8 +5,8 @@ class LdapFluff::ActiveDirectory::MemberService
 
   attr_accessor :ldap
 
-  def initialize(ldap,group_base)
-    @ldap = ldap
+  def initialize(ldap, group_base)
+    @ldap       = ldap
     @group_base = group_base
   end
 
@@ -33,9 +33,9 @@ class LdapFluff::ActiveDirectory::MemberService
   def _groups_from_ldap_data(payload)
     data = []
     if payload != nil
-      first_level = _group_names_from_cn(payload[:memberof])
+      first_level  = _group_names_from_cn(payload[:memberof])
       total_groups = _walk_group_ancestry(first_level)
-      data = (first_level + total_groups).uniq
+      data         = (first_level + total_groups).uniq
     end
     data
   end
@@ -48,8 +48,8 @@ class LdapFluff::ActiveDirectory::MemberService
       search = @ldap.search(:filter => filter, :base => @group_base)
       if search != nil && search.first != nil
         group = search.first
-        set += _group_names_from_cn(group[:memberof])
-        set += _walk_group_ancestry(set)
+        set   += _group_names_from_cn(group[:memberof])
+        set   += _walk_group_ancestry(set)
       end
     end
     set
@@ -60,11 +60,11 @@ class LdapFluff::ActiveDirectory::MemberService
   end
 
   def class_filter
-    Net::LDAP::Filter.eq("objectclass","group")
+    Net::LDAP::Filter.eq("objectclass", "group")
   end
 
   def name_filter(uid)
-    Net::LDAP::Filter.eq("samaccountname",uid)
+    Net::LDAP::Filter.eq("samaccountname", uid)
   end
 
   # extract the group names from the LDAP style response,

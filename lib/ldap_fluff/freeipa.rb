@@ -3,18 +3,18 @@ class LdapFluff::FreeIPA
   attr_accessor :ldap, :member_service
 
   def initialize(config={})
-    @ldap = Net::LDAP.new :host => config.host,
-                         :base => config.base_dn,
-                         :port => config.port,
-                         :encryption => config.encryption
+    @ldap       = Net::LDAP.new :host       => config.host,
+                                :base       => config.base_dn,
+                                :port       => config.port,
+                                :encryption => config.encryption
     @group_base = config.group_base
     @group_base ||= config.base_dn
-    @base = config.base_dn
-    @bind_user = config.service_user
-    @bind_pass = config.service_pass
-    @anon = config.anon_queries
+    @base       = config.base_dn
+    @bind_user  = config.service_user
+    @bind_pass  = config.service_pass
+    @anon       = config.anon_queries
 
-    @member_service = MemberService.new(@ldap,@group_base)
+    @member_service = MemberService.new(@ldap, @group_base)
   end
 
   def bind?(uid=nil, password=nil)

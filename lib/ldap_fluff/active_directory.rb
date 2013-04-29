@@ -2,18 +2,18 @@ class LdapFluff::ActiveDirectory
   attr_accessor :ldap, :member_service
 
   def initialize(config={})
-    @ldap = Net::LDAP.new :host => config.host,
-                         :base => config.base_dn,
-                         :port => config.port,
-                         :encryption => config.encryption
+    @ldap       = Net::LDAP.new :host       => config.host,
+                                :base       => config.base_dn,
+                                :port       => config.port,
+                                :encryption => config.encryption
     @group_base = config.group_base
     @group_base ||= config.base_dn
-    @ad_domain = config.ad_domain
-    @bind_user = config.service_user
-    @bind_pass = config.service_pass
-    @anon = config.anon_queries
+    @ad_domain  = config.ad_domain
+    @bind_user  = config.service_user
+    @bind_pass  = config.service_pass
+    @anon       = config.anon_queries
 
-    @member_service = MemberService.new(@ldap,@group_base)
+    @member_service = MemberService.new(@ldap, @group_base)
   end
 
   def bind?(uid=nil, password=nil)
@@ -46,7 +46,7 @@ class LdapFluff::ActiveDirectory
     service_bind
     return true if gids == []
     begin
-      groups = @member_service.find_user_groups(uid)
+      groups       = @member_service.find_user_groups(uid)
       intersection = gids & groups
       if all
         return intersection == gids

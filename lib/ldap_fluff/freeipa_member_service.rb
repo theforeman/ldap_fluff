@@ -5,8 +5,8 @@ class LdapFluff::FreeIPA::MemberService
 
   attr_accessor :ldap
 
-  def initialize(ldap,group_base)
-    @ldap = ldap
+  def initialize(ldap, group_base)
+    @ldap       = ldap
     @group_base = group_base
   end
 
@@ -33,11 +33,11 @@ class LdapFluff::FreeIPA::MemberService
   end
 
   def name_filter(uid)
-    Net::LDAP::Filter.eq("uid",uid)
+    Net::LDAP::Filter.eq("uid", uid)
   end
 
   def group_filter(gid)
-    Net::LDAP::Filter.eq("cn",gid)
+    Net::LDAP::Filter.eq("cn", gid)
   end
 
   def _group_names_from_cn(grouplist)
