@@ -6,17 +6,21 @@ require 'minitest/autorun'
 module LdapTestHelper
   attr_accessor :group_base, :class_filter, :user
 
+  def config_hash
+    { :host         => "internet.com",
+      :port         => "387",
+      :encryption   => :start_tls,
+      :base_dn      => "dc=internet,dc=com",
+      :group_base   => "ou=group,dc=internet,dc=com",
+      :service_user => "service",
+      :service_pass => "pass",
+      :ad_domain    => "internet.com",
+      :server_type  => :free_ipa
+    }
+  end
+
   def config
-    @config = OpenStruct.new(
-        :host => "internet.com",
-        :port => "387",
-        :encryption => :start_tls,
-        :base_dn => "dc=internet,dc=com",
-        :group_base => "ou=group,dc=internet,dc=com",
-        :service_user => "service",
-        :service_pass => "pass",
-        :ad_domain => "internet.com"
-      )
+    @config ||= OpenStruct.new config_hash
   end
 
   def ad_name_filter(name)
