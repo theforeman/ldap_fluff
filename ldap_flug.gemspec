@@ -14,5 +14,6 @@ Gem::Specification.new do |s|
   s.email    = 'jomara@redhat.com'
 
   s.add_dependency('net-ldap')
+  s.add_development_dependency('rake')
   s.add_development_dependency('minitest')
 end
