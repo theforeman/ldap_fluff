@@ -5,8 +5,8 @@ class TestADMemberService < MiniTest::Unit::TestCase
 
   def setup
     config
-    @ldap = MiniTest::Mock.new
-    @adms = LdapFluff::ActiveDirectory::MemberService.new(@ldap,@config.group_base)
+    @ldap    = MiniTest::Mock.new
+    @adms    = LdapFluff::ActiveDirectory::MemberService.new(@ldap, @config.group_base)
     @gfilter = group_filter('group') & group_class_filter
   end
 
@@ -26,7 +26,7 @@ class TestADMemberService < MiniTest::Unit::TestCase
       @ldap.expect(:search, ad_parent_payload(i+1), [:filter => gfilter_bros, :base => @config.group_base])
     end
     # terminate or we loop FOREVER
-    @ldap.expect(:search,[], [:filter => group_filter("bros#{n}") & group_class_filter, :base => @config.group_base])
+    @ldap.expect(:search, [], [:filter => group_filter("bros#{n}") & group_class_filter, :base => @config.group_base])
   end
 
   def double_nested(n)
@@ -36,10 +36,10 @@ class TestADMemberService < MiniTest::Unit::TestCase
       @ldap.expect(:search, ad_double_payload(i+1), [:filter => gfilter_bros, :base => @config.group_base])
     end
     # terminate or we loop FOREVER
-    @ldap.expect(:search,[], [:filter => group_filter("bros#{n}") & group_class_filter, :base => @config.group_base])
+    @ldap.expect(:search, [], [:filter => group_filter("bros#{n}") & group_class_filter, :base => @config.group_base])
     (n-1).downto(1) do |i|
       gfilter_bros = group_filter("broskies#{i+1}") & group_class_filter
-      @ldap.expect(:search,[], [:filter => gfilter_bros, :base => @config.group_base])
+      @ldap.expect(:search, [], [:filter => gfilter_bros, :base => @config.group_base])
     end
   end
 

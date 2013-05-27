@@ -6,33 +6,37 @@ require 'minitest/autorun'
 module LdapTestHelper
   attr_accessor :group_base, :class_filter, :user
 
+  def config_hash
+    { :host         => "internet.com",
+      :port         => "387",
+      :encryption   => :start_tls,
+      :base_dn      => "dc=internet,dc=com",
+      :group_base   => "ou=group,dc=internet,dc=com",
+      :service_user => "service",
+      :service_pass => "pass",
+      :ad_domain    => "internet.com",
+      :server_type  => :free_ipa
+    }
+  end
+
   def config
-    @config = OpenStruct.new(
-        :host => "internet.com",
-        :port => "387",
-        :encryption => :start_tls,
-        :base_dn => "dc=internet,dc=com",
-        :group_base => "ou=group,dc=internet,dc=com",
-        :service_user => "service",
-        :service_pass => "pass",
-        :ad_domain => "internet.com"
-      )
+    @config ||= OpenStruct.new config_hash
   end
 
   def ad_name_filter(name)
-    Net::LDAP::Filter.eq("samaccountname",name)
+    Net::LDAP::Filter.eq("samaccountname", name)
   end
 
   def ad_group_filter(name)
-    Net::LDAP::Filter.eq("cn",name)
+    Net::LDAP::Filter.eq("cn", name)
   end
 
   def ipa_name_filter(name)
-    Net::LDAP::Filter.eq("uid",name)
+    Net::LDAP::Filter.eq("uid", name)
   end
 
   def ipa_group_filter(name)
-    Net::LDAP::Filter.eq("cn",name)
+    Net::LDAP::Filter.eq("cn", name)
   end
 
   def group_filter(g)
@@ -40,7 +44,7 @@ module LdapTestHelper
   end
 
   def group_class_filter
-    Net::LDAP::Filter.eq("objectclass","group")
+    Net::LDAP::Filter.eq("objectclass", "group")
   end
 
   def ipa_user_bind(uid)
@@ -52,7 +56,7 @@ module LdapTestHelper
   end
 
   def ad_group_payload
-    [{:cn => "broze",  :memberof => ["CN=group,dc=internet,dc=com"] }]
+    [{ :cn => "broze", :memberof => ["CN=group,dc=internet,dc=com"] }]
   end
 
   def ad_parent_payload(num)
@@ -64,18 +68,18 @@ module LdapTestHelper
   end
 
   def posix_user_payload
-    [{:cn => ["bros"]}]
+    [{ :cn => ["bros"] }]
   end
 
   def posix_group_payload
-    [{:cn => ["broze"]}]
+    [{ :cn => ["broze"] }]
   end
 
   def ipa_user_payload
-    [{:cn => 'john'},{:memberof => ['cn=group,dc=internet,dc=com','cn=bros,dc=internet,dc=com']}]
+    [{ :cn => 'john' }, { :memberof => ['cn=group,dc=internet,dc=com', 'cn=bros,dc=internet,dc=com'] }]
   end
 
   def ipa_group_payload
-    [{:cn => 'group'},{:memberof => ['cn=group,dc=internet,dc=com','cn=bros,dc=internet,dc=com']}]
+    [{ :cn => 'group' }, { :memberof => ['cn=group,dc=internet,dc=com', 'cn=bros,dc=internet,dc=com'] }]
   end
 end

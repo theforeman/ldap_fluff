@@ -6,18 +6,13 @@ class TestPosixMemberService < MiniTest::Unit::TestCase
   def setup
     config
     @ldap = MiniTest::Mock.new
-    @ms = LdapFluff::Posix::MemberService.new(@ldap, @config.group_base)
+    @ms   = LdapFluff::Posix::MemberService.new(@ldap, @config.group_base)
   end
 
   def test_find_user
     user = posix_user_payload
-    @ldap.expect(:search,
-                 user,
-                 [
-                   :filter => @ms.name_filter('john'),
-                  :base =>config.group_base
-                 ]
-                )
+    @ldap.expect(:search, user, [:filter => @ms.name_filter('john'),
+                                 :base   => config.group_base])
     @ms.ldap = @ldap
     assert_equal ['bros'], @ms.find_user_groups('john')
     @ldap.verify
@@ -25,26 +20,16 @@ class TestPosixMemberService < MiniTest::Unit::TestCase
 
   def test_user_exists
     user = posix_user_payload
-    @ldap.expect(:search,
-                 user,
-                 [
-                   :filter => @ms.name_filter('john'),
-                  :base =>config.group_base
-                 ]
-                )
+    @ldap.expect(:search, user, [:filter => @ms.name_filter('john'),
+                                 :base   => config.group_base])
     @ms.ldap = @ldap
     assert @ms.find_user('john')
     @ldap.verify
   end
 
   def test_user_doesnt_exists
-    @ldap.expect(:search,
-                 nil,
-                 [
-                   :filter => @ms.name_filter('john'),
-                  :base =>config.group_base
-                 ]
-                )
+    @ldap.expect(:search, nil, [:filter => @ms.name_filter('john'),
+                                :base   => config.group_base])
     @ms.ldap = @ldap
     assert_raises(LdapFluff::Posix::MemberService::UIDNotFoundException) { @ms.find_user('john') }
     @ldap.verify
@@ -52,26 +37,16 @@ class TestPosixMemberService < MiniTest::Unit::TestCase
 
   def test_group_exists
     group = posix_group_payload
-    @ldap.expect(:search,
-                 group,
-                 [
-                   :filter => @ms.group_filter('broze'),
-                  :base =>config.group_base
-                 ]
-                )
+    @ldap.expect(:search, group, [:filter => @ms.group_filter('broze'),
+                                  :base   => config.group_base])
     @ms.ldap = @ldap
     assert @ms.find_group('broze')
     @ldap.verify
   end
 
   def test_group_doesnt_exists
-    @ldap.expect(:search,
-                 nil,
-                 [
-                   :filter => @ms.group_filter('broze'),
-                  :base =>config.group_base
-                 ]
-                )
+    @ldap.expect(:search, nil, [:filter => @ms.group_filter('broze'),
+                                :base   => config.group_base])
     @ms.ldap = @ldap
     assert_raises(LdapFluff::Posix::MemberService::GIDNotFoundException) { @ms.find_group('broze') }
     @ldap.verify

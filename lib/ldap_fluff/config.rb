@@ -1,51 +1,17 @@
-require 'singleton'
 require 'yaml'
 
 class LdapFluff
-  ####################################################################
-  # Module constants
-  ####################################################################
-  CONFIG = "/etc/ldap_fluff.yml"
-  ####################################################################
-  # Module class definitions
-  ####################################################################
   class Config
-    include Singleton
-    attr_accessor :host,
-                  :port,
-                  :encryption,
-                  :base_dn,
-                  :group_base,
-                  :server_type,
-                  :ad_domain,
-                  :service_user,
-                  :service_pass,
-                  :anon_queries
+    ATTRIBUTES = [:host, :port, :encryption, :base_dn, :group_base, :server_type, :ad_domain, :service_user,
+                  :service_pass, :anon_queries]
+    ATTRIBUTES.each { |attr| attr_reader attr }
 
-    def initialize
-      begin
-        config = YAML.load_file(LdapFluff::CONFIG)
-        @host = config["host"]
-        @port = config["port"]
-        if config["encryption"].respond_to? :to_sym
-          @encryption = config["encryption"].to_sym
-        else
-          @encryption = nil
-        end
-        @base_dn = config["base_dn"]
-        @group_base = config["group_base"]
-        @ad_domain = config["ad_domain"]
-        @service_user = config["service_user"]
-        @service_pass = config["service_pass"]
-        @anon_queries = config["anon_queries"]
-        @server_type = config["server_type"]
-      rescue Errno::ENOENT
-        $stderr.puts("The #{LdapFluff::CONFIG} config file you specified was not found")
-        exit
-      rescue Errno::EACCES
-        $stderr.puts("The #{LdapFluff::CONFIG} config file you specified is not readable")
-        exit
-      end
+    def initialize(options)
+      raise ArgumentError unless options.kind_of? Hash
+      options = options.inject({}) { |hash, (k, v)| hash.update k.to_s => v }
+      ATTRIBUTES.each { |attr| instance_variable_set :"@#{attr}", options[attr.to_s] }
+      @encryption = @encryption.to_sym if @encryption
+      @server_type = @server_type.to_sym if @server_type
     end
   end
 end

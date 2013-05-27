@@ -1,0 +1,20 @@
+PATH
+  remote: .
+  specs:
+    ldap_fluff (0.2.0)
+      net-ldap
+
+GEM
+  remote: http://rubygems.org/
+  specs:
+    minitest (4.7.0)
+    net-ldap (0.3.1)
+    rake (10.0.4)
+
+PLATFORMS
+  ruby
+
+DEPENDENCIES
+  ldap_fluff!
+  minitest
+  rake

@@ -3,14 +3,13 @@ class LdapFluff::Posix
   attr_accessor :ldap, :member_service
 
   def initialize(config={})
-    @ldap = Net::LDAP.new :host => config.host,
-                         :base => config.base_dn,
-                         :port => config.port,
-                         :encryption => config.encryption
-    @group_base = config.group_base
-    @group_base ||= config.base
-    @base = config.base_dn
-    @member_service = MemberService.new(@ldap,@group_base)
+    @ldap           = Net::LDAP.new :host       => config.host,
+                                    :base       => config.base_dn,
+                                    :port       => config.port,
+                                    :encryption => config.encryption
+    @group_base     = config.group_base || config.base
+    @base           = config.base_dn
+    @member_service = MemberService.new(@ldap, @group_base)
   end
 
   def bind?(uid=nil, password=nil)
