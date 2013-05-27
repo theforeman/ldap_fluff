@@ -2,7 +2,7 @@ require 'rubygems'
 require 'net/ldap'
 
 class LdapFluff
-  class ConfigError < StandardError;
+  class ConfigError < StandardError
   end
 
   attr_accessor :ldap
