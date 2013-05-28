@@ -2,23 +2,22 @@ require 'rubygems'
 require 'net/ldap'
 
 class LdapFluff
-  class ConfigError < StandardError; end
+  class ConfigError < StandardError
+  end
 
   attr_accessor :ldap
 
-  def initialize(config=nil)
-    config ||= LdapFluff::Config.instance
-    type = config.server_type
-    if type.respond_to? :to_sym
-      if type.to_sym == :posix
-        @ldap = Posix.new(config)
-      elsif type.to_sym == :active_directory
-        @ldap = ActiveDirectory.new(config)
-      elsif type.to_sym == :free_ipa
-        @ldap = FreeIPA.new(config)
-      else
-        raise ConfigError, "Unsupported connection type. Supported types = :active_directory, :posix, :free_ipa"
-      end
+  def initialize(config = {})
+    config = LdapFluff::Config.new config
+    case config.server_type
+    when :posix
+      @ldap = Posix.new(config)
+    when :active_directory
+      @ldap = ActiveDirectory.new(config)
+    when :free_ipa
+      @ldap = FreeIPA.new(config)
+    else
+      raise ConfigError, "Unsupported connection type #{config.server_type.inspect}. Supported types = :active_directory, :posix, :free_ipa"
     end
   end
 

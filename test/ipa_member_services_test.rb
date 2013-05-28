@@ -5,8 +5,8 @@ class TestIPAMemberService < MiniTest::Unit::TestCase
 
   def setup
     config
-    @ldap = MiniTest::Mock.new
-    @ipams = LdapFluff::FreeIPA::MemberService.new(@ldap,@config.group_base)
+    @ldap  = MiniTest::Mock.new
+    @ipams = LdapFluff::FreeIPA::MemberService.new(@ldap, @config.group_base)
   end
 
   def basic_user
@@ -32,7 +32,7 @@ class TestIPAMemberService < MiniTest::Unit::TestCase
   end
 
   def test_no_groups
-    @ldap.expect(:search, ['',{:memberof=>[]}], [:filter => ipa_name_filter("john")])
+    @ldap.expect(:search, ['', { :memberof => [] }], [:filter => ipa_name_filter("john")])
     @ipams.ldap = @ldap
     assert_equal [], @ipams.find_user_groups('john')
     @ldap.verify
