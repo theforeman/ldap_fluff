@@ -8,7 +8,7 @@ class LdapFluff
   attr_accessor :ldap
 
   def initialize(config = {})
-    config = LdapFluff::Config.new config
+    config = LdapFluff::Config.new(config)
     case config.server_type
     when :posix
       @ldap = Posix.new(config)
