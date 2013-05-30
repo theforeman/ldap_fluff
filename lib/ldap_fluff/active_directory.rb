@@ -6,8 +6,7 @@ class LdapFluff::ActiveDirectory
                                 :base       => config.base_dn,
                                 :port       => config.port,
                                 :encryption => config.encryption
-    @group_base = config.group_base
-    @group_base ||= config.base_dn
+    @group_base = config.group_base || config.base_dn
     @ad_domain  = config.ad_domain
     @bind_user  = config.service_user
     @bind_pass  = config.service_pass
