@@ -7,8 +7,8 @@ class LdapFluff
     ATTRIBUTES.each { |attr| attr_reader attr }
 
     def initialize(options)
-      raise ArgumentError unless options.kind_of? Hash
-      options = options.inject({}) { |hash, (k, v)| hash.update k.to_s => v }
+      raise ArgumentError unless options.respond_to?(:to_hash)
+      options = options.to_hash.inject({}) { |hash, (k, v)| hash.update k.to_s => v }
       ATTRIBUTES.each { |attr| instance_variable_set :"@#{attr}", options[attr.to_s] }
       @encryption = @encryption.to_sym if @encryption
       @server_type = @server_type.to_sym if @server_type
