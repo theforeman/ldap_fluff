@@ -2,9 +2,6 @@ require 'rubygems'
 require 'net/ldap'
 
 class LdapFluff
-  class ConfigError < StandardError
-  end
-
   attr_accessor :ldap
 
   def initialize(config = {})
@@ -17,7 +14,7 @@ class LdapFluff
     when :free_ipa
       @ldap = FreeIPA.new(config)
     else
-      raise ConfigError, "Unsupported connection type #{config.server_type.inspect}. Supported types = :active_directory, :posix, :free_ipa"
+      raise
     end
   end
 
