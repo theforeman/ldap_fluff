@@ -51,19 +51,26 @@ class LdapFluff
       unknown_keys.empty? or
           raise ConfigError, "unknown configuration keys: #{unknown_keys.join ','}"
 
-      %w[host port base_dn group_base server_type service_user service_pass].all? do |key|
+      %w[host port base_dn group_base server_type].all? do |key|
         config[key].nil? and
             raise ConfigError, "config key #{key} has to be set, it was nil"
       end
+
+      [false, true].include? config['anon_queries'] or
+          raise ConfigError,
+                "config key anon_queries has to be true or false but was #{config['anon_queries']}"
 
       [:posix, :active_directory, :free_ipa].include? config['server_type'] or
           raise ConfigError,
                 'config key server_type has to be :active_directory, :posix, :free_ipa ' +
                     "but was #{config['server_type']}"
 
-      [false, true].include? config['anon_queries'] or
-          raise ConfigError,
-                "config key anon_queries has to be true or false but was #{config['anon_queries']}"
+      %w[service_user service_pass].all? do |key|
+        if !config['anon_queries'] && config['server_type'] != :posix && config[key].nil?
+          raise ConfigError, "config key #{key} has to be set, it was nil"
+        end
+      end
+
       return config
     end
   end
