@@ -14,7 +14,7 @@ class LdapFluff
     when :free_ipa
       @ldap = FreeIPA.new(config)
     else
-      raise
+      raise 'unknown server_type'
     end
   end
 
