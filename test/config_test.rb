@@ -1,6 +1,6 @@
 require_relative './lib/ldap_test_helper'
 
-class ConfigTest < MiniTest::Unit::TestCase
+class ConfigTest < MiniTest::Test
   include LdapTestHelper
 
   def test_unsupported_type

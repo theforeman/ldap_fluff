@@ -1,6 +1,6 @@
 require_relative './lib/ldap_test_helper'
 
-class TestLDAP < MiniTest::Unit::TestCase
+class TestLDAP < MiniTest::Test
   include LdapTestHelper
 
   def setup

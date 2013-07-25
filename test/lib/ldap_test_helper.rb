@@ -20,7 +20,7 @@ module LdapTestHelper
   end
 
   def config
-    @config ||= OpenStruct.new config_hash
+    @config ||= LdapFluff::Config.new config_hash
   end
 
   def ad_name_filter(name)
