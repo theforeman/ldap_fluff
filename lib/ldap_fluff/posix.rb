@@ -13,8 +13,8 @@ class LdapFluff::Posix
   end
 
   def bind?(uid=nil, password=nil)
-    @ldap.auth "uid=#{uid},#{@base}", password
-    @ldap.bind
+    @ldap.bind_as :filter   => "(uid=#{uid})",
+                  :password => password
   end
 
   def groups_for_uid(uid)
