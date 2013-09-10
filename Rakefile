@@ -1,6 +1,5 @@
 require 'rubygems'
 require 'rake/testtask'
-require 'rdoc/task'
 
 # The default task is run if rake is given no explicit arguments.
 desc 'Default Task'
