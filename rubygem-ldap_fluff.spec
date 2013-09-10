@@ -3,7 +3,7 @@
 
 %global gem_name ldap_fluff
 
-Summary: LDAP integration for Active Directory, Free IPA and posix  
+Summary: LDAP integration for Active Directory, Free IPA and posix
 Name: %{?scl_prefix}rubygem-%{gem_name}
 Version: 0.1.7
 Release: 1%{?dist}

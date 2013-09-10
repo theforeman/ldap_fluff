@@ -1,4 +1,4 @@
-= LDAP Fluff 
+= LDAP Fluff
 
 Provides multiple implementations of LDAP queries for various backends
 
@@ -24,13 +24,13 @@ It exposes these methods:
 
   is_in_groups?(uid, grouplist)
     returns true if the user provided is in all of the groups listed in grouplist
-  
+
   valid_user?(uid)
-    returns true if the user provided exists 
-  
+    returns true if the user provided exists
+
   valid_group?(uid)
     returns true if the group provided exists
-    
+
 These methods are handy for using LDAP for both authentication and authorization.
 
 This gem integrates with warden/devise quite nicely.
@@ -44,7 +44,7 @@ Your global configuration must provide information about your LDAP host to funct
   group_base: ##baseDN for your ldap groups, eg ou=Groups,dc=redhat,dc=com
   server_type: ## type of server. default == posix. :active_directory, :posix, :free_ipa
   ad_domain: ## domain for your users if using active directory, eg redhat.com
-  service_user: ## service account for authenticating ldap calls in active directory or freeipa. required unless you enable anon 
+  service_user: ## service account for authenticating ldap calls in active directory or freeipa. required unless you enable anon
   service_pass: ## service password for authenticating ldap calls in active directory or freeipa. required unless you enable anon
   anon_queries: ## false by default, true if you don't want to use the service user
 
