@@ -49,15 +49,13 @@ class TestPosix < MiniTest::Test
   end
 
   def test_good_bind
-    @ldap.expect(:auth, nil, ["uid=internet,dc=internet,dc=com", "password"])
-    @ldap.expect(:bind, true)
+    @ldap.expect(:bind_as, true, [:filter => "(uid=internet)", :password => "password"])
     @posix.ldap = @ldap
     assert_equal @posix.bind?("internet", "password"), true
   end
 
   def test_bad_bind
-    @ldap.expect(:auth, nil, ["uid=internet,dc=internet,dc=com", "password"])
-    @ldap.expect(:bind, false)
+    @ldap.expect(:bind_as, false, [:filter => "(uid=internet)", :password => "password"])
     @posix.ldap = @ldap
     assert_equal @posix.bind?("internet", "password"), false
   end
