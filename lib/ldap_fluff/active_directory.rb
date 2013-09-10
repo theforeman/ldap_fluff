@@ -1,11 +1,11 @@
 class LdapFluff::ActiveDirectory
   attr_accessor :ldap, :member_service
 
-  def initialize(config={})
-    @ldap       = Net::LDAP.new :host       => config.host,
+  def initialize(config = {})
+    @ldap       = Net::LDAP.new(:host       => config.host,
                                 :base       => config.base_dn,
                                 :port       => config.port,
-                                :encryption => config.encryption
+                                :encryption => config.encryption)
     @group_base = config.group_base || config.base_dn
     @ad_domain  = config.ad_domain
     @bind_user  = config.service_user
@@ -15,8 +15,8 @@ class LdapFluff::ActiveDirectory
     @member_service = MemberService.new(@ldap, @group_base)
   end
 
-  def bind?(uid=nil, password=nil)
-    @ldap.auth "#{uid}@#{@ad_domain}", password
+  def bind?(uid = nil, password = nil)
+    @ldap.auth("#{uid}@#{@ad_domain}", password)
     @ldap.bind
   end
 
@@ -40,18 +40,14 @@ class LdapFluff::ActiveDirectory
   end
 
   # active directory stores group membership on a users model
-  # TODO query by group individually not like this
+  # TODO: query by group individually not like this
   def is_in_groups(uid, gids = [], all = false)
     service_bind
     return true if gids == []
     begin
       groups       = @member_service.find_user_groups(uid)
       intersection = gids & groups
-      if all
-        return intersection == gids
-      else
-        return intersection.size > 0
-      end
+      return (all ? intersection == gids : intersection.size > 0)
     rescue MemberService::UIDNotFoundException
       return false
     end
@@ -60,7 +56,7 @@ class LdapFluff::ActiveDirectory
   def user_exists?(uid)
     begin
       service_bind
-      user = @member_service.find_user(uid)
+      @member_service.find_user(uid)
     rescue MemberService::UIDNotFoundException
       return false
     end
@@ -70,7 +66,7 @@ class LdapFluff::ActiveDirectory
   def group_exists?(gid)
     begin
       service_bind
-      group = @member_service.find_group(gid)
+      @member_service.find_group(gid)
     rescue MemberService::GIDNotFoundException
       return false
     end

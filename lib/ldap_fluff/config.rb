@@ -1,4 +1,5 @@
 require 'yaml'
+require 'active_support/core_ext/hash'
 
 class LdapFluff
   class ConfigError < StandardError
@@ -9,29 +10,6 @@ class LdapFluff
                     service_pass anon_queries]
     ATTRIBUTES.each { |attr| attr_reader attr.to_sym }
 
-    def initialize(config)
-      raise ArgumentError unless config.respond_to? :to_hash
-      config = validate convert(config)
-
-      ATTRIBUTES.each do |attr|
-        instance_variable_set :"@#{attr}", config[attr]
-      end
-    end
-
-    private
-
-    # @param [#to_hash] config
-    def convert(config)
-      config.
-          to_hash.
-          inject({}) { |hash, (k, v)| hash.update k.to_s => v }.
-          tap do |config|
-        %w[encryption server_type].each do |key|
-          config[key] = config[key].to_sym if config[key]
-        end
-      end
-    end
-
     DEFAULT_CONFIG = { 'port'         => 389,
                        'encryption'   => nil,
                        'base_dn'      => 'dc=company,dc=com',
@@ -40,38 +18,73 @@ class LdapFluff
                        'ad_domain'    => nil,
                        'anon_queries' => false }
 
-    def validate(config)
-      config = DEFAULT_CONFIG.merge config
+    def initialize(config)
+      raise ArgumentError unless config.respond_to?(:to_hash)
+      config = validate(convert(config))
 
-      missing_keys = ATTRIBUTES - config.keys
-      missing_keys.empty? or
-          raise ConfigError, "missing configuration for keys: #{missing_keys.join ','}"
-
-      unknown_keys = config.keys - ATTRIBUTES
-      unknown_keys.empty? or
-          raise ConfigError, "unknown configuration keys: #{unknown_keys.join ','}"
-
-      %w[host port base_dn group_base server_type].all? do |key|
-        config[key].nil? and
-            raise ConfigError, "config key #{key} has to be set, it was nil"
+      ATTRIBUTES.each do |attr|
+        instance_variable_set(:"@#{attr}", config[attr])
       end
+    end
 
-      [false, true].include? config['anon_queries'] or
-          raise ConfigError,
-                "config key anon_queries has to be true or false but was #{config['anon_queries']}"
+    private
 
-      [:posix, :active_directory, :free_ipa].include? config['server_type'] or
-          raise ConfigError,
-                'config key server_type has to be :active_directory, :posix, :free_ipa ' +
-                    "but was #{config['server_type']}"
+    # @param [#to_hash] config
+    def convert(config)
+      config.to_hash.with_indifferent_access.tap do |conf|
+        %w[encryption server_type].each do |key|
+          conf[key] = conf[key].to_sym if conf[key]
+        end
+      end
+    end
+
+    def missing_keys?(config)
+      missing_keys = ATTRIBUTES - config.keys
+      raise ConfigError, "missing configuration for keys: #{missing_keys.join(',')}" unless missing_keys.empty?
+    end
+
+    def unknown_keys?(config)
+      unknown_keys = config.keys - ATTRIBUTES
+      raise ConfigError, "unknown configuration keys: #{unknown_keys.join(',')}" unless unknown_keys.empty?
+    end
+
+    def all_required_keys?(config)
+      %w[host port base_dn group_base server_type].all? do |key|
+        raise ConfigError, "config key #{key} has to be set, it was nil" if config[key].nil?
+      end
 
       %w[service_user service_pass].all? do |key|
         if !config['anon_queries'] && config['server_type'] != :posix && config[key].nil?
           raise ConfigError, "config key #{key} has to be set, it was nil"
         end
       end
-
-      return config
     end
-  end
-end
+
+    def anon_queries_set?(config)
+      unless [false, true].include?(config['anon_queries'])
+        raise ConfigError, "config key anon_queries has to be true or false but was #{config['anon_queries']}"
+      end
+    end
+
+    def correct_server_type?(config)
+      unless [:posix, :active_directory, :free_ipa].include?(config['server_type'])
+        raise ConfigError, 'config key server_type has to be :active_directory, :posix, :free_ipa ' +
+          "but was #{config['server_type']}"
+      end
+    end
+
+    def validate(config)
+      config = DEFAULT_CONFIG.merge(config)
+
+      correct_server_type?(config)
+      missing_keys?(config)
+      unknown_keys?(config)
+      all_required_keys?(config)
+      anon_queries_set?(config)
+
+      config
+    end
+
+  end # Config
+
+end # LdapFluff

@@ -2,11 +2,11 @@ class LdapFluff::FreeIPA
 
   attr_accessor :ldap, :member_service
 
-  def initialize(config={})
-    @ldap       = Net::LDAP.new :host       => config.host,
+  def initialize(config = {})
+    @ldap       = Net::LDAP.new(:host       => config.host,
                                 :base       => config.base_dn,
                                 :port       => config.port,
-                                :encryption => config.encryption
+                                :encryption => config.encryption)
     @group_base = config.group_base || config.base_dn
     @base       = config.base_dn
     @bind_user  = config.service_user
@@ -16,8 +16,8 @@ class LdapFluff::FreeIPA
     @member_service = MemberService.new(@ldap, @group_base)
   end
 
-  def bind?(uid=nil, password=nil)
-    @ldap.auth "uid=#{uid},cn=users,cn=accounts,#{@base}", password
+  def bind?(uid = nil, password = nil)
+    @ldap.auth("uid=#{uid},cn=users,cn=accounts,#{@base}", password)
     @ldap.bind
   end
 
@@ -47,7 +47,7 @@ class LdapFluff::FreeIPA
   #
   # returns true if owner is in ALL of the groups if all=true, otherwise
   # returns true if owner is in ANY of the groups
-  def is_in_groups(uid, gids = [], all=true)
+  def is_in_groups(uid, gids = [], all = true)
     service_bind
     groups = @member_service.find_user_groups(uid)
     if all
@@ -60,7 +60,7 @@ class LdapFluff::FreeIPA
   def user_exists?(uid)
     begin
       service_bind
-      user = @member_service.find_user(uid)
+      @member_service.find_user(uid)
     rescue MemberService::UIDNotFoundException
       return false
     end
@@ -70,7 +70,7 @@ class LdapFluff::FreeIPA
   def group_exists?(gid)
     begin
       service_bind
-      group = @member_service.find_group(gid)
+      @member_service.find_group(gid)
     rescue MemberService::GIDNotFoundException
       return false
     end
@@ -81,4 +81,3 @@ class LdapFluff::FreeIPA
   end
 
 end
-
