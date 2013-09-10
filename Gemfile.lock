@@ -5,7 +5,7 @@ PATH
       net-ldap (>= 0.3.1)
 
 GEM
-  remote: http://rubygems.org/
+  remote: https://rubygems.org/
   specs:
     minitest (5.0.3)
     net-ldap (0.3.1)
