@@ -3,3 +3,5 @@
 .bin
 .bundle
 *.gem
+.rvmrc
+.ruby-gemset
