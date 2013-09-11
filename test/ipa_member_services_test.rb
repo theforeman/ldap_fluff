@@ -20,45 +20,52 @@ class TestIPAMemberService < MiniTest::Test
   def test_find_user
     basic_user
     @ipams.ldap = @ldap
-    assert_equal ['group', 'bros'], @ipams.find_user_groups("john")
+    assert_equal(%w(group bros), @ipams.find_user_groups("john"))
     @ldap.verify
   end
 
   def test_missing_user
     @ldap.expect(:search, nil, [:filter => ipa_name_filter("john")])
     @ipams.ldap = @ldap
-    assert_raises(LdapFluff::FreeIPA::MemberService::UIDNotFoundException) { @ipams.find_user_groups("john").data }
+    assert_raises(LdapFluff::FreeIPA::MemberService::UIDNotFoundException) do
+      @ipams.find_user_groups("john").data
+    end
     @ldap.verify
   end
 
   def test_no_groups
     @ldap.expect(:search, ['', { :memberof => [] }], [:filter => ipa_name_filter("john")])
     @ipams.ldap = @ldap
-    assert_equal [], @ipams.find_user_groups('john')
+    assert_equal([], @ipams.find_user_groups('john'))
     @ldap.verify
   end
 
   def test_find_good_user
     basic_user
     @ipams.ldap = @ldap
-    assert_equal ipa_user_payload, @ipams.find_user('john')
+    assert_equal(ipa_user_payload, @ipams.find_user('john'))
   end
 
   def test_find_missing_user
     @ldap.expect(:search, nil, [:filter => ipa_name_filter("john")])
     @ipams.ldap = @ldap
-    assert_raises(LdapFluff::FreeIPA::MemberService::UIDNotFoundException) { @ipams.find_user('john') }
+    assert_raises(LdapFluff::FreeIPA::MemberService::UIDNotFoundException) do
+      @ipams.find_user('john')
+    end
   end
 
   def test_find_good_group
     basic_group
     @ipams.ldap = @ldap
-    assert_equal ipa_group_payload, @ipams.find_group('broze')
+    assert_equal(ipa_group_payload, @ipams.find_group('broze'))
   end
 
   def test_find_missing_group
     @ldap.expect(:search, nil, [:filter => ipa_group_filter("broze"), :base => @config.group_base])
     @ipams.ldap = @ldap
-    assert_raises(LdapFluff::FreeIPA::MemberService::GIDNotFoundException) { @ipams.find_group('broze') }
+    assert_raises(LdapFluff::FreeIPA::MemberService::GIDNotFoundException) do
+      @ipams.find_group('broze')
+    end
   end
+
 end

@@ -2,19 +2,18 @@ class LdapFluff::Posix
 
   attr_accessor :ldap, :member_service
 
-  def initialize(config={})
-    @ldap           = Net::LDAP.new :host       => config.host,
+  def initialize(config = {})
+    @ldap           = Net::LDAP.new(:host       => config.host,
                                     :base       => config.base_dn,
                                     :port       => config.port,
-                                    :encryption => config.encryption
+                                    :encryption => config.encryption)
     @group_base     = config.group_base || config.base
     @base           = config.base_dn
     @member_service = MemberService.new(@ldap, @group_base)
   end
 
-  def bind?(uid=nil, password=nil)
-    @ldap.bind_as :filter   => "(uid=#{uid})",
-                  :password => password
+  def bind?(uid = nil, password = nil)
+    @ldap.bind_as(:filter => "(uid=#{uid})", :password => password)
   end
 
   def groups_for_uid(uid)
@@ -28,13 +27,13 @@ class LdapFluff::Posix
   #
   # returns true if owner is in ALL of the groups if all=true, otherwise
   # returns true if owner is in ANY of the groups
-  def is_in_groups(uid, gids = [], all=true)
+  def is_in_groups(uid, gids = [], all = true)
     (gids.empty? || @member_service.times_in_groups(uid, gids, all) > 0)
   end
 
   def user_exists?(uid)
     begin
-      user = @member_service.find_user(uid)
+      @member_service.find_user(uid)
     rescue MemberService::UIDNotFoundException
       return false
     end
@@ -43,7 +42,7 @@ class LdapFluff::Posix
 
   def group_exists?(gid)
     begin
-      group = @member_service.find_group(gid)
+      @member_service.find_group(gid)
     rescue MemberService::GIDNotFoundException
       return false
     end
