@@ -2,3 +2,6 @@ language: ruby
 rvm:
   - '1.9.3'
   - '2.0.0'
+
+script:
+  - "./travis/ldapfluff_up_to_snuff.sh"

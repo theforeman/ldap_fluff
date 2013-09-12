@@ -22,18 +22,17 @@ class LdapFluff::Posix::MemberService
 
   def find_user(uid)
     user = @ldap.search(:filter => name_filter(uid), :base => @group_base)
-    raise UIDNotFoundException if (user == nil || user.empty?)
+    raise UIDNotFoundException if (user.nil? || user.empty?)
     user
   end
 
   def find_group(gid)
     group = @ldap.search(:filter => group_filter(gid), :base => @group_base)
-    raise GIDNotFoundException if (group == nil || group.empty?)
+    raise GIDNotFoundException if (group.nil? || group.empty?)
     group
   end
 
   def times_in_groups(uid, gids, all)
-    matches = 0
     filters = []
     gids.each do |cn|
       filters << group_filter(cn)
@@ -52,15 +51,11 @@ class LdapFluff::Posix::MemberService
   end
 
   # AND or OR all of the filters together
-  def merge_filters(filters = [], all=false)
-    if filters != nil && filters.size >= 1
+  def merge_filters(filters = [], all = false)
+    if !filters.nil? && filters.size >= 1
       filter = filters[0]
-      filters[1..filters.size-1].each do |gfilter|
-        if all
-          filter = filter & gfilter
-        else
-          filter = filter | gfilter
-        end
+      filters[1..(filters.size - 1)].each do |gfilter|
+        filter = (all ? filter & gfilter : filter | gfilter)
       end
       return filter
     end
@@ -71,4 +66,5 @@ class LdapFluff::Posix::MemberService
 
   class GIDNotFoundException < StandardError
   end
+
 end

@@ -22,13 +22,13 @@ class LdapFluff::FreeIPA::MemberService
 
   def find_user(uid)
     user = @ldap.search(:filter => name_filter(uid))
-    raise UIDNotFoundException if (user == nil || user.empty?)
+    raise UIDNotFoundException if (user.nil? || user.empty?)
     user
   end
 
   def find_group(gid)
     group = @ldap.search(:filter => group_filter(gid), :base => @group_base)
-    raise GIDNotFoundException if (group == nil || group.empty?)
+    raise GIDNotFoundException if (group.nil? || group.empty?)
     group
   end
 
@@ -41,7 +41,7 @@ class LdapFluff::FreeIPA::MemberService
   end
 
   def _group_names_from_cn(grouplist)
-    p = Proc.new { |g| g.sub(/.*?cn=(.*?),.*/, '\1') }
+    p = proc { |g| g.sub(/.*?cn=(.*?),.*/, '\1') }
     grouplist.collect(&p)
   end
 
@@ -53,5 +53,6 @@ class LdapFluff::FreeIPA::MemberService
 
   class InsufficientQueryPrivilegesException < StandardError
   end
+
 end
 
