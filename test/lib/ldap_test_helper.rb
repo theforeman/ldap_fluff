@@ -1,4 +1,4 @@
-require_relative '../../lib/ldap_fluff'
+require 'ldap_fluff'
 require 'ostruct'
 require 'net/ldap'
 require 'minitest/autorun'

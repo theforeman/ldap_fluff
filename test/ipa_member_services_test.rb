@@ -1,4 +1,4 @@
-require_relative './lib/ldap_test_helper'
+require 'test/lib/ldap_test_helper'
 
 class TestIPAMemberService < MiniTest::Test
   include LdapTestHelper
