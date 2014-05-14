@@ -5,3 +5,6 @@
 *.gem
 .rvmrc
 .ruby-gemset
+.ruby-version
+Gemfile.lock
+

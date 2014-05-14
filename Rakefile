@@ -8,6 +8,7 @@ task :default => :test
 # Test Tasks ---------------------------------------------------------
 
 Rake::TestTask.new('test') do |t|
-  t.test_files = FileList['test/lib/*.rb', 'test/*.rb']
+  t.libs       = %w[lib test]
+  t.test_files = FileList['test/**/*.rb']
   t.verbose    = true
 end

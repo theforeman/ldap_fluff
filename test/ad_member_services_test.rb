@@ -1,4 +1,4 @@
-require 'test/lib/ldap_test_helper'
+require 'lib/ldap_test_helper'
 
 class TestADMemberService < MiniTest::Test
   include LdapTestHelper
