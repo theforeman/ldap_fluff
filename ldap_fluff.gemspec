@@ -1,6 +1,6 @@
 Gem::Specification.new do |s|
   s.name        = 'ldap_fluff'
-  s.version     = '0.2.2'
+  s.version     = '0.2.3'
   s.summary     = 'LDAP Querying tools for Active Directory, FreeIPA and Posix-style'
   s.description = 'Simple library for binding & group querying on top of various ldap implementations'
   s.homepage    = 'https://github.com/Katello/ldap_fluff'
@@ -15,7 +15,7 @@ Gem::Specification.new do |s|
 
   s.add_dependency('net-ldap', '>= 0.3.1')
   s.add_dependency('activesupport', '3.2.18')
+  s.add_dependency('rainbow', '<= 1.1.4')
   s.add_development_dependency('rake')
   s.add_development_dependency('minitest')
-  s.add_development_dependency('rubocop')
 end
