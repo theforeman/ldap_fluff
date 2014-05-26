@@ -14,8 +14,8 @@ Gem::Specification.new do |s|
   s.email    = 'jomara@redhat.com'
 
   s.add_dependency('net-ldap', '>= 0.3.1')
-  s.add_dependency('activesupport', '3.2.18')
   s.add_dependency('rainbow', '<= 1.1.4')
+  s.add_dependency('activesupport', '~> 3.2')
   s.add_development_dependency('rake')
   s.add_development_dependency('minitest')
 end

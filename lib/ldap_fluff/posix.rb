@@ -7,7 +7,7 @@ class LdapFluff::Posix
                                     :base       => config.base_dn,
                                     :port       => config.port,
                                     :encryption => config.encryption)
-    @group_base     = config.group_base || config.base
+    @group_base     = config.group_base || config.base_dn
     @base           = config.base_dn
     @member_service = MemberService.new(@ldap, @group_base)
   end
