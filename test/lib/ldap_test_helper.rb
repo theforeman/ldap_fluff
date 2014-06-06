@@ -7,20 +7,43 @@ module LdapTestHelper
   attr_accessor :group_base, :class_filter, :user
 
   def config_hash
-    { :host         => "internet.com",
-      :port         => "387",
-      :encryption   => :start_tls,
-      :base_dn      => "dc=internet,dc=com",
-      :group_base   => "ou=group,dc=internet,dc=com",
-      :service_user => "service",
-      :service_pass => "pass",
-      :ad_domain    => "internet.com",
-      :server_type  => :free_ipa
+    { :host          => "internet.com",
+      :port          => "387",
+      :encryption    => :start_tls,
+      :base_dn       => "dc=internet,dc=com",
+      :group_base    => "ou=group,dc=internet,dc=com",
+      :service_user  => "service",
+      :service_pass  => "pass",
+      :server_type   => :free_ipa,
+      :attr_login    => nil,
+      :search_filter => nil
     }
+  end
+
+  def setup
+    config
+    @ldap = MiniTest::Mock.new
   end
 
   def config
     @config ||= LdapFluff::Config.new config_hash
+  end
+
+  def service_bind
+    @ldap.expect(:bind, true)
+    get_test_instance_variable.ldap = @ldap
+  end
+
+  def basic_user
+    @md = MiniTest::Mock.new
+    @md.expect(:find_user_groups, %w(bros), %w(john))
+    get_test_instance_variable.member_service = @md
+  end
+
+  def bigtime_user
+    @md = MiniTest::Mock.new
+    @md.expect(:find_user_groups, %w(bros broskies), %w(john))
+    get_test_instance_variable.member_service = @md
   end
 
   def ad_name_filter(name)
@@ -52,19 +75,19 @@ module LdapTestHelper
   end
 
   def ad_user_payload
-    [{ :memberof => ["CN=group,dc=internet,dc=com"] }]
+    [{ :memberof => ["cn=group,dc=internet,dc=com"] }]
   end
 
   def ad_group_payload
-    [{ :cn => "broze", :memberof => ["CN=group,dc=internet,dc=com"] }]
+    [{ :cn => "broze", :memberof => ["cn=group,dc=internet,dc=com"] }]
   end
 
   def ad_parent_payload(num)
-    [{ :memberof => ["CN=bros#{num},dc=internet,dc=com"] }]
+    [{ :memberof => ["cn=bros#{num},dc=internet,dc=com"] }]
   end
 
   def ad_double_payload(num)
-    [{ :memberof => ["CN=bros#{num},dc=internet,dc=com", "CN=broskies#{num},dc=internet,dc=com"] }]
+    [{ :memberof => ["cn=bros#{num},dc=internet,dc=com", "cn=broskies#{num},dc=internet,dc=com"] }]
   end
 
   def posix_user_payload
@@ -81,5 +104,11 @@ module LdapTestHelper
 
   def ipa_group_payload
     [{ :cn => 'group' }, { :memberof => ['cn=group,dc=internet,dc=com', 'cn=bros,dc=internet,dc=com'] }]
+  end
+
+  private
+
+  def get_test_instance_variable
+    instance_variable_get("@#{self.class.to_s.underscore.split('_')[1..-1].join}")
   end
 end

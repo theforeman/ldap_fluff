@@ -4,9 +4,8 @@ class TestADMemberService < MiniTest::Test
   include LdapTestHelper
 
   def setup
-    config
-    @ldap    = MiniTest::Mock.new
-    @adms    = LdapFluff::ActiveDirectory::MemberService.new(@ldap, @config.group_base)
+    super
+    @adms    = LdapFluff::ActiveDirectory::MemberService.new(@ldap, @config)
     @gfilter = group_filter('group') & group_class_filter
   end
 

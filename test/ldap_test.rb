@@ -4,8 +4,7 @@ class TestLDAP < MiniTest::Test
   include LdapTestHelper
 
   def setup
-    config
-    @ldap  = MiniTest::Mock.new
+    super
     @fluff = LdapFluff.new(config_hash)
   end
 

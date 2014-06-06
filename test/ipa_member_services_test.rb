@@ -4,9 +4,8 @@ class TestIPAMemberService < MiniTest::Test
   include LdapTestHelper
 
   def setup
-    config
-    @ldap  = MiniTest::Mock.new
-    @ipams = LdapFluff::FreeIPA::MemberService.new(@ldap, @config.group_base)
+    super
+    @ipams = LdapFluff::FreeIPA::MemberService.new(@ldap, @config)
   end
 
   def basic_user

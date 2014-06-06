@@ -1,42 +1,22 @@
-class LdapFluff::ActiveDirectory
-  attr_accessor :ldap, :member_service
+class LdapFluff::ActiveDirectory < LdapFluff::Generic
 
   def initialize(config = {})
-    @ldap       = Net::LDAP.new(:host       => config.host,
-                                :base       => config.base_dn,
-                                :port       => config.port,
-                                :encryption => config.encryption)
-    @group_base = config.group_base || config.base_dn
-    @ad_domain  = config.ad_domain
     @bind_user  = config.service_user
     @bind_pass  = config.service_pass
     @anon       = config.anon_queries
-
-    @member_service = MemberService.new(@ldap, @group_base)
+    super
   end
 
   def bind?(uid = nil, password = nil)
-    @ldap.auth("#{uid}@#{@ad_domain}", password)
+    @ldap.auth(uid, password)
     @ldap.bind
-  end
-
-  # AD generally does not support un-authenticated searching
-  # Typically AD admins configure a public user for searching
-  def service_bind
-    unless @anon || bind?(@bind_user, @bind_pass)
-      raise UnauthenticatedActiveDirectoryException, "Could not bind to AD Service User"
-    end
   end
 
   # returns the list of groups to which a user belongs
   # this query is simpler in active directory
   def groups_for_uid(uid)
     service_bind
-    begin
-      @member_service.find_user_groups(uid)
-    rescue MemberService::UIDNotFoundException
-      return []
-    end
+    super
   end
 
   # active directory stores group membership on a users model
@@ -54,25 +34,34 @@ class LdapFluff::ActiveDirectory
   end
 
   def user_exists?(uid)
-    begin
-      service_bind
-      @member_service.find_user(uid)
-    rescue MemberService::UIDNotFoundException
-      return false
-    end
-    return true
+    service_bind
+    super
   end
 
   def group_exists?(gid)
-    begin
-      service_bind
-      @member_service.find_group(gid)
-    rescue MemberService::GIDNotFoundException
-      return false
-    end
-    return true
+    service_bind
+    super
   end
 
-  class UnauthenticatedActiveDirectoryException < StandardError
+  private
+
+  def users_from_search_results(search, method)
+    users = []
+
+    search.send(method).each do |member|
+      cn    = member.downcase.split(',')[0].split('=')[1]
+      entry = @member_service.find_user(cn).first
+
+      objectclasses = entry.objectclass.map(&:downcase)
+
+      if (%w(organizationalperson person) & objectclasses).present?
+        users << @member_service.get_logins([member])
+      elsif (%w(organizationalunit group) & objectclasses).present?
+        users << users_for_gid(cn)
+      end
+    end
+
+    users.flatten.uniq
   end
+
 end
