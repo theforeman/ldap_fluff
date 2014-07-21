@@ -4,6 +4,7 @@ Gem::Specification.new do |s|
   s.summary     = 'LDAP Querying tools for Active Directory, FreeIPA and Posix-style'
   s.description = 'Simple library for binding & group querying on top of various ldap implementations'
   s.homepage    = 'https://github.com/Katello/ldap_fluff'
+  s.license     = 'GPLv2'
   s.files       = Dir['lib/**/*.rb'] + Dir['test/**/*.rb']
 
   s.require_path = 'lib'
