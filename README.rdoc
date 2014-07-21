@@ -65,3 +65,7 @@ ad_domain, service_user and service_pass OR anon_queries are required for AD sup
 
 ldap_fluff appends cn=groups,cn=accounts to the beginning of all BIND calls. You do not need to
 include this in your base_dn string
+
+=== License
+
+ldap_fluff is licensed under the GPLv2. Please read LICENSE for more information.
