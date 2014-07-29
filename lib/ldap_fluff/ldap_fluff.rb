@@ -18,15 +18,21 @@ class LdapFluff
     end
   end
 
-  # return true if the user password combination
-  # authenticates the user, otherwise false
   def authenticate?(uid, password)
     if password.nil? || password.empty?
-      # protect against passwordless auth from ldap server
-      return false
+      false
     else
-      @ldap.bind? uid, password
+      !!@ldap.bind?(uid, password)
     end
+  end
+
+  def test
+    @ldap.ldap.open {}
+  end
+
+  # return a list[] of users for a given gid
+  def user_list(gid)
+    @ldap.users_for_gid(gid)
   end
 
   # return a list[] of groups for a given uid
@@ -50,4 +56,13 @@ class LdapFluff
     @ldap.group_exists? gid
   end
 
+  # return ldap entry
+  def find_user(uid)
+    @ldap.member_service.find_user(uid)
+  end
+
+  # return ldap entry
+  def find_group(gid)
+    @ldap.member_service.find_group(gid)
+  end
 end

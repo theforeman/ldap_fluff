@@ -4,15 +4,8 @@ class TestPosix < MiniTest::Test
   include LdapTestHelper
 
   def setup
-    config
+    super
     @posix = LdapFluff::Posix.new(@config)
-    @ldap  = MiniTest::Mock.new
-  end
-
-  def basic_user
-    @md = MiniTest::Mock.new
-    @md.expect(:find_user_groups, %w(bros), %w(john))
-    @posix.member_service = @md
   end
 
   def test_groups
@@ -21,25 +14,25 @@ class TestPosix < MiniTest::Test
   end
 
   def test_missing_user
-    @md = MiniTest::Mock.new
-    @md.expect(:find_user_groups, [], %w(john))
-    @posix.member_service = @md
+    md = MiniTest::Mock.new
+    md.expect(:find_user_groups, [], %w(john))
+    @posix.member_service = md
     assert_equal([], @posix.groups_for_uid('john'))
   end
 
   def test_isnt_in_groups
     basic_user
-    @md = MiniTest::Mock.new
-    @md.expect(:times_in_groups, 0, ['john', %w(bros), true])
-    @posix.member_service = @md
+    md = MiniTest::Mock.new
+    md.expect(:times_in_groups, 0, ['john', %w(bros), true])
+    @posix.member_service = md
     assert_equal(@posix.is_in_groups('john', %w(bros), true), false)
   end
 
   def test_is_in_groups
     basic_user
-    @md = MiniTest::Mock.new
-    @md.expect(:times_in_groups, 1, ['john', %w(bros), true])
-    @posix.member_service = @md
+    md = MiniTest::Mock.new
+    md.expect(:times_in_groups, 1, ['john', %w(bros), true])
+    @posix.member_service = md
     assert_equal(@posix.is_in_groups('john', %w(bros), true), true)
   end
 
@@ -61,36 +54,59 @@ class TestPosix < MiniTest::Test
   end
 
   def test_user_exists
-    @md = MiniTest::Mock.new
-    @md.expect(:find_user, 'notnilluser', %w(john))
-    @posix.member_service = @md
+    md = MiniTest::Mock.new
+    md.expect(:find_user, 'notnilluser', %w(john))
+    @posix.member_service = md
     assert(@posix.user_exists?('john'))
   end
 
   def test_missing_user
-    @md = MiniTest::Mock.new
-    @md.expect(:find_user, nil, %w(john))
-    def @md.find_user(uid)
+    md = MiniTest::Mock.new
+    md.expect(:find_user, nil, %w(john))
+    def md.find_user(uid)
       raise LdapFluff::Posix::MemberService::UIDNotFoundException
     end
-    @posix.member_service = @md
+    @posix.member_service = md
     refute(@posix.user_exists?('john'))
   end
 
   def test_group_exists
-    @md = MiniTest::Mock.new
-    @md.expect(:find_group, 'notnillgroup', %w(broskies))
-    @posix.member_service = @md
+    md = MiniTest::Mock.new
+    md.expect(:find_group, 'notnillgroup', %w(broskies))
+    @posix.member_service = md
     assert(@posix.group_exists?('broskies'))
   end
 
   def test_missing_group
-    @md = MiniTest::Mock.new
-    @md.expect(:find_group, nil, %w(broskies))
-    def @md.find_group(uid)
+    md = MiniTest::Mock.new
+    md.expect(:find_group, nil, %w(broskies))
+    def md.find_group(uid)
       raise LdapFluff::Posix::MemberService::GIDNotFoundException
     end
-    @posix.member_service = @md
+    @posix.member_service = md
     refute(@posix.group_exists?('broskies'))
+  end
+
+  def test_find_users_in_nested_groups
+    group = Net::LDAP::Entry.new('CN=foremaners,DC=example,DC=com')
+    group[:memberuid] = ['katellers']
+    nested_group = Net::LDAP::Entry.new('CN=katellers,CN=foremaners,DC=example,DC=com')
+    nested_group[:memberuid] = ['testuser']
+
+    @ldap.expect(:search,
+                 [nested_group],
+                 [{ :base   => group.dn,
+                    :filter => Net::LDAP::Filter.eq('objectClass','posixGroup') |
+                               Net::LDAP::Filter.eq('objectClass', 'organizationalunit')}])
+    @posix.ldap = @ldap
+
+    md = MiniTest::Mock.new
+    2.times { md.expect(:find_group, [group], ['foremaners']) }
+    @posix.member_service = md
+
+    assert_equal @posix.users_for_gid('foremaners'), ['testuser']
+
+    md.verify
+    @ldap.verify
   end
 end

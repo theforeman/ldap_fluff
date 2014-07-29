@@ -4,7 +4,7 @@ class ConfigTest < MiniTest::Test
   include LdapTestHelper
 
   def test_unsupported_type
-    assert_raises(LdapFluff::ConfigError) { LdapFluff.new(config_hash.update :server_type => 'inactive_directory') }
+    assert_raises(LdapFluff::Config::ConfigError) { LdapFluff.new(config_hash.update :server_type => 'inactive_directory') }
   end
 
   def test_load_posix

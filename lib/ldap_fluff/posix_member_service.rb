@@ -1,23 +1,11 @@
 require 'net/ldap'
 
 # handles the naughty bits of posix ldap
-class LdapFluff::Posix::MemberService
+class LdapFluff::Posix::MemberService < LdapFluff::GenericMemberService
 
-  attr_accessor :ldap
-
-  def initialize(ldap, group_base)
-    @ldap       = ldap
-    @group_base = group_base
-  end
-
-  # return an ldap user with groups attached
-  # note : this method is not particularly fast for large ldap systems
-  def find_user_groups(uid)
-    groups = []
-    find_user(uid).each do |entry|
-      groups << entry[:cn][0]
-    end
-    groups
+  def initialize(ldap, config)
+    @attr_login = (config.attr_login || 'memberuid')
+    super
   end
 
   def find_user(uid)
@@ -26,10 +14,14 @@ class LdapFluff::Posix::MemberService
     user
   end
 
-  def find_group(gid)
-    group = @ldap.search(:filter => group_filter(gid), :base => @group_base)
-    raise GIDNotFoundException if (group.nil? || group.empty?)
-    group
+  # return an ldap user with groups attached
+  # note : this method is not particularly fast for large ldap systems
+  def find_user_groups(uid)
+    groups = []
+    @ldap.search(:filter => Net::LDAP::Filter.eq('memberuid', uid)).each do |entry|
+      groups << entry[:cn][0]
+    end
+    groups
   end
 
   def times_in_groups(uid, gids, all)
@@ -40,14 +32,6 @@ class LdapFluff::Posix::MemberService
     group_filters = merge_filters(filters, all)
     filter        = name_filter(uid) & group_filters
     @ldap.search(:base => @group_base, :filter => filter).size
-  end
-
-  def name_filter(uid)
-    Net::LDAP::Filter.eq("memberUid", uid)
-  end
-
-  def group_filter(cn)
-    Net::LDAP::Filter.eq("cn", cn)
   end
 
   # AND or OR all of the filters together
@@ -61,10 +45,10 @@ class LdapFluff::Posix::MemberService
     end
   end
 
-  class UIDNotFoundException < StandardError
+  class UIDNotFoundException < LdapFluff::Error
   end
 
-  class GIDNotFoundException < StandardError
+  class GIDNotFoundException < LdapFluff::Error
   end
 
 end

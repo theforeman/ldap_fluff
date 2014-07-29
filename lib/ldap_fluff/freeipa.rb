@@ -1,19 +1,11 @@
-class LdapFluff::FreeIPA
-
-  attr_accessor :ldap, :member_service
+class LdapFluff::FreeIPA < LdapFluff::Generic
 
   def initialize(config = {})
-    @ldap       = Net::LDAP.new(:host       => config.host,
-                                :base       => config.base_dn,
-                                :port       => config.port,
-                                :encryption => config.encryption)
-    @group_base = config.group_base || config.base_dn
     @base       = config.base_dn
     @bind_user  = config.service_user
     @bind_pass  = config.service_pass
     @anon       = config.anon_queries
-
-    @member_service = MemberService.new(@ldap, @group_base)
+    super
   end
 
   def bind?(uid = nil, password = nil)
@@ -22,21 +14,11 @@ class LdapFluff::FreeIPA
   end
 
   def groups_for_uid(uid)
-    service_bind
     begin
-      @member_service.find_user_groups(uid)
-    rescue MemberService::UIDNotFoundException
-      return []
+    service_bind
+    super
     rescue MemberService::InsufficientQueryPrivilegesException
-      raise UnauthenticatedFreeIPAException, "Insufficient Privileges to query groups data"
-    end
-  end
-
-  # AD generally does not support un-authenticated searching
-  # Typically AD admins configure a public user for searching
-  def service_bind
-    unless @anon || bind?(@bind_user, @bind_pass)
-      raise UnauthenticatedFreeIPAException, "Could not bind to FreeIPA Query User"
+      raise UnauthenticatedException, "Insufficient Privileges to query groups data"
     end
   end
 
@@ -58,26 +40,30 @@ class LdapFluff::FreeIPA
   end
 
   def user_exists?(uid)
-    begin
-      service_bind
-      @member_service.find_user(uid)
-    rescue MemberService::UIDNotFoundException
-      return false
-    end
-    return true
+    service_bind
+    super
   end
 
   def group_exists?(gid)
-    begin
-      service_bind
-      @member_service.find_group(gid)
-    rescue MemberService::GIDNotFoundException
-      return false
+    service_bind
+    super
+  end
+
+  private
+
+  def users_from_search_results(search, method)
+    # Member results come in the form uid=sampleuser,cn=users, etc.. or gid=samplegroup,cn=groups
+    users = []
+
+    search.send(method).each do |member|
+      type = member.downcase.split(',')[1]
+      if type == 'cn=users'
+        users << @member_service.get_logins([member])
+      elsif type == 'cn=groups'
+        users << users_for_gid(member.split(',')[0].split('=')[1])
+      end
     end
-    return true
-  end
 
-  class UnauthenticatedFreeIPAException < StandardError
+    users.flatten.uniq
   end
-
 end

@@ -4,35 +4,19 @@ class TestIPA < MiniTest::Test
   include LdapTestHelper
 
   def setup
-    config
-    @ipa  = LdapFluff::FreeIPA.new(@config)
-    @ldap = MiniTest::Mock.new
+    super
+    @ipa = LdapFluff::FreeIPA.new(@config)
   end
 
   # default setup for service bind users
   def service_bind
     @ldap.expect(:auth, nil, [ipa_user_bind('service'), "pass"])
-    @ldap.expect(:bind, true)
-    @ipa.ldap = @ldap
-  end
-
-  def basic_user
-    @md = MiniTest::Mock.new
-    @md.expect(:find_user_groups, %w(bros), %w(john))
-    @ipa.member_service = @md
-  end
-
-  def bigtime_user
-    @md = MiniTest::Mock.new
-    @md.expect(:find_user_groups, %w(bros broskies), %w(john))
-    @ipa.member_service = @md
+    super
   end
 
   def test_good_bind
-    @ldap.expect(:auth, nil, [ipa_user_bind('internet'), "password"])
-    @ldap.expect(:bind, true)
-    @ipa.ldap = @ldap
-    assert_equal(@ipa.bind?("internet", "password"), true)
+    service_bind
+    assert_equal(@ipa.bind?('service', 'pass'), true)
     @ldap.verify
   end
 
@@ -65,7 +49,7 @@ class TestIPA < MiniTest::Test
     @ldap.expect(:auth, nil, [ipa_user_bind('service'), "pass"])
     @ldap.expect(:bind, false)
     @ipa.ldap = @ldap
-    assert_raises(LdapFluff::FreeIPA::UnauthenticatedFreeIPAException) do
+    assert_raises(LdapFluff::FreeIPA::UnauthenticatedException) do
       @ipa.groups_for_uid('john')
     end
   end
@@ -136,6 +120,24 @@ class TestIPA < MiniTest::Test
     @ipa.member_service = @md
     service_bind
     refute(@ipa.group_exists?('broskies'))
+  end
+
+  def test_find_users_in_nested_groups
+    group = Net::LDAP::Entry.new('gid=foremaners,cn=Groups,cn=accounts,dc=localdomain')
+    group[:member] = ['gid=katellers,cn=Groups,cn=accounts,dc=localdomain']
+    nested_group = Net::LDAP::Entry.new('gid=katellers,cn=Groups,cn=accounts,dc=localdomain')
+    nested_group[:member] = ['uid=testuser,cn=users,cn=accounts,dc=localdomain']
+
+    md = MiniTest::Mock.new
+    2.times { md.expect(:find_group, [group], ['foremaners']) }
+    2.times { md.expect(:find_group, [nested_group], ['katellers']) }
+    2.times { service_bind }
+    md.expect(:get_logins, ['testuser'], [['uid=testuser,cn=users,cn=accounts,dc=localdomain']])
+
+    @ipa.member_service = md
+
+    assert_equal @ipa.users_for_gid('foremaners'), ['testuser']
+    md.verify
   end
 
 end
