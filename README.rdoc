@@ -20,7 +20,10 @@ It exposes these methods:
     returns true if the username & password combo bind correctly
 
   group_list(uid)
-    returns the set of ldap groups a user belongs to in a string list
+    returns the set of LDAP groups a user belongs to in a string list
+
+  user_list(gid)
+    returns the set of users that belong to an LDAP group
 
   is_in_groups?(uid, grouplist)
     returns true if the user provided is in all of the groups listed in grouplist
@@ -31,27 +34,43 @@ It exposes these methods:
   valid_group?(uid)
     returns true if the group provided exists
 
+  find_user(uid)
+    returns the LDAP entry of the user if found, nil if not found
+
+  find_group(gid)
+    returns the LDAP entry of the group if found, nil if not found
+
 These methods are handy for using LDAP for both authentication and authorization.
 
 This gem integrates with warden/devise quite nicely.
 
 Your global configuration must provide information about your LDAP host to function properly.
 
-  host: ## ip address or hostname
-  port: ## port
-  encryption: ## blank or :start_tls
-  base_dn: ## baseDN for ldap auth, eg dc=redhat,dc=com
-  group_base: ##baseDN for your ldap groups, eg ou=Groups,dc=redhat,dc=com
-  server_type: ## type of server. default == posix. :active_directory, :posix, :free_ipa
-  ad_domain: ## domain for your users if using active directory, eg redhat.com
-  service_user: ## service account for authenticating ldap calls in active directory or freeipa. required unless you enable anon
-  service_pass: ## service password for authenticating ldap calls in active directory or freeipa. required unless you enable anon
-  anon_queries: ## false by default, true if you don't want to use the service user
+  host: # ip address or hostname
+  port: # port
+  encryption: # blank, :simple_tls, or :start_tls
+  base_dn: # base DN for LDAP auth, eg dc=redhat,dc=com
+  group_base: # base DN for your LDAP groups, eg ou=Groups,dc=redhat,dc=com
+  server_type: # type of server. default == posix. :active_directory, :posix, :free_ipa
+  ad_domain: # domain for your users if using active directory, eg redhat.com
+  service_user: # service account for authenticating LDAP calls in active directory or freeipa. required unless you enable anon
+  service_pass: # service password for authenticating LDAP calls in active directory or freeipa. required unless you enable anon
+  anon_queries: # false by default, true if you don't want to use the service user
 
-=== tls support
+You can pass these arguments as a hash to LdapFluff to get a valid LdapFluff object.
 
-ldap_fluff fully supports start_tls encryption, but most likely you'll need to add your
-server's CAs to the local bundle. on a red hat style system, it's probably something like this:
+  ldap_config = { :host => "freeipa.localdomain", :port => 389, :encryption => nil, :base_dn => "DC=mydomain,DC=com",
+                  :group_base => "DC=groups,DC=mydomain,DC=com", :attr_login => "uid", :server_type => :freeipa,
+                  :service_user => "admin", :search_filter => "(objectClass=*)", :service_pass => "mypass",
+                  :anon_queries => false }
+
+  fluff = LdapFluff.new(ldap_config)
+  fluff.valid_user?("admin") # returns true
+
+=== TLS support
+
+ldap_fluff fully supports simple_tls and start_tls encryption, but most likely you'll need to add your
+server's CAs to the local bundle. on a Red Hat style system, it's probably something like this:
 
   $ cat ldap_server_ca.crt >> /etc/pki/tls/certs/ca-bundle.crt
 
@@ -59,7 +78,7 @@ server's CAs to the local bundle. on a red hat style system, it's probably somet
 
 ldap_fluff does not support searching/binding global catalogs
 
-ad_domain, service_user and service_pass OR anon_queries are required for AD support
+service_user (formatted as "ad_domain/username") and service_pass OR anon_queries are required for AD support
 
 === A note on FreeIPA
 
