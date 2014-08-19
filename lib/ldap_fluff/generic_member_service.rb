@@ -6,6 +6,7 @@ class LdapFluff::GenericMemberService
 
   def initialize(ldap, config)
     @ldap       = ldap
+    @base       = config.base_dn
     @group_base = (config.group_base.empty? ? config.base_dn : config.group_base)
     begin
       @search_filter = Net::LDAP::Filter.construct(config.search_filter) unless (config.search_filter.nil? || config.search_filter.empty?)
