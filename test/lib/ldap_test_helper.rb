@@ -74,6 +74,10 @@ module LdapTestHelper
     "uid=#{uid},cn=users,cn=accounts,#{@config.base_dn}"
   end
 
+  def ad_user_bind(name)
+    "CN=#{name},CN=Users,#{@config.base_dn}"
+  end
+
   def ad_user_payload
     [{ :memberof => ["cn=group,dc=internet,dc=com"] }]
   end

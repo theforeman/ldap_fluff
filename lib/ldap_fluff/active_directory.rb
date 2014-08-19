@@ -1,22 +1,13 @@
 class LdapFluff::ActiveDirectory < LdapFluff::Generic
 
-  def initialize(config = {})
-    @bind_user  = config.service_user
-    @bind_pass  = config.service_pass
-    @anon       = config.anon_queries
-    super
-  end
-
-  def bind?(uid = nil, password = nil)
+  def bind?(uid = nil, password = nil, opts = {})
+    unless uid.include?(',') || uid.include?('\\') || opts[:search] == false
+      service_bind
+      user = @member_service.find_user(uid)
+      uid = user.first.dn if user && user.first
+    end
     @ldap.auth(uid, password)
     @ldap.bind
-  end
-
-  # returns the list of groups to which a user belongs
-  # this query is simpler in active directory
-  def groups_for_uid(uid)
-    service_bind
-    super
   end
 
   # active directory stores group membership on a users model
@@ -31,16 +22,6 @@ class LdapFluff::ActiveDirectory < LdapFluff::Generic
     rescue MemberService::UIDNotFoundException
       return false
     end
-  end
-
-  def user_exists?(uid)
-    service_bind
-    super
-  end
-
-  def group_exists?(gid)
-    service_bind
-    super
   end
 
   private

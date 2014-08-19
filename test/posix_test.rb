@@ -8,7 +8,13 @@ class TestPosix < MiniTest::Test
     @posix = LdapFluff::Posix.new(@config)
   end
 
+  def service_bind
+    @ldap.expect(:auth, nil, %w[service pass])
+    super
+  end
+
   def test_groups
+    service_bind
     basic_user
     assert_equal(@posix.groups_for_uid("john"), %w(bros))
   end
@@ -21,6 +27,7 @@ class TestPosix < MiniTest::Test
   end
 
   def test_isnt_in_groups
+    service_bind
     basic_user
     md = MiniTest::Mock.new
     md.expect(:times_in_groups, 0, ['john', %w(bros), true])
@@ -29,6 +36,7 @@ class TestPosix < MiniTest::Test
   end
 
   def test_is_in_groups
+    service_bind
     basic_user
     md = MiniTest::Mock.new
     md.expect(:times_in_groups, 1, ['john', %w(bros), true])
@@ -37,23 +45,42 @@ class TestPosix < MiniTest::Test
   end
 
   def test_is_in_no_groups
+    service_bind
     basic_user
     assert_equal(@posix.is_in_groups('john', [], true), true)
   end
 
   def test_good_bind
-    @ldap.expect(:bind_as, true, [:filter => "(uid=internet)", :password => "password"])
+    # looks up the uid's full DN via the service account
+    @md = MiniTest::Mock.new
+    user_result = MiniTest::Mock.new
+    user_result.expect(:dn, 'uid=internet,dn=example')
+    @md.expect(:find_user, [user_result], %w(internet))
+    @posix.member_service = @md
+    service_bind
+    @ldap.expect(:auth, nil, %w[uid=internet,dn=example password])
+    @ldap.expect(:bind, true)
     @posix.ldap = @ldap
     assert_equal(@posix.bind?("internet", "password"), true)
   end
 
-  def test_bad_bind
-    @ldap.expect(:bind_as, false, [:filter => "(uid=internet)", :password => "password"])
+  def test_good_bind_with_dn
+    # no expectation on the service account
+    @ldap.expect(:auth, nil, %w[uid=internet,dn=example password])
+    @ldap.expect(:bind, true)
     @posix.ldap = @ldap
-    assert_equal(@posix.bind?("internet", "password"), false)
+    assert_equal(@posix.bind?("uid=internet,dn=example", "password"), true)
+  end
+
+  def test_bad_bind
+    @ldap.expect(:auth, nil, %w[uid=internet,dn=example password])
+    @ldap.expect(:bind, false)
+    @posix.ldap = @ldap
+    assert_equal(@posix.bind?("uid=internet,dn=example", "password"), false)
   end
 
   def test_user_exists
+    service_bind
     md = MiniTest::Mock.new
     md.expect(:find_user, 'notnilluser', %w(john))
     @posix.member_service = md
@@ -61,6 +88,7 @@ class TestPosix < MiniTest::Test
   end
 
   def test_missing_user
+    service_bind
     md = MiniTest::Mock.new
     md.expect(:find_user, nil, %w(john))
     def md.find_user(uid)
@@ -71,6 +99,7 @@ class TestPosix < MiniTest::Test
   end
 
   def test_group_exists
+    service_bind
     md = MiniTest::Mock.new
     md.expect(:find_group, 'notnillgroup', %w(broskies))
     @posix.member_service = md
@@ -78,6 +107,7 @@ class TestPosix < MiniTest::Test
   end
 
   def test_missing_group
+    service_bind
     md = MiniTest::Mock.new
     md.expect(:find_group, nil, %w(broskies))
     def md.find_group(uid)
@@ -88,6 +118,7 @@ class TestPosix < MiniTest::Test
   end
 
   def test_find_users_in_nested_groups
+    service_bind
     group = Net::LDAP::Entry.new('CN=foremaners,DC=example,DC=com')
     group[:memberuid] = ['katellers']
     nested_group = Net::LDAP::Entry.new('CN=katellers,CN=foremaners,DC=example,DC=com')

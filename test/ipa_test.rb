@@ -15,8 +15,25 @@ class TestIPA < MiniTest::Test
   end
 
   def test_good_bind
+    # looks up the uid's full DN via the service account
+    @md = MiniTest::Mock.new
+    user_result = MiniTest::Mock.new
+    user_result.expect(:dn, ipa_user_bind('internet'))
+    @md.expect(:find_user, [user_result], %w(internet))
+    @ipa.member_service = @md
     service_bind
-    assert_equal(@ipa.bind?('service', 'pass'), true)
+    @ldap.expect(:auth, nil, [ipa_user_bind('internet'), "password"])
+    @ldap.expect(:bind, true)
+    assert_equal(@ipa.bind?('internet', 'password'), true)
+    @ldap.verify
+  end
+
+  def test_good_bind_with_dn
+    # no expectation on the service account
+    @ldap.expect(:auth, nil, [ipa_user_bind('internet'), "password"])
+    @ldap.expect(:bind, true)
+    @ipa.ldap = @ldap
+    assert_equal(@ipa.bind?(ipa_user_bind('internet'), 'password'), true)
     @ldap.verify
   end
 
@@ -24,7 +41,7 @@ class TestIPA < MiniTest::Test
     @ldap.expect(:auth, nil, [ipa_user_bind('internet'), "password"])
     @ldap.expect(:bind, false)
     @ipa.ldap = @ldap
-    assert_equal(@ipa.bind?("internet", "password"), false)
+    assert_equal(@ipa.bind?(ipa_user_bind("internet"), "password"), false)
     @ldap.verify
   end
 

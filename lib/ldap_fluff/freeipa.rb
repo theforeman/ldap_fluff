@@ -1,22 +1,20 @@
 class LdapFluff::FreeIPA < LdapFluff::Generic
 
-  def initialize(config = {})
-    @base       = config.base_dn
-    @bind_user  = config.service_user
-    @bind_pass  = config.service_pass
-    @anon       = config.anon_queries
-    super
-  end
-
-  def bind?(uid = nil, password = nil)
-    @ldap.auth("uid=#{uid},cn=users,cn=accounts,#{@base}", password)
+  def bind?(uid = nil, password = nil, opts = {})
+    unless uid.include?(',')
+      unless opts[:search] == false
+        service_bind
+        user = @member_service.find_user(uid)
+      end
+      uid = user && user.first ? user.first.dn : "uid=#{uid},cn=users,cn=accounts,#{@base}"
+    end
+    @ldap.auth(uid, password)
     @ldap.bind
   end
 
   def groups_for_uid(uid)
     begin
-    service_bind
-    super
+      super
     rescue MemberService::InsufficientQueryPrivilegesException
       raise UnauthenticatedException, "Insufficient Privileges to query groups data"
     end
@@ -37,16 +35,6 @@ class LdapFluff::FreeIPA < LdapFluff::Generic
     else
       return groups & gids != []
     end
-  end
-
-  def user_exists?(uid)
-    service_bind
-    super
-  end
-
-  def group_exists?(gid)
-    service_bind
-    super
   end
 
   private

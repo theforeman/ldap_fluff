@@ -15,16 +15,42 @@ class TestAD < MiniTest::Test
   end
 
   def test_good_bind
+    # no expectation on the service account
+    @ldap.expect(:auth, nil, ['EXAMPLE\\internet', "password"])
+    @ldap.expect(:bind, true)
+    @ad.ldap = @ldap
+    assert_equal(@ad.bind?('EXAMPLE\\internet', 'password'), true)
+    @ldap.verify
+  end
+
+  def test_good_bind_with_dn
+    # no expectation on the service account
+    @ldap.expect(:auth, nil, [ad_user_bind('Internet User'), "password"])
+    @ldap.expect(:bind, true)
+    @ad.ldap = @ldap
+    assert_equal(@ad.bind?(ad_user_bind('Internet User'), 'password'), true)
+    @ldap.verify
+  end
+
+  def test_good_bind_with_account_name
+    # looks up the account name's full DN via the service account
+    @md = MiniTest::Mock.new
+    user_result = MiniTest::Mock.new
+    user_result.expect(:dn, ad_user_bind('Internet User'))
+    @md.expect(:find_user, [user_result], %w(internet))
+    @ad.member_service = @md
     service_bind
-    assert_equal(@ad.bind?('service', 'pass'), true)
+    @ldap.expect(:auth, nil, [ad_user_bind('Internet User'), "password"])
+    @ldap.expect(:bind, true)
+    assert_equal(@ad.bind?('internet', 'password'), true)
     @ldap.verify
   end
 
   def test_bad_bind
-    @ldap.expect(:auth, nil, %w(internet password))
+    @ldap.expect(:auth, nil, %w(EXAMPLE\\internet password))
     @ldap.expect(:bind, false)
     @ad.ldap = @ldap
-    assert_equal(@ad.bind?("internet", "password"), false)
+    assert_equal(@ad.bind?("EXAMPLE\\internet", "password"), false)
     @ldap.verify
   end
 
