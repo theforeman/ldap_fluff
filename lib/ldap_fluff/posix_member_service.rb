@@ -9,7 +9,7 @@ class LdapFluff::Posix::MemberService < LdapFluff::GenericMemberService
   end
 
   def find_user(uid)
-    user = @ldap.search(:filter => name_filter(uid), :base => @group_base)
+    user = @ldap.search(:filter => name_filter(uid), :base => @base)
     raise UIDNotFoundException if (user.nil? || user.empty?)
     user
   end
