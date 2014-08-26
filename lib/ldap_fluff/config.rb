@@ -49,7 +49,7 @@ class LdapFluff::Config
     end
 
     %w[service_user service_pass].all? do |key|
-      if !config['anon_queries'] && config['server_type'] != :posix && config[key].nil?
+      if !config['anon_queries'] && config[key].nil?
         raise ConfigError, "config key #{key} has to be set, it was nil"
       end
     end

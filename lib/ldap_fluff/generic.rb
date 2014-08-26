@@ -6,12 +6,17 @@ class LdapFluff::Generic
                           :base       => config.base_dn,
                           :port       => config.port,
                           :encryption => config.encryption)
+    @bind_user  = config.service_user
+    @bind_pass  = config.service_pass
+    @anon       = config.anon_queries
     @attr_login = config.attr_login
+    @base       = config.base_dn
     @group_base = (config.group_base.empty? ? config.base_dn : config.group_base)
     @member_service = self.class::MemberService.new(@ldap, config)
   end
 
   def user_exists?(uid)
+    service_bind
     @member_service.find_user(uid)
     true
   rescue self.class::MemberService::UIDNotFoundException
@@ -19,6 +24,7 @@ class LdapFluff::Generic
   end
 
   def group_exists?(gid)
+    service_bind
     @member_service.find_group(gid)
     true
   rescue self.class::MemberService::GIDNotFoundException
@@ -26,6 +32,7 @@ class LdapFluff::Generic
   end
 
   def groups_for_uid(uid)
+    service_bind
     @member_service.find_user_groups(uid)
   rescue self.class::MemberService::UIDNotFoundException
     return []
@@ -48,7 +55,7 @@ class LdapFluff::Generic
   end
 
   def service_bind
-    unless @anon || bind?(@bind_user, @bind_pass)
+    unless @anon || bind?(@bind_user, @bind_pass, :search => false)
       raise UnauthenticatedException,
             "Could not bind to #{class_name} user #{@bind_user}"
     end
