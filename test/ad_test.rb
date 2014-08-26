@@ -154,7 +154,8 @@ class TestAD < MiniTest::Test
     nested_user  = Net::LDAP::Entry.new('testuser')
 
     group[:member]        = ['CN=katellers,DC=corp,DC=windows,DC=com']
-    nested_group[:member] = ['CN=testuser,CN=Users,DC=corp,DC=windows,DC=com']
+    nested_group[:cn]     = ['katellers']
+    nested_group[:member] = ['CN=Test User,CN=Users,DC=corp,DC=windows,DC=com']
     nested_group[:objectclass] = ['organizationalunit']
     nested_user[:objectclass]  = ['person']
 
@@ -163,11 +164,12 @@ class TestAD < MiniTest::Test
     2.times { md.expect(:find_group, [nested_group], ['katellers']) }
     2.times { service_bind }
 
-    md.expect(:find_user,  [nested_group], ['katellers'])
-    md.expect(:find_user,  [nested_user],  ['testuser'])
-    md.expect(:get_logins, 'testuser', [nested_group.member])
+    md.expect(:find_by_dn, [nested_group], ['CN=katellers,DC=corp,DC=windows,DC=com'])
+    md.expect(:find_by_dn, [nested_user],  ['CN=Test User,CN=Users,DC=corp,DC=windows,DC=com'])
+    md.expect(:get_login_from_entry, 'testuser', [nested_user])
     @ad.member_service = md
     assert_equal @ad.users_for_gid('foremaners'), ['testuser']
+    md.verify
   end
 
 end

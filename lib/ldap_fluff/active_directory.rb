@@ -30,15 +30,13 @@ class LdapFluff::ActiveDirectory < LdapFluff::Generic
     users = []
 
     search.send(method).each do |member|
-      cn    = member.downcase.split(',')[0].split('=')[1]
-      entry = @member_service.find_user(cn).first
-
+      entry = @member_service.find_by_dn(member).first
       objectclasses = entry.objectclass.map(&:downcase)
 
       if (%w(organizationalperson person) & objectclasses).present?
-        users << @member_service.get_logins([member])
+        users << @member_service.get_login_from_entry(entry)
       elsif (%w(organizationalunit group) & objectclasses).present?
-        users << users_for_gid(cn)
+        users << users_for_gid(entry.cn.first)
       end
     end
 

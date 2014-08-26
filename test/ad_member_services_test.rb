@@ -117,4 +117,31 @@ class TestADMemberService < MiniTest::Test
     end
   end
 
+  def test_find_by_dn
+    @ldap.expect(:search, [:result], [:filter => Net::LDAP::Filter.eq('cn', 'Foo Bar'), :base => 'dc=example,dc=com'])
+    @adms.ldap = @ldap
+    assert_equal([:result], @adms.find_by_dn('cn=Foo Bar,dc=example,dc=com'))
+    @ldap.verify
+  end
+
+  def test_find_by_dn_missing_entry
+    @ldap.expect(:search, nil, [:filter => Net::LDAP::Filter.eq('cn', 'Foo Bar'), :base => 'dc=example,dc=com'])
+    @adms.ldap = @ldap
+    assert_raises(LdapFluff::ActiveDirectory::MemberService::UIDNotFoundException) do
+      @adms.find_by_dn('cn=Foo Bar,dc=example,dc=com')
+    end
+    @ldap.verify
+  end
+
+  def test_get_login_from_entry
+    entry = Net::LDAP::Entry.new('Example User')
+    entry['sAMAccountName'] = 'example'
+    assert_equal(['example'], @adms.get_login_from_entry(entry))
+  end
+
+  def test_get_login_from_entry_missing_attr
+    entry = Net::LDAP::Entry.new('Example User')
+    assert_nil(@adms.get_login_from_entry(entry))
+  end
+
 end
