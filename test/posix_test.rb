@@ -128,7 +128,8 @@ class TestPosix < MiniTest::Test
                  [nested_group],
                  [{ :base   => group.dn,
                     :filter => Net::LDAP::Filter.eq('objectClass','posixGroup') |
-                               Net::LDAP::Filter.eq('objectClass', 'organizationalunit')}])
+                               Net::LDAP::Filter.eq('objectClass', 'organizationalunit') |
+                               Net::LDAP::Filter.eq('objectClass', 'groupOfUniqueNames')}])
     @posix.ldap = @ldap
 
     md = MiniTest::Mock.new
