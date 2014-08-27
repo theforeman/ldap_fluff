@@ -21,14 +21,22 @@ class LdapFluff::GenericMemberService
     user
   end
 
+  def find_by_dn(dn)
+    entry, base = dn.split(',', 2)
+    entry_attr, entry_value = entry.split('=', 2)
+    user = @ldap.search(:filter => name_filter(entry_value, entry_attr), :base => base)
+    raise self.class::UIDNotFoundException if (user.nil? || user.empty?)
+    user
+  end
+
   def find_group(gid)
     group = @ldap.search(:filter => group_filter(gid), :base => @group_base)
     raise self.class::GIDNotFoundException if (group.nil? || group.empty?)
     group
   end
 
-  def name_filter(uid)
-    filter = Net::LDAP::Filter.eq(@attr_login, uid)
+  def name_filter(uid, attr = @attr_login)
+    filter = Net::LDAP::Filter.eq(attr, uid)
 
     if @search_filter.nil?
       filter
@@ -58,6 +66,13 @@ class LdapFluff::GenericMemberService
         logins
       end
     end.compact.flatten
+  end
+
+  def get_login_from_entry(entry)
+    [@attr_login, 'uid', 'cn'].each do |attribute|
+      return entry.send(attribute) if entry.respond_to? attribute
+    end
+    nil
   end
 
 end
