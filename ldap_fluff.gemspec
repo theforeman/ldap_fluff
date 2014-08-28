@@ -5,7 +5,8 @@ Gem::Specification.new do |s|
   s.description = 'Simple library for binding & group querying on top of various LDAP implementations'
   s.homepage    = 'https://github.com/theforeman/ldap_fluff'
   s.license     = 'GPLv2'
-  s.files       = Dir['lib/**/*.rb'] + Dir['test/**/*.rb']
+  s.files       = Dir['lib/**/*.rb'] + Dir['test/**/*.rb'] + ['README.rdoc', 'LICENSE']
+  s.extra_rdoc_files = ['README.rdoc', 'LICENSE']
 
   s.require_path = 'lib'
   s.test_files   = Dir['test/**/*.rb']
