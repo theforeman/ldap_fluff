@@ -33,7 +33,9 @@ class TestIPAMemberService < MiniTest::Test
   end
 
   def test_no_groups
-    @ldap.expect(:search, ['', { :memberof => [] }], [:filter => ipa_name_filter("john")])
+    entry = Net::LDAP::Entry.new
+    entry['memberof'] = []
+    @ldap.expect(:search, [ Net::LDAP::Entry.new, entry ], [:filter => ipa_name_filter("john")])
     @ipams.ldap = @ldap
     assert_equal([], @ipams.find_user_groups('john'))
     @ldap.verify

@@ -14,8 +14,9 @@ class LdapFluff::FreeIPA::MemberService < LdapFluff::GenericMemberService
     user = find_user(uid)
     # if group data is missing, they aren't querying with a user
     # with enough privileges
-    raise InsufficientQueryPrivilegesException if user.size <= 1
-    get_groups(user[1][:memberof])
+    user.delete_if { |u| u.nil? || !u.respond_to?(:attribute_names) || !u.attribute_names.include?(:memberof) }
+    raise InsufficientQueryPrivilegesException if user.size < 1
+    get_groups(user[0][:memberof])
   end
 
   class UIDNotFoundException < LdapFluff::Error

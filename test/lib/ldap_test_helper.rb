@@ -103,7 +103,13 @@ module LdapTestHelper
   end
 
   def ipa_user_payload
-    [{ :cn => 'john' }, { :memberof => ['cn=group,dc=internet,dc=com', 'cn=bros,dc=internet,dc=com'] }]
+    @ipa_user_payload_cache ||= begin
+      entry_1 = Net::LDAP::Entry.new
+      entry_1['cn'] = 'John'
+      entry_2 = Net::LDAP::Entry.new
+      entry_2['memberof'] = ['cn=group,dc=internet,dc=com', 'cn=bros,dc=internet,dc=com']
+      [ entry_1, entry_2 ]
+    end
   end
 
   def ipa_group_payload
