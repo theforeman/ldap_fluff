@@ -44,7 +44,7 @@ class LdapFluff::Generic
 
     method = [:member, :ismemberof, :memberof,
               :memberuid, :uniquemember].find { |m| search.respond_to? m } or
-             raise 'Group does not have any members'
+             return []
 
     users_from_search_results(search, method)
   end
