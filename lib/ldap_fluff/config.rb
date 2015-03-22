@@ -27,8 +27,8 @@ class LdapFluff::Config
   # @param [#to_hash] config
   def convert(config)
     config.to_hash.with_indifferent_access.tap do |conf|
-      %w[encryption server_type].each do |key|
-        conf[key] = conf[key].to_sym if conf[key]
+      %w[encryption server_type method].each do |key|
+        conf[key] = conf[key].is_a?(Hash) ? convert(conf[key]) : conf[key].to_sym if conf[key]
       end
     end
   end
