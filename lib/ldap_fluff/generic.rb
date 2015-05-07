@@ -2,10 +2,11 @@ class LdapFluff::Generic
   attr_accessor :ldap, :member_service
 
   def initialize(config = {})
-    @ldap = Net::LDAP.new(:host       => config.host,
-                          :base       => config.base_dn,
-                          :port       => config.port,
-                          :encryption => config.encryption)
+    @ldap = Net::LDAP.new(:host => config.host,
+                          :base => config.base_dn,
+                          :port => config.port,
+                          :encryption => config.encryption,
+                          :instrumentation_service => config.instrumentation_service)
     @bind_user  = config.service_user
     @bind_pass  = config.service_pass
     @anon       = config.anon_queries

@@ -56,6 +56,7 @@ Your global configuration must provide information about your LDAP host to funct
   service_user: # service account for authenticating LDAP calls. required unless you enable anon
   service_pass: # service password for authenticating LDAP calls. required unless you enable anon
   anon_queries: # false by default, true if you don't want to use the service user
+  instrumentation_service: # nil by default, an object that supports the ActiveSupport::Notifications API
 
 You can pass these arguments as a hash to LdapFluff to get a valid LdapFluff object.
 
@@ -84,6 +85,17 @@ service_user (formatted as "ad_domain/username") and service_pass OR anon_querie
 
 ldap_fluff appends cn=groups,cn=accounts to the beginning of all BIND calls. You do not need to
 include this in your base_dn string
+
+=== Instrumentation
+
+Both net-ldap and ldap_fluff support instrumentation of API calls, which can help debug performance issues or
+to find what LDAP queries are being made.
+
+The :instrumentation_service item in the configuration should support an equivalent API to
+ActiveSupport::Notifications.  ldap_fluff will use this and also pass it to net-ldap.
+
+When using Rails, pass `:instrumentation_service => ActiveSupport::Notifications` and then subscribe to, and
+optionally log events (e.g. https://gist.github.com/mnutt/566725).
 
 === License
 

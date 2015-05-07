@@ -22,4 +22,9 @@ class ConfigTest < MiniTest::Test
     assert_instance_of LdapFluff::FreeIPA, ldap.ldap
   end
 
+  def test_instrumentation_service
+    is = Object.new
+    net_ldap = LdapFluff.new(config_hash.update :instrumentation_service => is).ldap.ldap
+    assert_equal is, net_ldap.send(:instrumentation_service)
+  end
 end
