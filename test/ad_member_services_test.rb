@@ -11,7 +11,7 @@ class TestADMemberService < MiniTest::Test
 
   def basic_user
     @ldap.expect(:search, ad_user_payload, [:filter => ad_name_filter("john")])
-    @ldap.expect(:search, ad_parent_payload(1), [:filter => @gfilter, :base => @config.group_base])
+    @ldap.expect(:search, ad_parent_payload(1), [:base => ad_group_dn, :scope => 0])
   end
 
   def basic_group
@@ -20,32 +20,28 @@ class TestADMemberService < MiniTest::Test
 
   def nest_deep(n)
     # add all the expects
-    1.upto(n - 1) do |i|
-      gfilter_bros = group_filter("bros#{i}") & group_class_filter
-      @ldap.expect(:search, ad_parent_payload(i + 1), [:filter => gfilter_bros, :base => @config.group_base])
+    1.upto(n-1) do |i|
+      @ldap.expect(:search, ad_parent_payload(i + 1), [:base => ad_group_dn("bros#{i}"), :scope => 0])
     end
     # terminate or we loop FOREVER
-    @ldap.expect(:search, [], [:filter => group_filter("bros#{n}") & group_class_filter, :base => @config.group_base])
+    @ldap.expect(:search, [], [:base => ad_group_dn("bros#{n}"), :scope => 0])
   end
 
   def double_nested(n)
     # add all the expects
     1.upto(n - 1) do |i|
-      gfilter_bros = group_filter("bros#{i}") & group_class_filter
-      @ldap.expect(:search, ad_double_payload(i + 1), [:filter => gfilter_bros, :base => @config.group_base])
+      @ldap.expect(:search, ad_double_payload(i + 1), [:base => ad_group_dn("bros#{i}"), :scope => 0])
     end
     # terminate or we loop FOREVER
-    @ldap.expect(:search, [], [:filter => group_filter("bros#{n}") & group_class_filter, :base => @config.group_base])
+    @ldap.expect(:search, [], [:base => ad_group_dn("bros#{n}"), :scope => 0])
     (n - 1).downto(1) do |j|
-      gfilter_bros = group_filter("broskies#{j + 1}") & group_class_filter
-      @ldap.expect(:search, [], [:filter => gfilter_bros, :base => @config.group_base])
+      @ldap.expect(:search, [], [:base => ad_group_dn("broskies#{j + 1}"), :scope => 0])
     end
   end
 
   def test_find_user
     basic_user
-    gfilter_bros = group_filter('bros1') & group_class_filter
-    @ldap.expect(:search, [], [:filter => gfilter_bros, :base => @config.group_base])
+    @ldap.expect(:search, [], [:base => ad_group_dn('bros1'), :scope => 0])
     @adms.ldap = @ldap
     assert_equal(%w(group bros1), @adms.find_user_groups("john"))
     @ldap.verify

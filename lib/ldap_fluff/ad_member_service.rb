@@ -19,22 +19,21 @@ class LdapFluff::ActiveDirectory::MemberService < LdapFluff::GenericMemberServic
   def _groups_from_ldap_data(payload)
     data = []
     if !payload.nil?
-      first_level  = get_groups(payload[:memberof])
+      first_level  = payload[:memberof]
       total_groups = _walk_group_ancestry(first_level)
-      data         = (first_level + total_groups).uniq
+      data         = (get_groups(first_level + total_groups)).uniq
     end
     data
   end
 
   # recursively loop over the parent list
-  def _walk_group_ancestry(gids = [])
+  def _walk_group_ancestry(group_dns = [])
     set = []
-    gids.each do |g|
-      filter = group_filter(g) & class_filter
-      search = @ldap.search(:filter => filter, :base => @group_base)
+    group_dns.each do |group_dn|
+      search = @ldap.search(:base => group_dn, :scope => Net::LDAP::SearchScope_BaseObject)
       if !search.nil? && !search.first.nil?
         group = search.first
-        set  += get_groups(group[:memberof])
+        set  += group[:memberof]
         set  += _walk_group_ancestry(set)
       end
     end
