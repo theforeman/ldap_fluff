@@ -74,24 +74,28 @@ module LdapTestHelper
     "uid=#{uid},cn=users,cn=accounts,#{@config.base_dn}"
   end
 
-  def ad_user_bind(name)
+  def ad_user_dn(name)
     "CN=#{name},CN=Users,#{@config.base_dn}"
   end
 
+  def ad_group_dn(name='group')
+    "cn=#{name},#{@config.group_base}"
+  end
+
   def ad_user_payload
-    [{ :memberof => ["cn=group,dc=internet,dc=com"] }]
+    [{ :memberof => [ad_group_dn] }]
   end
 
   def ad_group_payload
-    [{ :cn => "broze", :memberof => ["cn=group,dc=internet,dc=com"] }]
+    [{ :cn => "group", :memberof => [ad_group_dn] }]
   end
 
   def ad_parent_payload(num)
-    [{ :memberof => ["cn=bros#{num},dc=internet,dc=com"] }]
+    [{ :memberof => [ad_group_dn("bros#{num}")] }]
   end
 
   def ad_double_payload(num)
-    [{ :memberof => ["cn=bros#{num},dc=internet,dc=com", "cn=broskies#{num},dc=internet,dc=com"] }]
+    [{ :memberof => [ad_group_dn("bros#{num}"), ad_group_dn("broskies#{num}")] }]
   end
 
   def posix_user_payload
