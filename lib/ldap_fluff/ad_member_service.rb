@@ -33,8 +33,8 @@ class LdapFluff::ActiveDirectory::MemberService < LdapFluff::GenericMemberServic
       search = @ldap.search(:base => group_dn, :scope => Net::LDAP::SearchScope_BaseObject, :attributes => ['memberof'])
       if !search.nil? && !search.first.nil?
         group = search.first
+        set  += _walk_group_ancestry(group[:memberof])
         set  += group[:memberof]
-        set  += _walk_group_ancestry(set)
       end
     end
     set
