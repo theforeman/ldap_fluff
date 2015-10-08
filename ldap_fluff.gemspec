@@ -15,14 +15,11 @@ Gem::Specification.new do |s|
   s.author   = ['Jordan O\'Mara', 'Daniel Lobato', 'Petr Chalupa', 'Adam Price', 'Marek Hulan']
   s.email    = %w(jomara@redhat.com elobatocs@gmail.com pchalupa@redhat.com komidore64@gmail.com mhulan@redhat.com)
 
-  if RUBY_VERSION < '1.9'
-    s.add_dependency('net-ldap', '>= 0.3.1', '< 0.9.0')
-    s.add_dependency('activesupport', '~> 3.2')
-    s.add_dependency('i18n', '< 0.7.0')
-  else
-    s.add_dependency('net-ldap', '>= 0.3.1')
-    s.add_dependency('activesupport')
-  end
+  s.required_ruby_version = ">= 1.9.3"
+
+  s.add_dependency('net-ldap', '>= 0.3.1')
+  s.add_dependency('activesupport')
   s.add_development_dependency('rake')
   s.add_development_dependency('minitest')
+  s.add_development_dependency('rubocop')
 end
