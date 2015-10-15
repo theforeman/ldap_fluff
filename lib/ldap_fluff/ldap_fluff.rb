@@ -31,7 +31,7 @@ class LdapFluff
 
   def test
     instrument('test.ldap_fluff') do |payload|
-      @ldap.ldap.open {}
+      @ldap.test_ldap
     end
   end
 

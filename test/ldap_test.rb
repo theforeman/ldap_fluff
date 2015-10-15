@@ -57,6 +57,12 @@ class TestLDAP < MiniTest::Test
     @ldap.verify
   end
 
+  def test_ldap_connection
+    @ldap.expect(:test_ldap, true)
+    @fluff.ldap = @ldap
+    assert(@fluff.test)
+    @ldap.verify
+  end
 end
 
 

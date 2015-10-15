@@ -62,6 +62,11 @@ class LdapFluff::Generic
     end
   end
 
+  def test_ldap
+    service_bind
+    @member_service.ldap.open {}
+  end
+
   private
   def class_name
     self.class.name.split('::').last
