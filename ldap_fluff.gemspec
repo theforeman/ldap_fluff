@@ -1,6 +1,6 @@
 Gem::Specification.new do |s|
   s.name        = 'ldap_fluff'
-  s.version     = '0.3.7'
+  s.version     = '0.4.0'
   s.summary     = 'LDAP querying tools for Active Directory, FreeIPA and POSIX-style'
   s.description = 'Simple library for binding & group querying on top of various LDAP implementations'
   s.homepage    = 'https://github.com/theforeman/ldap_fluff'
