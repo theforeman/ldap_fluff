@@ -43,8 +43,7 @@ class LdapFluff::Generic
     return [] unless group_exists?(gid)
     search = @member_service.find_group(gid).last
 
-    method = [:member, :ismemberof, :memberof,
-              :memberuid, :uniquemember].find { |m| search.respond_to? m } or
+    method = [:member, :memberuid, :uniquemember].find { |m| search.respond_to? m } or
              return []
 
     users_from_search_results(search, method)

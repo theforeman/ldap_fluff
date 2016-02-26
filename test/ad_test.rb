@@ -172,4 +172,28 @@ class TestAD < MiniTest::Test
     md.verify
   end
 
+  def test_find_users_with_empty_nested_group
+    group        = Net::LDAP::Entry.new('foremaners')
+    nested_group = Net::LDAP::Entry.new('katellers')
+    nested_user  = Net::LDAP::Entry.new('testuser')
+
+    group[:member] = ['CN=Test User,CN=Users,DC=corp,DC=windows,DC=com', 'CN=katellers,DC=corp,DC=windows,DC=com']
+    nested_group[:cn] = ['katellers']
+    nested_group[:objectclass] = ['organizationalunit']
+    nested_group[:memberof] = ['CN=foremaners,DC=corp,DC=windows,DC=com']
+    nested_user[:objectclass]  = ['person']
+
+    md = MiniTest::Mock.new
+    2.times { md.expect(:find_group, [group], ['foremaners']) }
+    2.times { md.expect(:find_group, [nested_group], ['katellers']) }
+    2.times { service_bind }
+
+    md.expect(:find_by_dn, [nested_user],  ['CN=Test User,CN=Users,DC=corp,DC=windows,DC=com'])
+    md.expect(:find_by_dn, [nested_group], ['CN=katellers,DC=corp,DC=windows,DC=com'])
+    md.expect(:get_login_from_entry, 'testuser', [nested_user])
+    @ad.member_service = md
+    assert_equal @ad.users_for_gid('foremaners'), ['testuser']
+    md.verify
+  end
+
 end
