@@ -1,6 +1,6 @@
 Gem::Specification.new do |s|
   s.name        = 'ldap_fluff'
-  s.version     = '0.4.0'
+  s.version     = '0.4.1'
   s.summary     = 'LDAP querying tools for Active Directory, FreeIPA and POSIX-style'
   s.description = 'Simple library for binding & group querying on top of various LDAP implementations'
   s.homepage    = 'https://github.com/theforeman/ldap_fluff'
@@ -12,8 +12,8 @@ Gem::Specification.new do |s|
   s.test_files   = Dir['test/**/*.rb']
 
   s.has_rdoc = true
-  s.author   = ['Jordan O\'Mara', 'Daniel Lobato', 'Petr Chalupa', 'Adam Price', 'Marek Hulan']
-  s.email    = %w(jomara@redhat.com elobatocs@gmail.com pchalupa@redhat.com komidore64@gmail.com mhulan@redhat.com)
+  s.author   = ['Jordan O\'Mara', 'Daniel Lobato', 'Petr Chalupa', 'Adam Price', 'Marek Hulan', 'Dominic Cleal']
+  s.email    = %w(jomara@redhat.com elobatocs@gmail.com pchalupa@redhat.com komidore64@gmail.com mhulan@redhat.com dominic@cleal.org)
 
   s.required_ruby_version = ">= 1.9.3"
 
