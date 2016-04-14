@@ -32,7 +32,8 @@ class LdapFluff::Posix < LdapFluff::Generic
     groups = @ldap.search(:base   => search.dn,
                           :filter => Net::LDAP::Filter.eq('objectClass','posixGroup') |
                                      Net::LDAP::Filter.eq('objectClass', 'organizationalunit') |
-                                     Net::LDAP::Filter.eq('objectClass', 'groupOfUniqueNames'))
+                                     Net::LDAP::Filter.eq('objectClass', 'groupOfUniqueNames') |
+                                     Net::LDAP::Filter.eq('objectClass', 'groupOfNames'))
 
     members = groups.map { |group| group.send(method) }.flatten.uniq
 
