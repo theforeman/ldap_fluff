@@ -66,7 +66,7 @@ class LdapFluff::GenericMemberService
       else
         logins
       end
-    end.compact.flatten
+    end.uniq.compact.flatten
   end
 
   def get_login_from_entry(entry)
