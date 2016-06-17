@@ -47,6 +47,16 @@ class TestADMemberService < MiniTest::Test
     @ldap.verify
   end
 
+  def test_nested_groups
+    basic_user
+    # basic user is memberof 'group'... and 'group' is memberof 'bros1'
+    # now make 'bros1' be memberof 'group' again
+    @ldap.expect(:search, ad_user_payload, [:base => ad_group_dn('bros1'), :scope => 0, :attributes => ['memberof']])
+    @adms.ldap = @ldap
+    assert_equal(%w(group bros1), @adms.find_user_groups("john"))
+    @ldap.verify
+  end
+
   def test_missing_user
     @ldap.expect(:search, nil, [:filter => ad_name_filter("john")])
     @adms.ldap = @ldap

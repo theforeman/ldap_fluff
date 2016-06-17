@@ -40,7 +40,7 @@ class LdapFluff::ActiveDirectory::MemberService < LdapFluff::GenericMemberServic
         known_groups                += next_level
       end
     end
-    return [set, known_groups]
+    [set, known_groups]
   end
 
   def class_filter
