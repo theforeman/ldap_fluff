@@ -11,3 +11,5 @@ unless RUBY_VERSION >= '2.2'
 end
 
 gemspec
+
+gem 'rubocop', :group => :test if RUBY_VERSION >= '2.0'
