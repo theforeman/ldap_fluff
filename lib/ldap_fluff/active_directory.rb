@@ -33,7 +33,7 @@ class LdapFluff::ActiveDirectory < LdapFluff::Generic
       entry = @member_service.find_by_dn(member).first
       objectclasses = entry.objectclass.map(&:downcase)
 
-      if (%w(organizationalperson person) & objectclasses).present?
+      if (%w(organizationalperson person userproxy) & objectclasses).present?
         users << @member_service.get_login_from_entry(entry)
       elsif (%w(organizationalunit group) & objectclasses).present?
         users << users_for_gid(entry.cn.first)
