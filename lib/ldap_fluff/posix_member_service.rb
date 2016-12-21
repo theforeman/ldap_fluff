@@ -8,8 +8,8 @@ class LdapFluff::Posix::MemberService < LdapFluff::GenericMemberService
     super
   end
 
-  def find_user(uid)
-    user = @ldap.search(:filter => name_filter(uid), :base => @base)
+  def find_user(uid, base_dn = @base)
+    user = @ldap.search(:filter => name_filter(uid), :base => base_dn)
     raise UIDNotFoundException if (user.nil? || user.empty?)
     user
   end
@@ -18,7 +18,8 @@ class LdapFluff::Posix::MemberService < LdapFluff::GenericMemberService
   # note : this method is not particularly fast for large ldap systems
   def find_user_groups(uid)
     groups = []
-    @ldap.search(:filter => Net::LDAP::Filter.eq('memberuid', uid)).each do |entry|
+    @ldap.search(:filter => Net::LDAP::Filter.eq('memberuid', uid),
+                 :base => @group_base).each do |entry|
       groups << entry[:cn][0]
     end
     groups

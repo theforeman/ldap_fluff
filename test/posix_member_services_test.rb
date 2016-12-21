@@ -19,7 +19,8 @@ class TestPosixMemberService < MiniTest::Test
 
   def test_find_user_groups
     user = posix_user_payload
-    @ldap.expect(:search, user, [:filter => @ms.name_filter('john')])
+    @ldap.expect(:search, user, [:filter => @ms.name_filter('john'),
+                                 :base => config.group_base])
     @ms.ldap = @ldap
     assert_equal ['bros'], @ms.find_user_groups('john')
     @ldap.verify
