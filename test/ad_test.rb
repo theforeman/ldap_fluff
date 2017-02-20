@@ -110,6 +110,19 @@ class TestAD < MiniTest::Test
     assert_equal(@ad.is_in_groups("john", %w(broskies), true), true)
   end
 
+  def test_subgroups_in_groups_are_ignored
+    group        = Net::LDAP::Entry.new('foremaners')
+    md = MiniTest::Mock.new
+    2.times { md.expect(:find_group, [group], ['foremaners']) }
+    2.times { service_bind }
+    def md.find_by_dn(dn)
+      raise LdapFluff::ActiveDirectory::MemberService::UIDNotFoundException
+    end
+    @ad.member_service = md
+    assert_equal @ad.users_for_gid('foremaners'), []
+    md.verify
+  end
+
   def test_user_exists
     md = MiniTest::Mock.new
     md.expect(:find_user, 'notnilluser', %w(john))
