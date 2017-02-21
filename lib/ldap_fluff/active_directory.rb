@@ -30,7 +30,11 @@ class LdapFluff::ActiveDirectory < LdapFluff::Generic
     users = []
 
     search.send(method).each do |member|
-      entry = @member_service.find_by_dn(member).first
+      begin
+        entry = @member_service.find_by_dn(member).first
+      rescue MemberService::UIDNotFoundException
+        next
+      end
       objectclasses = entry.objectclass.map(&:downcase)
 
       if (%w(organizationalperson person userproxy) & objectclasses).present?
