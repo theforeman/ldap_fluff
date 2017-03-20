@@ -29,18 +29,12 @@ class TestPosix < MiniTest::Test
   def test_isnt_in_groups
     service_bind
     basic_user
-    md = MiniTest::Mock.new
-    md.expect(:times_in_groups, 0, ['john', %w(bros), true])
-    @posix.member_service = md
-    assert_equal(@posix.is_in_groups('john', %w(bros), true), false)
+    assert_equal(@posix.is_in_groups('john', %w(broskies), true), false)
   end
 
   def test_is_in_groups
     service_bind
     basic_user
-    md = MiniTest::Mock.new
-    md.expect(:times_in_groups, 1, ['john', %w(bros), true])
-    @posix.member_service = md
     assert_equal(@posix.is_in_groups('john', %w(bros), true), true)
   end
 
@@ -127,7 +121,7 @@ class TestPosix < MiniTest::Test
     @ldap.expect(:search,
                  [nested_group],
                  [{ :base   => group.dn,
-                    :filter => Net::LDAP::Filter.eq('objectClass','posixGroup') |
+                    :filter => Net::LDAP::Filter.eq('objectClass', 'posixGroup') |
                                Net::LDAP::Filter.eq('objectClass', 'organizationalunit') |
                                Net::LDAP::Filter.eq('objectClass', 'groupOfUniqueNames') |
                                Net::LDAP::Filter.eq('objectClass', 'groupOfNames')}])

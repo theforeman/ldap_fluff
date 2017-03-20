@@ -51,6 +51,7 @@ Your global configuration must provide information about your LDAP host to funct
   encryption: # blank, :simple_tls, or :start_tls
   base_dn: # base DN for LDAP auth, eg dc=redhat,dc=com
   group_base: # base DN for your LDAP groups, eg ou=Groups,dc=redhat,dc=com
+  use_netgroups: # false by default, use true if you want to use netgroup triples
   server_type: # type of server. default == posix. :active_directory, :posix, :free_ipa
   ad_domain: # domain for your users if using active directory, eg redhat.com
   service_user: # service account for authenticating LDAP calls. required unless you enable anon

@@ -13,7 +13,8 @@ class LdapFluff::Generic
     @attr_login = config.attr_login
     @base       = config.base_dn
     @group_base = (config.group_base.empty? ? config.base_dn : config.group_base)
-    @member_service = self.class::MemberService.new(@ldap, config)
+    @use_netgroups = config.use_netgroups
+    @member_service = create_member_service(config)
   end
 
   def user_exists?(uid)
@@ -42,11 +43,26 @@ class LdapFluff::Generic
   def users_for_gid(gid)
     return [] unless group_exists?(gid)
     search = @member_service.find_group(gid).last
-
-    method = [:member, :memberuid, :uniquemember].find { |m| search.respond_to? m } or
-             return []
-
+    method = select_member_method(search)
+    return [] if method.nil?
     users_from_search_results(search, method)
+  end
+
+  # returns whether a user is a member of ALL or ANY particular groups
+  # note: this method is much faster than groups_for_uid
+  #
+  # gids should be an array of group common names
+  #
+  # returns true if owner is in ALL of the groups if all=true, otherwise
+  # returns true if owner is in ANY of the groups
+  def is_in_groups(uid, gids = [], all = true)
+    service_bind
+    groups = @member_service.find_user_groups(uid)
+    if all
+      return groups & gids == gids
+    else
+      return groups & gids != []
+    end
   end
 
   def includes_cn?(cn)
@@ -62,6 +78,22 @@ class LdapFluff::Generic
   end
 
   private
+  def select_member_method(search_result)
+    if @use_netgroups
+      :nisnetgrouptriple
+    else
+      [:member, :memberuid, :uniquemember].find { |m| search_result.respond_to? m }
+    end
+  end
+
+  def create_member_service(config)
+    if config.use_netgroups
+      self.class::NetgroupMemberService.new(@ldap, config)
+    else
+      self.class::MemberService.new(@ldap, config)
+    end
+  end
+
   def class_name
     self.class.name.split('::').last
   end
@@ -71,6 +103,8 @@ class LdapFluff::Generic
     if method == :memberuid
       # memberuid contains an array ['user1','user2'], no need to parse it
       members
+    elsif method == :nisnetgrouptriple
+      @member_service.get_netgroup_users(members)
     else
       @member_service.get_logins(members)
     end

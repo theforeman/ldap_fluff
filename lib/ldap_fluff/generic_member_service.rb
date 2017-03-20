@@ -8,6 +8,7 @@ class LdapFluff::GenericMemberService
     @ldap       = ldap
     @base       = config.base_dn
     @group_base = (config.group_base.empty? ? config.base_dn : config.group_base)
+    @search_filter = nil
     begin
       @search_filter = Net::LDAP::Filter.construct(config.search_filter) unless (config.search_filter.nil? || config.search_filter.empty?)
     rescue Net::LDAP::LdapError => error
@@ -55,6 +56,11 @@ class LdapFluff::GenericMemberService
   # CN=bros,OU=bropeeps,DC=jomara,DC=redhat,DC=com
   def get_groups(grouplist)
     grouplist.map(&:downcase).collect { |g| g.sub(/.*?cn=(.*?),.*/, '\1') }
+  end
+
+  def get_netgroup_users(netgroup_triples)
+    return [] if netgroup_triples.nil?
+    netgroup_triples.map{|m| m.split(',')[1] }
   end
 
   def get_logins(userlist)
