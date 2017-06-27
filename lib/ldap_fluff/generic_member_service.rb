@@ -60,7 +60,7 @@ class LdapFluff::GenericMemberService
 
   def get_netgroup_users(netgroup_triples)
     return [] if netgroup_triples.nil?
-    netgroup_triples.map{|m| m.split(',')[1] }
+    netgroup_triples.map { |m| m.split(',')[1] }
   end
 
   def get_logins(userlist)

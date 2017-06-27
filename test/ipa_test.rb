@@ -83,6 +83,12 @@ class TestIPA < MiniTest::Test
     assert_equal(@ipa.is_in_groups("john", %w(bros buds), false), true)
   end
 
+  def test_is_in_all_groupss
+    service_bind
+    bigtime_user
+    assert_equal(true, @ipa.is_in_groups("john", %w(broskies bros), true))
+  end
+
   def test_isnt_in_all_groups
     service_bind
     basic_user

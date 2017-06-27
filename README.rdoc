@@ -51,8 +51,9 @@ Your global configuration must provide information about your LDAP host to funct
   encryption: # blank, :simple_tls, or :start_tls
   base_dn: # base DN for LDAP auth, eg dc=redhat,dc=com
   group_base: # base DN for your LDAP groups, eg ou=Groups,dc=redhat,dc=com
-  use_netgroups: # false by default, use true if you want to use netgroup triples
-  server_type: # type of server. default == posix. :active_directory, :posix, :free_ipa
+  use_netgroups: # false by default, use true if you want to use netgroup triples,
+                 # supported only for server type :free_ipa and :posix
+  server_type: # type of server. default == :posix. :active_directory, :posix, :free_ipa
   ad_domain: # domain for your users if using active directory, eg redhat.com
   service_user: # service account for authenticating LDAP calls. required unless you enable anon
   service_pass: # service password for authenticating LDAP calls. required unless you enable anon
@@ -62,7 +63,7 @@ Your global configuration must provide information about your LDAP host to funct
 You can pass these arguments as a hash to LdapFluff to get a valid LdapFluff object.
 
   ldap_config = { :host => "freeipa.localdomain", :port => 389, :encryption => nil, :base_dn => "DC=mydomain,DC=com",
-                  :group_base => "DC=groups,DC=mydomain,DC=com", :attr_login => "uid", :server_type => :freeipa,
+                  :group_base => "DC=groups,DC=mydomain,DC=com", :attr_login => "uid", :server_type => :free_ipa,
                   :service_user => "admin", :search_filter => "(objectClass=*)", :service_pass => "mypass",
                   :anon_queries => false }
 

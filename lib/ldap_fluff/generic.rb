@@ -57,11 +57,12 @@ class LdapFluff::Generic
   # returns true if owner is in ANY of the groups
   def is_in_groups(uid, gids = [], all = true)
     service_bind
-    groups = @member_service.find_user_groups(uid)
+    groups = @member_service.find_user_groups(uid).sort
+    gids = gids.sort
     if all
       return groups & gids == gids
     else
-      return groups & gids != []
+      return (groups & gids).any?
     end
   end
 
@@ -87,7 +88,7 @@ class LdapFluff::Generic
   end
 
   def create_member_service(config)
-    if config.use_netgroups
+    if @use_netgroups
       self.class::NetgroupMemberService.new(@ldap, config)
     else
       self.class::MemberService.new(@ldap, config)
