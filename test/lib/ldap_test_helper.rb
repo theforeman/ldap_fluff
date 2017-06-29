@@ -29,6 +29,10 @@ module LdapTestHelper
     @config ||= LdapFluff::Config.new config_hash
   end
 
+  def netgroups_config
+    @config ||= LdapFluff::Config.new config_hash.merge(:use_netgroups => true)
+  end
+
   def service_bind
     @ldap.expect(:bind, true)
     get_test_instance_variable.ldap = @ldap
@@ -99,11 +103,15 @@ module LdapTestHelper
   end
 
   def posix_user_payload
-    [{ :cn => ["bros"] }]
+    [{ :cn => ["john"] }]
   end
 
   def posix_group_payload
     [{ :cn => ["broze"] }]
+  end
+
+  def posix_netgroup_payload(cn, netgroups=[])
+    [{ :cn => [cn], :nisnetgrouptriple => netgroups }]
   end
 
   def ipa_user_payload
@@ -118,6 +126,10 @@ module LdapTestHelper
 
   def ipa_group_payload
     [{ :cn => 'group' }, { :memberof => ['cn=group,dc=internet,dc=com', 'cn=bros,dc=internet,dc=com'] }]
+  end
+
+  def ipa_netgroup_payload(cn, netgroups=[])
+    [{ :cn => [cn], :nisnetgrouptriple => netgroups }]
   end
 
   private

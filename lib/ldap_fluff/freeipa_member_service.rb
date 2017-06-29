@@ -1,6 +1,5 @@
 require 'net/ldap'
 
-# handles the naughty bits of posix ldap
 class LdapFluff::FreeIPA::MemberService < LdapFluff::GenericMemberService
 
   def initialize(ldap, config)
@@ -17,6 +16,19 @@ class LdapFluff::FreeIPA::MemberService < LdapFluff::GenericMemberService
     user.delete_if { |u| u.nil? || !u.respond_to?(:attribute_names) || !u.attribute_names.include?(:memberof) }
     raise InsufficientQueryPrivilegesException if user.size < 1
     get_groups(user[0][:memberof])
+  end
+
+  # extract the group names from the LDAP style response,
+  # return string will be something like
+  # CN=bros,OU=bropeeps,DC=jomara,DC=redhat,DC=com
+  def get_groups(grouplist)
+    grouplist.map(&:downcase).collect do |g|
+      if g.match(/.*?ipauniqueid=(.*?)/)
+        @ldap.search(:base => g)[0][:cn][0]
+      else
+        g.sub(/.*?cn=(.*?),.*/, '\1')
+      end
+    end.compact
   end
 
   class UIDNotFoundException < LdapFluff::Error

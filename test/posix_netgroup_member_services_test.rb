@@ -1,11 +1,12 @@
 require 'lib/ldap_test_helper'
 
-class TestPosixMemberService < MiniTest::Test
+class TestPosixNetgroupMemberService < MiniTest::Test
   include LdapTestHelper
 
   def setup
+    netgroups_config
     super
-    @ms = LdapFluff::Posix::MemberService.new(@ldap, @config)
+    @ms = LdapFluff::Posix::NetgroupMemberService.new(@ldap, netgroups_config)
   end
 
   def test_find_user
@@ -18,17 +19,20 @@ class TestPosixMemberService < MiniTest::Test
   end
 
   def test_find_user_groups
-    user = posix_group_payload
-    @ldap.expect(:search, user, [:filter => @ms.name_filter('john'),
-                                 :base => config.group_base])
+    response = posix_netgroup_payload('bros', ['(,john,)', '(,joe,)'])
+    @ldap.expect(:search, response, [:filter => Net::LDAP::Filter.eq('objectClass', 'nisNetgroup'),
+                                     :base => config.group_base])
+
     @ms.ldap = @ldap
-    assert_equal ['broze'], @ms.find_user_groups('john')
+    assert_equal ['bros'], @ms.find_user_groups('john')
     @ldap.verify
   end
 
-  def test_find_no_groups
-    @ldap.expect(:search, [], [:filter => @ms.name_filter("john"),
-                               :base => config.group_base])
+  def test_find_no_user_groups
+    response = posix_netgroup_payload('bros', ['(,joe,)'])
+    @ldap.expect(:search, response, [:filter => Net::LDAP::Filter.eq('objectClass', 'nisNetgroup'),
+                                     :base => config.group_base])
+
     @ms.ldap = @ldap
     assert_equal [], @ms.find_user_groups('john')
     @ldap.verify
@@ -52,7 +56,7 @@ class TestPosixMemberService < MiniTest::Test
   end
 
   def test_group_exists
-    group = posix_group_payload
+    group = posix_netgroup_payload('broze')
     @ldap.expect(:search, group, [:filter => @ms.group_filter('broze'),
                                   :base   => config.group_base])
     @ms.ldap = @ldap

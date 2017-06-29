@@ -20,35 +20,24 @@ class LdapFluff::FreeIPA < LdapFluff::Generic
     end
   end
 
-  # In freeipa, a simple user query returns a full set
-  # of nested groups! yipee
-  #
-  # gids should be an array of group common names
-  #
-  # returns true if owner is in ALL of the groups if all=true, otherwise
-  # returns true if owner is in ANY of the groups
-  def is_in_groups(uid, gids = [], all = true)
-    service_bind
-    groups = @member_service.find_user_groups(uid)
-    if all
-      return groups & gids == gids
-    else
-      return groups & gids != []
-    end
-  end
-
   private
 
   def users_from_search_results(search, method)
     # Member results come in the form uid=sampleuser,cn=users, etc.. or gid=samplegroup,cn=groups
     users = []
 
-    search.send(method).each do |member|
-      type = member.downcase.split(',')[1]
-      if type == 'cn=users'
-        users << @member_service.get_logins([member])
-      elsif type == 'cn=groups'
-        users << users_for_gid(member.split(',')[0].split('=')[1])
+    members = search.send(method)
+
+    if method == :nisnetgrouptriple
+      users = @member_service.get_netgroup_users(members)
+    else
+      members.each do |member|
+        type = member.downcase.split(',')[1]
+        if type == 'cn=users'
+          users << @member_service.get_logins([member])
+        elsif type == 'cn=groups'
+          users << users_for_gid(member.split(',')[0].split('=')[1])
+        end
       end
     end
 

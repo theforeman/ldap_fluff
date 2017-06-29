@@ -4,7 +4,7 @@ require 'active_support/core_ext/hash'
 class LdapFluff::Config
   ATTRIBUTES = %w[host port encryption base_dn group_base server_type service_user
                     service_pass anon_queries attr_login search_filter
-                    instrumentation_service ]
+                    instrumentation_service use_netgroups]
   ATTRIBUTES.each { |attr| attr_reader attr.to_sym }
 
   DEFAULT_CONFIG = { 'port' => 389,
@@ -13,7 +13,8 @@ class LdapFluff::Config
                      'group_base' => 'dc=company,dc=com',
                      'server_type' => :free_ipa,
                      'anon_queries' => false,
-                     'instrumentation_service' => nil }
+                     'instrumentation_service' => nil,
+                     'use_netgroups' => false }
 
   def initialize(config)
     raise ArgumentError unless config.respond_to?(:to_hash)
