@@ -15,7 +15,7 @@ class TestADMemberService < MiniTest::Test
   end
 
   def basic_group
-    @ldap.expect(:search, ad_group_payload, [:filter => ad_group_filter("broze"), :base => @config.group_base])
+    @ldap.expect(:search, ad_group_payload, [:filter => ad_group_filter("broze"), :base => @config.group_base, :attributes=>["*", "primaryGroupToken"]])
   end
 
   def nest_deep(n)
@@ -116,7 +116,7 @@ class TestADMemberService < MiniTest::Test
   end
 
   def test_find_missing_group
-    @ldap.expect(:search, nil, [:filter => ad_group_filter("broze"), :base => @config.group_base])
+    @ldap.expect(:search, nil, [:filter => ad_group_filter("broze"), :base => @config.group_base, :attributes=>["*", "primaryGroupToken"]])
     @adms.ldap = @ldap
     assert_raises(LdapFluff::ActiveDirectory::MemberService::GIDNotFoundException) do
       @adms.find_group('broze')
@@ -159,6 +159,27 @@ class TestADMemberService < MiniTest::Test
   def test_get_login_from_entry_missing_attr
     entry = Net::LDAP::Entry.new('Example User')
     assert_nil(@adms.get_login_from_entry(entry))
+  end
+
+  def test_find_primary_group
+    prim_group  = Net::LDAP::Entry.new('p_group')
+    test_user   = Net::LDAP::Entry.new('t_user')
+
+    prim_group[:cn]                 = ['p_group']
+    prim_group[:dn]                 = ['CN=p_group,DC=corp,DC=example,DC=com']
+    prim_group[:primarygrouptoken]  = ['12345']
+    prim_group[:member]             = []
+    test_user[:objectsid]           = ["\x01\x04\x00\x00\x00\x00\x00\x05\x15\x00\x00\x00\a\x87\x00\x00\xA0[\x00\x00\xE1\x10\x00\x00"]
+    test_user[:primarygroupid]      = ['12345']
+    test_user[:samaccountname]      = ['tuser']
+    test_user[:memberof]            = []
+
+    @ldap.expect(:search, [test_user], [:filter => Net::LDAP::Filter.eq('samaccountname','tuser')])
+    @ldap.expect(:search, [prim_group], [:filter => Net::LDAP::Filter.eq('objectsid', 'S-1-5-21-34567-23456-12345'), :base => @config.group_base, :attributes => ['memberof']])
+    @ldap.expect(:search, [], [:base => 'CN=p_group,DC=corp,DC=example,DC=com', :scope => Net::LDAP::SearchScope_BaseObject, :attributes => ['memberof']])
+
+    @adms.ldap = @ldap
+    assert_equal(@adms.find_user_groups('tuser'), ['p_group'])
   end
 
 end
