@@ -77,9 +77,9 @@ class LdapFluff
 
   # @param [String] uid
   # @return [Boolean] true if a user is in all of the groups in grouplist
-  def is_in_groups?(uid, grouplist)
-    instrument('is_in_groups?.ldap_fluff', uid: uid, grouplist: grouplist) do |payload|
-      @ldap.is_in_groups(uid, grouplist, true)
+  def user_in_groups?(uid, grouplist)
+    instrument('user_in_groups?.ldap_fluff', uid: uid, grouplist: grouplist) do |payload|
+      @ldap.user_in_groups?(uid, grouplist, true)
     end
   end
 

@@ -25,7 +25,7 @@ It exposes these methods:
   user_list(gid)
     returns the set of users that belong to an LDAP group
 
-  is_in_groups?(uid, grouplist)
+  user_in_groups?(uid, grouplist)
     returns true if the user provided is in all of the groups listed in grouplist
 
   valid_user?(uid)

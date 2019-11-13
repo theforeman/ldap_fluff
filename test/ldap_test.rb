@@ -25,9 +25,9 @@ class TestLDAP < MiniTest::Test
   end
 
   def test_group_membership
-    @ldap.expect(:is_in_groups, false, ['john', %w[broskies girlfriends], true])
+    @ldap.expect(:user_in_groups?, false, ['john', %w[broskies girlfriends], true])
     @fluff.ldap = @ldap
-    assert_equal(@fluff.is_in_groups?('john', %w[broskies girlfriends]), false)
+    assert_equal(@fluff.user_in_groups?('john', %w[broskies girlfriends]), false)
     @ldap.verify
   end
 

@@ -67,14 +67,14 @@ class LdapFluff::Generic
   #
   # returns true if owner is in ALL of the groups if all=true, otherwise
   # returns true if owner is in ANY of the groups
-  def is_in_groups(uid, gids = [], all = true)
+  def user_in_groups?(uid, gids = [], all = true)
     service_bind
     groups = @member_service.find_user_groups(uid).sort
     gids = gids.sort
     if all
-      return groups & gids == gids
+      groups & gids == gids
     else
-      return (groups & gids).any?
+      (groups & gids).any?
     end
   end
 

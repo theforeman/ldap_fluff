@@ -13,7 +13,7 @@ class LdapFluff::ActiveDirectory < LdapFluff::Generic
 
   # active directory stores group membership on a users model
   # TODO: query by group individually not like this
-  def is_in_groups(uid, gids = [], all = false)
+  def user_in_groups?(uid, gids = [], all = false)
     service_bind
     return true if !gids || gids.empty?
 

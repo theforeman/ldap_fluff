@@ -75,37 +75,37 @@ class TestIPA < MiniTest::Test
   def test_is_in_groups
     service_bind
     basic_user
-    assert_equal(@ipa.is_in_groups('john', %w[bros], false), true)
+    assert_equal(@ipa.user_in_groups?('john', %w[bros], false), true)
   end
 
   def test_is_some_groups
     service_bind
     basic_user
-    assert_equal(@ipa.is_in_groups('john', %w[bros buds], false), true)
+    assert_equal(@ipa.user_in_groups?('john', %w[bros buds], false), true)
   end
 
   def test_is_in_all_groupss
     service_bind
     bigtime_user
-    assert_equal(true, @ipa.is_in_groups('john', %w[broskies bros], true))
+    assert_equal(true, @ipa.user_in_groups?('john', %w[broskies bros], true))
   end
 
   def test_isnt_in_all_groups
     service_bind
     basic_user
-    assert_equal(@ipa.is_in_groups('john', %w[bros buds], true), false)
+    assert_equal(@ipa.user_in_groups?('john', %w[bros buds], true), false)
   end
 
   def test_isnt_in_groups
     service_bind
     basic_user
-    assert_equal(@ipa.is_in_groups('john', %w[broskies], false), false)
+    assert_equal(@ipa.user_in_groups?('john', %w[broskies], false), false)
   end
 
   def test_group_subset
     service_bind
     bigtime_user
-    assert_equal(@ipa.is_in_groups('john', %w[broskies], true), true)
+    assert_equal(@ipa.user_in_groups?('john', %w[broskies], true), true)
   end
 
   def test_user_exists

@@ -31,19 +31,19 @@ class TestPosix < MiniTest::Test
   def test_isnt_in_groups
     service_bind
     basic_user
-    assert_equal(@posix.is_in_groups('john', %w[broskies], true), false)
+    assert_equal(@posix.user_in_groups?('john', %w[broskies], true), false)
   end
 
   def test_is_in_groups
     service_bind
     basic_user
-    assert_equal(@posix.is_in_groups('john', %w[bros], true), true)
+    assert_equal(@posix.user_in_groups?('john', %w[bros], true), true)
   end
 
   def test_is_in_no_groups
     service_bind
     basic_user
-    assert_equal(@posix.is_in_groups('john', [], true), true)
+    assert_equal(@posix.user_in_groups?('john', [], true), true)
   end
 
   def test_good_bind
