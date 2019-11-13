@@ -1,5 +1,6 @@
-class LdapFluff::FreeIPA < LdapFluff::Generic
+# frozen_string_literal: true
 
+class LdapFluff::FreeIPA < LdapFluff::Generic
   def bind?(uid = nil, password = nil, opts = {})
     unless uid.include?(',')
       unless opts[:search] == false
@@ -16,7 +17,7 @@ class LdapFluff::FreeIPA < LdapFluff::Generic
     begin
       super
     rescue MemberService::InsufficientQueryPrivilegesException
-      raise UnauthenticatedException, "Insufficient Privileges to query groups data"
+      raise UnauthenticatedException, 'Insufficient Privileges to query groups data'
     end
   end
 

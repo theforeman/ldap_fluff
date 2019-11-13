@@ -2,6 +2,7 @@
 
 $LOAD_PATH.unshift File.expand_path('../../lib', __FILE__)
 require 'ldap_fluff'
+
 require 'minitest/autorun'
 
 module LdapTestHelper
@@ -82,7 +83,7 @@ module LdapTestHelper
     "CN=#{name},CN=Users,#{@config.base_dn}"
   end
 
-  def ad_group_dn(name='group')
+  def ad_group_dn(name = 'group')
     "cn=#{name},#{@config.group_base}"
   end
 
@@ -110,17 +111,19 @@ module LdapTestHelper
     [{ cn: ['broze'] }]
   end
 
-  def posix_netgroup_payload(cn, netgroups=[])
+  def posix_netgroup_payload(cn, netgroups = [])
     [{ cn: [cn], nisnetgrouptriple: netgroups }]
   end
 
   def ipa_user_payload
     @ipa_user_payload_cache ||= begin
-      entry_1 = Net::LDAP::Entry.new
-      entry_1['cn'] = 'John'
-      entry_2 = Net::LDAP::Entry.new
-      entry_2['memberof'] = ['cn=group,dc=internet,dc=com', 'cn=bros,dc=internet,dc=com']
-      [ entry_1, entry_2 ]
+      entry1 = Net::LDAP::Entry.new
+      entry1['cn'] = 'John'
+
+      entry2 = Net::LDAP::Entry.new
+      entry2['memberof'] = ['cn=group,dc=internet,dc=com', 'cn=bros,dc=internet,dc=com']
+
+      [entry1, entry2]
     end
   end
 
@@ -128,13 +131,13 @@ module LdapTestHelper
     [{ cn: 'group' }, { memberof: ['cn=group,dc=internet,dc=com', 'cn=bros,dc=internet,dc=com'] }]
   end
 
-  def ipa_netgroup_payload(cn, netgroups=[])
+  def ipa_netgroup_payload(cn, netgroups = [])
     [{ cn: [cn], nisnetgrouptriple: netgroups }]
   end
 
   private
 
   def get_test_instance_variable
-    instance_variable_get("@#{self.class.to_s.underscore.split('_')[1..-1].join}")
+    instance_variable_get("@#{self.class.name.sub(/^Test|Test$/, '').downcase}")
   end
 end

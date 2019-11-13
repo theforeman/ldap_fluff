@@ -1,5 +1,6 @@
-class LdapFluff::ActiveDirectory < LdapFluff::Generic
+# frozen_string_literal: true
 
+class LdapFluff::ActiveDirectory < LdapFluff::Generic
   def bind?(uid = nil, password = nil, opts = {})
     unless uid.include?(',') || uid.include?('\\') || opts[:search] == false
       service_bind
@@ -14,13 +15,14 @@ class LdapFluff::ActiveDirectory < LdapFluff::Generic
   # TODO: query by group individually not like this
   def is_in_groups(uid, gids = [], all = false)
     service_bind
-    return true if gids == []
+    return true if !gids || gids.empty?
+
     begin
       groups       = @member_service.find_user_groups(uid)
       intersection = gids & groups
-      return (all ? intersection == gids : intersection.size > 0)
+      all ? (intersection == gids) : !intersection.empty?
     rescue MemberService::UIDNotFoundException
-      return false
+      false
     end
   end
 
@@ -37,14 +39,13 @@ class LdapFluff::ActiveDirectory < LdapFluff::Generic
       end
       objectclasses = entry.objectclass.map(&:downcase)
 
-      if (%w(organizationalperson person userproxy) & objectclasses).present?
+      if !(%w[organizationalperson person userproxy] & objectclasses).empty?
         users << @member_service.get_login_from_entry(entry)
-      elsif (%w(organizationalunit group) & objectclasses).present?
+      elsif !(%w[organizationalunit group] & objectclasses).empty?
         users << users_for_gid(entry.cn.first)
       end
     end
 
     users.flatten.uniq
   end
-
 end

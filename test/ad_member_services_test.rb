@@ -7,7 +7,7 @@ class TestADMemberService < MiniTest::Test
 
   def setup
     super
-    @adms    = LdapFluff::ActiveDirectory::MemberService.new(@ldap, @config)
+    @adms = LdapFluff::ActiveDirectory::MemberService.new(@ldap, @config)
     @gfilter = group_filter('group') & group_class_filter
   end
 
@@ -22,7 +22,7 @@ class TestADMemberService < MiniTest::Test
 
   def nest_deep(n)
     # add all the expects
-    1.upto(n-1) do |i|
+    1.upto(n - 1) do |i|
       @ldap.expect(:search, ad_parent_payload(i + 1), [base: ad_group_dn("bros#{i}"), scope: 0, attributes: ['memberof']])
     end
     # terminate or we loop FOREVER

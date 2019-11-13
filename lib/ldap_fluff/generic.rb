@@ -1,12 +1,22 @@
+# frozen_string_literal: true
+
 class LdapFluff::Generic
+  # @!attribute [rw] ldap
+  #   @return [Net::LDAP]
+  # @!attribute [rw] member_service
+  #   @return [GenericMemberService]
   attr_accessor :ldap, :member_service
 
-  def initialize(config = {})
-    @ldap = Net::LDAP.new(:host => config.host,
-                          :base => config.base_dn,
-                          :port => config.port,
-                          :encryption => config.encryption,
-                          :instrumentation_service => config.instrumentation_service)
+  # @param [Config] config
+  def initialize(config)
+    @ldap = Net::LDAP.new(
+      host: config.host,
+      base: config.base_dn,
+      port: config.port,
+      encryption: config.encryption,
+      instrumentation_service: config.instrumentation_service
+    )
+
     @bind_user  = config.service_user
     @bind_pass  = config.service_pass
     @anon       = config.anon_queries
@@ -17,6 +27,8 @@ class LdapFluff::Generic
     @member_service = create_member_service(config)
   end
 
+  # @param [String] uid
+  # @return [Boolean]
   def user_exists?(uid)
     service_bind
     @member_service.find_user(uid)
@@ -68,17 +80,20 @@ class LdapFluff::Generic
 
   def includes_cn?(cn)
     filter = Net::LDAP::Filter.eq('cn', cn)
-    @ldap.search(:base => @ldap.base, :filter => filter).present?
+    results = @ldap.search(base: @ldap.base, filter: filter)
+    # NOTE: present?
+    !(results.respond_to?(:empty?) ? results.empty? : !results)
   end
 
   def service_bind
-    unless @anon || bind?(@bind_user, @bind_pass, :search => false)
+    unless @anon || bind?(@bind_user, @bind_pass, search: false)
       raise UnauthenticatedException,
             "Could not bind to #{class_name} user #{@bind_user}"
     end
   end
 
   private
+
   def select_member_method(search_result)
     if @use_netgroups
       :nisnetgrouptriple
@@ -114,4 +129,3 @@ class LdapFluff::Generic
   class UnauthenticatedException < LdapFluff::Error
   end
 end
-

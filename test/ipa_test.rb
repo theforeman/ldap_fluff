@@ -56,9 +56,8 @@ class TestIPA < MiniTest::Test
   def test_bad_user
     service_bind
     @md = MiniTest::Mock.new
-    @md.expect(:find_user_groups, nil, %w[john])
-    def @md.find_user_groups(*args)
-      raise LdapFluff::FreeIPA::MemberService::UIDNotFoundException
+    @md.expect(:find_user_groups, nil) do |uid|
+      raise LdapFluff::FreeIPA::MemberService::UIDNotFoundException if uid == 'john'
     end
     @ipa.member_service = @md
     assert_equal(@ipa.groups_for_uid('john'), [])
@@ -119,9 +118,8 @@ class TestIPA < MiniTest::Test
 
   def test_missing_user
     @md = MiniTest::Mock.new
-    @md.expect(:find_user, nil, %w[john])
-    def @md.find_user(uid)
-      raise LdapFluff::FreeIPA::MemberService::UIDNotFoundException
+    @md.expect(:find_user, nil) do |uid|
+      raise LdapFluff::FreeIPA::MemberService::UIDNotFoundException if uid == 'john'
     end
     @ipa.member_service = @md
     service_bind
@@ -138,9 +136,8 @@ class TestIPA < MiniTest::Test
 
   def test_missing_group
     @md = MiniTest::Mock.new
-    @md.expect(:find_group, nil, %w[broskies])
-    def @md.find_group(uid)
-      raise LdapFluff::FreeIPA::MemberService::GIDNotFoundException
+    @md.expect(:find_group, nil) do |gid|
+      raise LdapFluff::FreeIPA::MemberService::GIDNotFoundException if gid == 'broskies'
     end
     @ipa.member_service = @md
     service_bind

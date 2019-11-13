@@ -21,7 +21,6 @@ Gem::Specification.new do |s|
   s.required_ruby_version = '>= 1.9.3'
 
   s.add_dependency 'net-ldap', '~> 0.12'
-  s.add_dependency 'activesupport'
 
   s.add_development_dependency 'bundler', '>= 1.14'
   s.add_development_dependency 'rake', '>= 10.0'

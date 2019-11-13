@@ -86,9 +86,8 @@ class TestPosix < MiniTest::Test
   def test_missing_user
     service_bind
     md = MiniTest::Mock.new
-    md.expect(:find_user, nil, %w[john])
-    def md.find_user(uid)
-      raise LdapFluff::Posix::MemberService::UIDNotFoundException
+    md.expect(:find_user, nil) do |uid|
+      raise LdapFluff::Posix::MemberService::UIDNotFoundException if uid == 'john'
     end
     @posix.member_service = md
     refute(@posix.user_exists?('john'))
@@ -105,9 +104,8 @@ class TestPosix < MiniTest::Test
   def test_missing_group
     service_bind
     md = MiniTest::Mock.new
-    md.expect(:find_group, nil, %w[broskies])
-    def md.find_group(uid)
-      raise LdapFluff::Posix::MemberService::GIDNotFoundException
+    md.expect(:find_group, nil) do |gid|
+      raise LdapFluff::Posix::MemberService::GIDNotFoundException if gid == 'broskies'
     end
     @posix.member_service = md
     refute(@posix.group_exists?('broskies'))
@@ -120,13 +118,7 @@ class TestPosix < MiniTest::Test
     nested_group = Net::LDAP::Entry.new('CN=katellers,CN=foremaners,DC=example,DC=com')
     nested_group[:memberuid] = ['testuser']
 
-    @ldap.expect(:search,
-                 [nested_group],
-                 [{ base: group.dn,
-                    filter: Net::LDAP::Filter.eq('objectClass', 'posixGroup') |
-                               Net::LDAP::Filter.eq('objectClass', 'organizationalunit') |
-                               Net::LDAP::Filter.eq('objectClass', 'groupOfUniqueNames') |
-                               Net::LDAP::Filter.eq('objectClass', 'groupOfNames')}])
+    @ldap.expect(:search, [nested_group], [base: group.dn, filter: groups_filter])
     @posix.ldap = @ldap
 
     md = MiniTest::Mock.new
@@ -137,5 +129,14 @@ class TestPosix < MiniTest::Test
 
     md.verify
     @ldap.verify
+  end
+
+  private
+
+  def groups_filter
+    Net::LDAP::Filter.eq('objectClass', 'posixGroup') |
+      Net::LDAP::Filter.eq('objectClass', 'organizationalunit') |
+      Net::LDAP::Filter.eq('objectClass', 'groupOfUniqueNames') |
+      Net::LDAP::Filter.eq('objectClass', 'groupOfNames')
   end
 end
