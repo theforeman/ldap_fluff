@@ -1,4 +1,6 @@
-require 'lib/ldap_test_helper'
+# frozen_string_literal: true
+
+require 'ldap_test_helper'
 
 class TestIPAMemberService < MiniTest::Test
   include LdapTestHelper
@@ -9,25 +11,25 @@ class TestIPAMemberService < MiniTest::Test
   end
 
   def basic_user
-    @ldap.expect(:search, ipa_user_payload, [:filter => ipa_name_filter("john")])
+    @ldap.expect(:search, ipa_user_payload, [filter: ipa_name_filter('john')])
   end
 
   def basic_group
-    @ldap.expect(:search, ipa_group_payload, [:filter => ipa_group_filter("broze"), :base => @config.group_base])
+    @ldap.expect(:search, ipa_group_payload, [filter: ipa_group_filter('broze'), base: @config.group_base])
   end
 
   def test_find_user
     basic_user
     @ipams.ldap = @ldap
-    assert_equal(%w(group bros), @ipams.find_user_groups("john"))
+    assert_equal(%w[group bros], @ipams.find_user_groups('john'))
     @ldap.verify
   end
 
   def test_missing_user
-    @ldap.expect(:search, nil, [:filter => ipa_name_filter("john")])
+    @ldap.expect(:search, nil, [filter: ipa_name_filter('john')])
     @ipams.ldap = @ldap
     assert_raises(LdapFluff::FreeIPA::MemberService::UIDNotFoundException) do
-      @ipams.find_user_groups("john").data
+      @ipams.find_user_groups('john').data
     end
     @ldap.verify
   end
@@ -35,7 +37,7 @@ class TestIPAMemberService < MiniTest::Test
   def test_no_groups
     entry = Net::LDAP::Entry.new
     entry['memberof'] = []
-    @ldap.expect(:search, [ Net::LDAP::Entry.new, entry ], [:filter => ipa_name_filter("john")])
+    @ldap.expect(:search, [ Net::LDAP::Entry.new, entry ], [filter: ipa_name_filter('john')])
     @ipams.ldap = @ldap
     assert_equal([], @ipams.find_user_groups('john'))
     @ldap.verify
@@ -48,7 +50,7 @@ class TestIPAMemberService < MiniTest::Test
   end
 
   def test_find_missing_user
-    @ldap.expect(:search, nil, [:filter => ipa_name_filter("john")])
+    @ldap.expect(:search, nil, [filter: ipa_name_filter('john')])
     @ipams.ldap = @ldap
     assert_raises(LdapFluff::FreeIPA::MemberService::UIDNotFoundException) do
       @ipams.find_user('john')
@@ -62,11 +64,10 @@ class TestIPAMemberService < MiniTest::Test
   end
 
   def test_find_missing_group
-    @ldap.expect(:search, nil, [:filter => ipa_group_filter("broze"), :base => @config.group_base])
+    @ldap.expect(:search, nil, [filter: ipa_group_filter('broze'), base: @config.group_base])
     @ipams.ldap = @ldap
     assert_raises(LdapFluff::FreeIPA::MemberService::GIDNotFoundException) do
       @ipams.find_group('broze')
     end
   end
-
 end

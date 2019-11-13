@@ -1,22 +1,22 @@
+# frozen_string_literal: true
+
+$LOAD_PATH.unshift File.expand_path('../../lib', __FILE__)
 require 'ldap_fluff'
-require 'ostruct'
-require 'net/ldap'
 require 'minitest/autorun'
 
 module LdapTestHelper
-  attr_accessor :group_base, :class_filter, :user
-
   def config_hash
-    { :host          => "internet.com",
-      :port          => "387",
-      :encryption    => :start_tls,
-      :base_dn       => "dc=internet,dc=com",
-      :group_base    => "ou=group,dc=internet,dc=com",
-      :service_user  => "service",
-      :service_pass  => "pass",
-      :server_type   => :free_ipa,
-      :attr_login    => nil,
-      :search_filter => nil
+    {
+      host: 'internet.com',
+      port: 387,
+      encryption: :start_tls,
+      base_dn: 'dc=internet,dc=com',
+      group_base: 'ou=group,dc=internet,dc=com',
+      service_user: 'service',
+      service_pass: 'pass',
+      server_type: :free_ipa,
+      attr_login: nil,
+      search_filter: nil
     }
   end
 
@@ -30,7 +30,7 @@ module LdapTestHelper
   end
 
   def netgroups_config
-    @config ||= LdapFluff::Config.new config_hash.merge(:use_netgroups => true)
+    @config ||= LdapFluff::Config.new config_hash.merge(use_netgroups: true)
   end
 
   def service_bind
@@ -40,38 +40,38 @@ module LdapTestHelper
 
   def basic_user
     @md = MiniTest::Mock.new
-    @md.expect(:find_user_groups, %w(bros), %w(john))
+    @md.expect(:find_user_groups, %w[bros], %w[john])
     get_test_instance_variable.member_service = @md
   end
 
   def bigtime_user
     @md = MiniTest::Mock.new
-    @md.expect(:find_user_groups, %w(bros broskies), %w(john))
+    @md.expect(:find_user_groups, %w[bros broskies], %w[john])
     get_test_instance_variable.member_service = @md
   end
 
   def ad_name_filter(name)
-    Net::LDAP::Filter.eq("samaccountname", name)
+    Net::LDAP::Filter.eq('samaccountname', name)
   end
 
   def ad_group_filter(name)
-    Net::LDAP::Filter.eq("cn", name)
+    Net::LDAP::Filter.eq('cn', name)
   end
 
   def ipa_name_filter(name)
-    Net::LDAP::Filter.eq("uid", name)
+    Net::LDAP::Filter.eq('uid', name)
   end
 
   def ipa_group_filter(name)
-    Net::LDAP::Filter.eq("cn", name)
+    Net::LDAP::Filter.eq('cn', name)
   end
 
   def group_filter(g)
-    Net::LDAP::Filter.eq("cn", g)
+    Net::LDAP::Filter.eq('cn', g)
   end
 
   def group_class_filter
-    Net::LDAP::Filter.eq("objectclass", "group")
+    Net::LDAP::Filter.eq('objectclass', 'group')
   end
 
   def ipa_user_bind(uid)
@@ -87,31 +87,31 @@ module LdapTestHelper
   end
 
   def ad_user_payload
-    [{ :memberof => [ad_group_dn] }]
+    [{ memberof: [ad_group_dn] }]
   end
 
   def ad_group_payload
-    [{ :cn => "group", :memberof => [ad_group_dn] }]
+    [{ cn: 'group', memberof: [ad_group_dn] }]
   end
 
   def ad_parent_payload(num)
-    [{ :memberof => [ad_group_dn("bros#{num}")] }]
+    [{ memberof: [ad_group_dn("bros#{num}")] }]
   end
 
   def ad_double_payload(num)
-    [{ :memberof => [ad_group_dn("bros#{num}"), ad_group_dn("broskies#{num}")] }]
+    [{ memberof: [ad_group_dn("bros#{num}"), ad_group_dn("broskies#{num}")] }]
   end
 
   def posix_user_payload
-    [{ :cn => ["john"] }]
+    [{ cn: ['john'] }]
   end
 
   def posix_group_payload
-    [{ :cn => ["broze"] }]
+    [{ cn: ['broze'] }]
   end
 
   def posix_netgroup_payload(cn, netgroups=[])
-    [{ :cn => [cn], :nisnetgrouptriple => netgroups }]
+    [{ cn: [cn], nisnetgrouptriple: netgroups }]
   end
 
   def ipa_user_payload
@@ -125,11 +125,11 @@ module LdapTestHelper
   end
 
   def ipa_group_payload
-    [{ :cn => 'group' }, { :memberof => ['cn=group,dc=internet,dc=com', 'cn=bros,dc=internet,dc=com'] }]
+    [{ cn: 'group' }, { memberof: ['cn=group,dc=internet,dc=com', 'cn=bros,dc=internet,dc=com'] }]
   end
 
   def ipa_netgroup_payload(cn, netgroups=[])
-    [{ :cn => [cn], :nisnetgrouptriple => netgroups }]
+    [{ cn: [cn], nisnetgrouptriple: netgroups }]
   end
 
   private
