@@ -4,7 +4,7 @@ class LdapFluff::FreeIPA::MemberService < LdapFluff::GenericMemberService
   # @param [Net::LDAP] ldap
   # @param [Config] config
   def initialize(ldap, config)
-    @attr_login = (config.attr_login || 'uid')
+    config.instance_variable_set(:@attr_login, 'uid') unless config.attr_login
     super
   end
 
@@ -15,21 +15,22 @@ class LdapFluff::FreeIPA::MemberService < LdapFluff::GenericMemberService
     user = find_user(uid)
 
     # if group data is missing, they aren't querying with a user with enough privileges
-    user.delete_if { |u| u.nil? || !u.respond_to?(:attribute_names) || !u.attribute_names.include?(:memberof) }
-    raise InsufficientQueryPrivilegesException if user.size < 1
+    user.delete_if { |u| !u.respond_to?(:attribute_names) || !u.attribute_names.include?(:memberof) }
+    raise InsufficientQueryPrivilegesException if user.empty?
 
-    get_groups(user[0][:memberof])
+    get_groups(user.first[:memberof])
   end
 
   # extract the group names from the LDAP style response,
   # @param [Array<String>] grouplist
   # @return [Array<String>] will be something like CN=bros,OU=bropeeps,DC=jomara,DC=redhat,DC=com
   def get_groups(grouplist)
-    grouplist.map(&:downcase).collect do |g|
-      if g.match(/.*?ipauniqueid=(.*?)/)
-        @ldap.search(base: g)[0][:cn][0]
+    grouplist.map do |g|
+      if g =~ /.*?ipauniqueid=(.*?)/i
+        search = (ldap.search(base: g.downcase) || []).first
+        search ? search[:cn].first : nil
       else
-        g.sub(/.*?cn=(.*?),.*/, '\1')
+        g.downcase.sub(/.*?cn=(.*?),.*/, '\1')
       end
     end.compact
   end

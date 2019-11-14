@@ -34,10 +34,10 @@ It exposes these methods:
   valid_group?(uid)
     returns true if the group provided exists
 
-  find_user(uid)
+  find_user(uid, only = nil)
     returns the LDAP entry of the user if found, nil if not found
 
-  find_group(gid)
+  find_group(gid, only = nil)
     returns the LDAP entry of the group if found, nil if not found
 
 These methods are handy for using LDAP for both authentication and authorization.
@@ -49,12 +49,12 @@ Your global configuration must provide information about your LDAP host to funct
   host: # ip address or hostname
   port: # port
   encryption: # blank, :simple_tls, or :start_tls
-  base_dn: # base DN for LDAP auth, eg dc=redhat,dc=com
+  base_dn:    # base DN for LDAP auth, eg dc=redhat,dc=com
   group_base: # base DN for your LDAP groups, eg ou=Groups,dc=redhat,dc=com
   use_netgroups: # false by default, use true if you want to use netgroup triples,
                  # supported only for server type :free_ipa and :posix
-  server_type: # type of server. default == :posix. :active_directory, :posix, :free_ipa
-  ad_domain: # domain for your users if using active directory, eg redhat.com
+  server_type:  # type of server. default == :posix. :active_directory, :posix, :free_ipa
+  ad_domain:    # domain for your users if using active directory, eg redhat.com
   service_user: # service account for authenticating LDAP calls. required unless you enable anon
   service_pass: # service password for authenticating LDAP calls. required unless you enable anon
   anon_queries: # false by default, true if you don't want to use the service user

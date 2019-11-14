@@ -77,19 +77,19 @@ class LdapFluff::Config
   end
 
   # @param [Hash] config
-  def missing_keys?(config)
+  def check_missing_keys(config)
     missing_keys = ATTRIBUTES - config.keys
     raise ConfigError, "missing configuration for keys: #{missing_keys.join(',')}" unless missing_keys.empty?
   end
 
   # @param [Hash] config
-  def unknown_keys?(config)
+  def check_unknown_keys(config)
     unknown_keys = config.keys - ATTRIBUTES
     raise ConfigError, "unknown configuration keys: #{unknown_keys.join(',')}" unless unknown_keys.empty?
   end
 
   # @param [Hash] config
-  def all_required_keys?(config)
+  def check_required_keys(config)
     [:host, :port, :base_dn, :group_base, :server_type].each do |key|
       raise ConfigError, "config key #{key} has to be set, it was nil" unless config[key]
     end
@@ -100,14 +100,14 @@ class LdapFluff::Config
   end
 
   # @param [Hash] config
-  def anon_queries_set?(config)
+  def check_anon_queries_set(config)
     return if [false, true].include?(config[:anon_queries])
 
     raise ConfigError, "config key anon_queries has to be true or false but was #{config[:anon_queries]}"
   end
 
   # @param [Hash] config
-  def correct_server_type?(config)
+  def check_server_type(config)
     return if [:posix, :active_directory, :free_ipa].include?(config[:server_type])
 
     raise ConfigError,
@@ -119,12 +119,13 @@ class LdapFluff::Config
   # @raise [ConfigError] if config contains invalid keys
   def validate(config)
     config = DEFAULT_CONFIG.merge(config)
+    config[:group_base] = config[:base_dn] if !config[:group_base] || config[:group_base].empty?
 
-    correct_server_type?(config)
-    missing_keys?(config)
-    unknown_keys?(config)
-    all_required_keys?(config)
-    anon_queries_set?(config)
+    check_server_type(config)
+    check_missing_keys(config)
+    check_unknown_keys(config)
+    check_required_keys(config)
+    check_anon_queries_set(config)
 
     config
   end
