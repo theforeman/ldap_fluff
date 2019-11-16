@@ -51,7 +51,7 @@ class TestIPA < MiniTest::Test
     service_bind
 
     md.expect(:find_user_groups, nil) do |uid|
-      uid != 'john' || raise(LdapFluff::FreeIPA::MemberService::UIDNotFoundException)
+      raise LdapFluff::FreeIPA::MemberService::UIDNotFoundException if uid == 'john'
     end
     @ipa.member_service = md
 
@@ -118,7 +118,7 @@ class TestIPA < MiniTest::Test
 
   def test_missing_user
     md.expect(:find_user, nil) do |uid|
-      uid != 'john' || raise(LdapFluff::FreeIPA::MemberService::UIDNotFoundException)
+      raise LdapFluff::FreeIPA::MemberService::UIDNotFoundException if uid == 'john'
     end
     @ipa.member_service = md
     service_bind
@@ -136,7 +136,7 @@ class TestIPA < MiniTest::Test
 
   def test_missing_group
     md.expect(:find_group, nil) do |gid|
-      gid != 'broskies' || raise(LdapFluff::FreeIPA::MemberService::GIDNotFoundException)
+      raise LdapFluff::FreeIPA::MemberService::GIDNotFoundException if gid == 'broskies'
     end
     @ipa.member_service = md
     service_bind
@@ -148,27 +148,39 @@ class TestIPA < MiniTest::Test
     group = Net::LDAP::Entry.new('gid=foremaners,cn=Groups,cn=accounts,dc=localdomain')
     group[:member] = ['gid=katellers,cn=Groups,cn=accounts,dc=localdomain']
 
-    nested_group = Net::LDAP::Entry.new('gid=katellers,cn=Groups,cn=accounts,dc=localdomain')
+    nested_group = Net::LDAP::Entry.new(group[:member].first)
     nested_group[:member] = ['uid=testuser,cn=users,cn=accounts,dc=localdomain']
 
     [group, nested_group]
   end
 
-  def basic_group(ret = nil, name = 'foremaners')
-    md.expect(:find_group, [ret], [name])
-    md.expect(:find_group, ret, [name, false])
-  end
-
   def test_find_users_in_nested_groups
     group, nested_group = nested_groups
 
-    basic_group(group)
-    basic_group(nested_group, 'katellers')
+    md.expect(:find_group, group, ['foremaners', false])
+    md.expect(:find_group, nested_group, ['katellers', false])
     2.times { service_bind }
 
-    md.expect(:get_logins, ['testuser'], [['uid=testuser,cn=users,cn=accounts,dc=localdomain']])
+    md.expect(:get_logins, ['testuser'], [nested_group[:member]])
     @ipa.member_service = md
 
     assert_equal ['testuser'], @ipa.users_for_gid('foremaners')
+  end
+
+  def test_insufficient_privileges_user
+    @ipa.member_service.ldap = service_bind
+    ldap.expect(:search, [nil], [filter: ipa_name_filter('john')])
+
+    assert_raises(LdapFluff::FreeIPA::UnauthenticatedException) { @ipa.groups_for_uid('john') }
+  end
+
+  def test_find_users_for_netgroup
+    config.instance_variable_set(:@use_netgroups, true)
+    @ipa.member_service.ldap = service_bind
+
+    group = Net::LDAP::Entry.new('gid=foremaners').tap { |g| g[:nisnetgrouptriple] = %w[(,john,) (,joe,)] }
+    ldap.expect(:search, [group], [filter: ipa_group_filter('foremaners'), base: config.group_base])
+
+    assert_equal %w[john joe], @ipa.users_for_gid('foremaners')
   end
 end

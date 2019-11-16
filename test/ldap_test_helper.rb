@@ -75,16 +75,17 @@ module LdapTestHelper
     Net::LDAP::Filter.eq('objectClass', name)
   end
 
-  def ad_name_filter(name)
-    Net::LDAP::Filter.eq('samaccountname', name)
+  # @!method ad_name_filter
+  #   @return [Net::LDAP::Filter]
+  # @!method posix_name_filter
+  #   @return [Net::LDAP::Filter]
+  # @!method ipa_name_filter
+  #   @return [Net::LDAP::Filter]
+  { ad: 'samaccountname', posix: 'memberuid', ipa: 'uid' }.each do |key, attr|
+    define_method("#{key}_name_filter".to_sym) { |name| Net::LDAP::Filter.eq(attr, name) }
   end
 
   alias ad_group_filter group_filter
-
-  def ipa_name_filter(name)
-    Net::LDAP::Filter.eq('uid', name)
-  end
-
   alias ipa_group_filter group_filter
 
   def ipa_user_bind(uid)

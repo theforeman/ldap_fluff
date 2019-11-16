@@ -3,7 +3,7 @@
 # Naughty bits of active directory LDAP queries
 class LdapFluff::ActiveDirectory::MemberService < LdapFluff::GenericMemberService
   # @param [Net::LDAP] ldap
-  # @param [Config] config
+  # @param [LdapFluff::Config] config
   def initialize(ldap, config)
     config.instance_variable_set(:@attr_login, 'samaccountname') unless config.attr_login
     super

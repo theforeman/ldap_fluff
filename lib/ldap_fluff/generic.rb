@@ -5,13 +5,13 @@ class LdapFluff::Generic
   # @!attribute [rw] ldap
   #   @return [Net::LDAP]
   # @!attribute [rw] member_service
-  #   @return [GenericMemberService]
+  #   @return [LdapFluff::GenericMemberService]
   attr_accessor :ldap, :member_service
 
-  # @return [Config]
+  # @return [LdapFluff::Config]
   attr_reader :config
 
-  # @param [Config] config
+  # @param [LdapFluff::Config] config
   def initialize(config)
     @config = config
 
@@ -51,11 +51,15 @@ class LdapFluff::Generic
   # @param [String] gid
   # @return [Array<String>]
   def users_for_gid(gid)
-    return [] unless group_exists?(gid)
+    service_bind
+    begin
+      # @type [Net::LDAP::Entry]
+      search = member_service.find_group(gid, false)
+    rescue self.class::MemberService::GIDNotFoundException
+      return []
+    end
 
-    search = member_service.find_group(gid, false)
     method = select_member_method(search)
-
     method ? users_from_search_results(search, method) : []
   end
 
@@ -79,11 +83,12 @@ class LdapFluff::Generic
 
   # @param [String] cn
   # @return [Boolean]
+  # @deprecated
   def includes_cn?(cn)
-    filter = Net::LDAP::Filter.eq('cn', cn)
-    result = ldap.search(base: ldap.base, filter: filter)
+    service_bind
+    search = ldap.search(filter: Net::LDAP::Filter.eq('cn', cn))
     # NOTE: present?
-    !(result.respond_to?(:empty?) ? result.empty? : !result)
+    !(search.respond_to?(:empty?) ? search.empty? : !search)
   end
 
   # @raise [UnauthenticatedException]
@@ -116,7 +121,7 @@ class LdapFluff::Generic
     end
   end
 
-  # @param [Config] config
+  # @param [LdapFluff::Config] config
   # @return [Net::LDAP]
   def create_ldap_client(config)
     Net::LDAP.new(
@@ -128,8 +133,8 @@ class LdapFluff::Generic
     )
   end
 
-  # @param [Config] config
-  # @return [GenericMemberService]
+  # @param [LdapFluff::Config] config
+  # @return [LdapFluff::GenericMemberService]
   def create_member_service(config)
     if config.use_netgroups
       self.class::NetgroupMemberService.new(@ldap, config)

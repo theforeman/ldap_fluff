@@ -6,13 +6,13 @@ class LdapFluff::GenericMemberService
   attr_accessor :ldap
 
   # @!attribute [r] config
-  #   @return [Config]
+  #   @return [LdapFluff::Config]
   # @!attribute [r] search_filter
   #   @return [Net::LDAP::Filter]
   attr_reader :config, :search_filter
 
   # @param [Net::LDAP] ldap
-  # @param [Config] config
+  # @param [LdapFluff::Config] config
   def initialize(ldap, config)
     @ldap   = ldap
     @config = config
@@ -33,6 +33,8 @@ class LdapFluff::GenericMemberService
   # @return [Array<Net::LDAP::Entry>, Net::LDAP::Entry]
   # @raise [UIDNotFoundException]
   def find_user(uid, only = nil)
+    return find_by_dn(uid, only) if uid.include?(',')
+
     # @type [Array<Net::LDAP::Entry>]
     user = ldap.search(filter: name_filter(uid))
     raise self.class::UIDNotFoundException if !user || user.empty?
@@ -60,6 +62,8 @@ class LdapFluff::GenericMemberService
   # @return [Array<Net::LDAP::Entry>, Net::LDAP::Entry]
   # @raise [UIDNotFoundException]
   def find_group(gid, only = nil)
+    return find_by_dn(gid, only) if gid.include?(',')
+
     # @type [Array<Net::LDAP::Entry>]
     group = ldap.search(filter: group_filter(gid), base: config.group_base)
     raise self.class::GIDNotFoundException if !group || group.empty?
@@ -87,11 +91,17 @@ class LdapFluff::GenericMemberService
     Net::LDAP::Filter.eq('cn', gid)
   end
 
+  # @param [String] name
+  # @return [Net::LDAP::Filter]
+  def class_filter(name)
+    Net::LDAP::Filter.eq('objectClass', name)
+  end
+
   # extract the group names from the LDAP style response,
   # @param [Array<String>] grouplist
   # @return [Array<String>] will be something like CN=bros,OU=bropeeps,DC=jomara,DC=redhat,DC=com
   def get_groups(grouplist)
-    grouplist.map { |g| g.downcase.sub(/.*?cn=(.*?),.*/, '\1') }
+    grouplist.map { |g| g.downcase.sub(/.*?\bcn=(.*?),.*/, '\1') }
   end
 
   # @param [Array<String>] netgroup_triples
@@ -107,12 +117,10 @@ class LdapFluff::GenericMemberService
   def get_logins(userlist)
     userlist.map!(&:downcase)
 
-    results = [config.attr_login, 'uid', 'cn'].map do |attribute|
-      logins = userlist.map { |g| g.sub(/.*?#{attribute}=(.*?),.*/, '\1') }
+    [config.attr_login, 'uid', 'cn'].map do |attribute|
+      logins = userlist.map { |g| g.sub(/.*?\b#{attribute}=(.*?),.*/, '\1') }
       logins == userlist ? nil : logins
-    end
-
-    results.flatten.compact.uniq
+    end.flatten.compact.uniq
   end
 
   # @param [Net::LDAP::Entry] entry

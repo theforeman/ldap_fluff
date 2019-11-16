@@ -75,4 +75,15 @@ class TestIPAMemberService < MiniTest::Test
       @ipams.find_group('broze')
     end
   end
+
+  def test_ipa_unique_groups
+    user = Net::LDAP::Entry.new.tap { |e| e[:memberof] = %w[cn=group,dc ipauniqueid=bros] }
+    ldap.expect(:search, [nil, user], [filter: ipa_name_filter('john')])
+
+    entry = Net::LDAP::Entry.new.tap { |e| e[:cn] = 'broze' }
+    ldap.expect(:search, [entry], [base: user[:memberof].last])
+    @ipams.ldap = ldap
+
+    assert_equal %w[group broze], @ipams.find_user_groups('john')
+  end
 end

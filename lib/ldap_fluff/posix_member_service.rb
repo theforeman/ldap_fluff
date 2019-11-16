@@ -3,7 +3,7 @@
 # handles the naughty bits of POSIX LDAP
 class LdapFluff::Posix::MemberService < LdapFluff::GenericMemberService
   # @param [Net::LDAP] ldap
-  # @param [Config] config
+  # @param [LdapFluff::Config] config
   def initialize(ldap, config)
     config.instance_variable_set(:@attr_login, 'memberuid') unless config.attr_login
     super
@@ -31,7 +31,7 @@ class LdapFluff::Posix::MemberService < LdapFluff::GenericMemberService
   # @return [Array<String>] an LDAP user with groups attached
   # @note this method is not particularly fast for large LDAP systems
   def find_user_groups(uid)
-    groups = ldap.search(filter: Net::LDAP::Filter.eq('memberuid', uid), base: config.group_base)
+    groups = ldap.search(filter: name_filter(uid), base: config.group_base)
     return [] unless groups
 
     groups.map { |entry| entry[:cn].first }

@@ -81,11 +81,11 @@ class TestPosix < MiniTest::Test
     assert(@posix.user_exists?('john'))
   end
 
-  def test_user_not_exists
+  def test_user_doesnt_exists
     service_bind
 
     md.expect(:find_user, nil) do |uid|
-      uid != 'john' || raise(LdapFluff::Posix::MemberService::UIDNotFoundException)
+      raise LdapFluff::Posix::MemberService::UIDNotFoundException if uid == 'john'
     end
     @posix.member_service = md
 
@@ -105,44 +105,83 @@ class TestPosix < MiniTest::Test
     service_bind
 
     md.expect(:find_group, nil) do |gid|
-      gid != 'broskies' || raise(LdapFluff::Posix::MemberService::GIDNotFoundException)
+      raise LdapFluff::Posix::MemberService::GIDNotFoundException if gid == 'broskies'
     end
     @posix.member_service = md
 
     refute(@posix.group_exists?('broskies'))
   end
 
-  def nested_groups
+  def posix_groups_filter
+    group_class_filter('posixGroup') |
+      group_class_filter('organizationalunit') |
+      group_class_filter('groupOfUniqueNames') |
+      group_class_filter('groupOfNames')
+  end
+
+  def bind_nested_groups(attr = :memberuid)
+    service_bind
+
     group = Net::LDAP::Entry.new('CN=foremaners,DC=example,DC=com')
-    group[:memberuid] = ['katellers']
+    group[attr] = ['katellers']
 
     nested_group = Net::LDAP::Entry.new('CN=katellers,CN=foremaners,DC=example,DC=com')
-    nested_group[:memberuid] = ['testuser']
+    nested_group[attr] = [attr == :member ? 'memberuid=testuser,' : 'testuser']
 
     [group, nested_group]
   end
 
-  def group_class_filter
-    super('posixGroup') |
-      super('organizationalunit') |
-      super('groupOfUniqueNames') |
-      super('groupOfNames')
-  end
-
-  def basic_group(ret = nil, name = 'foremaners')
-    md.expect(:find_group, [ret], [name])
-    md.expect(:find_group, ret, [name, false])
-  end
-
   def test_find_users_in_nested_groups
-    service_bind
-    group, nested_group = nested_groups
+    group, nested_group = bind_nested_groups
+    ldap.expect(:search, [nested_group], [base: group.dn, filter: posix_groups_filter])
 
-    ldap.expect(:search, [nested_group], [base: group.dn, filter: group_class_filter])
-    @posix.ldap = ldap
-
-    basic_group(group)
+    md.expect(:find_group, group, ['foremaners', false])
     @posix.member_service = md
+
+    assert_equal ['testuser'], @posix.users_for_gid('foremaners')
+  end
+
+  def test_find_members_in_group
+    group, nested_group = bind_nested_groups(:member)
+    ldap.expect(:search, [nested_group], [base: group.dn, filter: posix_groups_filter])
+
+    md.expect(:find_group, group, ['foremaners', false])
+    md.expect(:get_logins, ['katellers'], [nested_group[:member]])
+    @posix.member_service = md
+
+    assert_equal ['katellers'], @posix.users_for_gid('foremaners')
+  end
+
+  def test_find_users_in_netgroup
+    config.instance_variable_set(:@use_netgroups, true)
+
+    group, nested_group = bind_nested_groups(:nisnetgrouptriple)
+    ldap.expect(:search, [nested_group], [base: group.dn, filter: group_class_filter('nisNetgroup')])
+
+    md.expect(:find_group, group, ['foremaners', false])
+    md.expect(:get_netgroup_users, ['katellers'], [['testuser']])
+    @posix.member_service = md
+
+    assert_equal ['katellers'], @posix.users_for_gid('foremaners')
+  end
+
+  def test_users_in_non_exist_group
+    service_bind
+
+    md.expect(:find_group, nil) do |gid, only|
+      raise LdapFluff::Posix::MemberService::GIDNotFoundException if gid == 'foremaners' && only == false
+    end
+    @posix.member_service = md
+
+    assert_equal [], @posix.users_for_gid('foremaners')
+  end
+
+  def test_users_for_group
+    group, nested_group = bind_nested_groups(:member)
+
+    ldap.expect(:search, [group], [filter: group_filter('foremaners'), base: config.group_base])
+    ldap.expect(:search, [nested_group], [base: group.dn, filter: posix_groups_filter])
+    @posix.member_service.ldap = ldap
 
     assert_equal ['testuser'], @posix.users_for_gid('foremaners')
   end

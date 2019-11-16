@@ -4,7 +4,7 @@ class LdapFluff::FreeIPA::NetgroupMemberService < LdapFluff::FreeIPA::MemberServ
   # @param [String] uid
   # @return [Array<String>]
   def find_user_groups(uid)
-    groups = ldap.search(filter: Net::LDAP::Filter.eq('objectClass', 'nisNetgroup'), base: config.group_base)
+    groups = ldap.search(filter: class_filter('nisNetgroup'), base: config.group_base)
     return [] unless groups
 
     groups.map do |entry|

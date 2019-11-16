@@ -53,7 +53,7 @@ class TestAD < MiniTest::Test
     service_bind
 
     md.expect(:find_user_groups, nil) do |uid|
-      uid != 'john' || raise(LdapFluff::ActiveDirectory::MemberService::UIDNotFoundException)
+      raise LdapFluff::ActiveDirectory::MemberService::UIDNotFoundException if uid == 'john'
     end
     @ad.member_service = md
 
@@ -103,16 +103,11 @@ class TestAD < MiniTest::Test
     assert @ad.user_in_groups?('john', %w[broskies], true)
   end
 
-  def basic_group(ret = nil, name = 'foremaners')
-    md.expect(:find_group, [ret], [name])
-    md.expect(:find_group, ret, [name, false])
-  end
-
   def test_subgroups_in_groups_are_ignored
-    group = Net::LDAP::Entry.new('foremaners')
-    basic_group(group)
-    service_bind # 2.times
+    service_bind
 
+    group = Net::LDAP::Entry.new('foremaners')
+    md.expect(:find_group, group, ['foremaners', false])
     # NOTE: md.expect(:find_by_dn, nil) { raise LdapFluff::ActiveDirectory::MemberService::UIDNotFoundException }
     @ad.member_service = md
 
@@ -130,7 +125,7 @@ class TestAD < MiniTest::Test
 
   def test_missing_user
     md.expect(:find_user, nil) do |uid|
-      uid != 'john' || raise(LdapFluff::ActiveDirectory::MemberService::UIDNotFoundException)
+      raise LdapFluff::ActiveDirectory::MemberService::UIDNotFoundException if uid == 'john'
     end
 
     @ad.member_service = md
@@ -150,7 +145,7 @@ class TestAD < MiniTest::Test
 
   def test_missing_group
     md.expect(:find_group, nil) do |gid|
-      gid != 'broskies' || raise(LdapFluff::ActiveDirectory::MemberService::GIDNotFoundException)
+      raise LdapFluff::ActiveDirectory::MemberService::GIDNotFoundException if gid == 'broskies'
     end
 
     @ad.member_service = md
@@ -174,16 +169,21 @@ class TestAD < MiniTest::Test
     [group, nested_group, nested_user]
   end
 
+  def bind_nested_groups(group, nested_group)
+    md.expect(:find_group, group, ['foremaners', false])
+    md.expect(:find_group, nested_group, ['katellers', false])
+    @ad.member_service = md
+
+    2.times { service_bind }
+  end
+
   def test_find_users_in_nested_groups
     group, nested_group, nested_user = nested_groups
-    basic_group(group)
-    basic_group(nested_group, 'katellers')
-    2.times { service_bind }
+    bind_nested_groups(group, nested_group)
 
-    md.expect(:find_by_dn, nested_group, ['CN=katellers,DC=corp,DC=windows,DC=com', true])
-    md.expect(:find_by_dn, nested_user, ['CN=Test User,CN=Users,DC=corp,DC=windows,DC=com', true])
+    md.expect(:find_by_dn, nested_group, [group[:member].first, true])
+    md.expect(:find_by_dn, nested_user, [nested_group[:member].first, true])
     md.expect(:get_login_from_entry, 'testuser', [nested_user])
-    @ad.member_service = md
 
     assert_equal ['testuser'], @ad.users_for_gid('foremaners')
   end
@@ -205,15 +205,37 @@ class TestAD < MiniTest::Test
 
   def test_find_users_with_empty_nested_group
     group, nested_group, nested_user = empty_nested_groups
-    basic_group(group)
-    basic_group(nested_group, 'katellers')
-    2.times { service_bind }
+    bind_nested_groups(group, nested_group)
 
-    md.expect(:find_by_dn, nested_user, ['CN=Test User,CN=Users,DC=corp,DC=windows,DC=com', true])
-    md.expect(:find_by_dn, nested_group, ['CN=katellers,DC=corp,DC=windows,DC=com', true])
+    md.expect(:find_by_dn, nested_user, [group[:member].first, true])
+    md.expect(:find_by_dn, nested_group, [group[:member].last, true])
     md.expect(:get_login_from_entry, 'testuser', [nested_user])
-    @ad.member_service = md
 
     assert_equal ['testuser'], @ad.users_for_gid('foremaners')
+  end
+
+  def test_non_exist_user_in_groups
+    service_bind
+
+    md.expect(:find_user_groups, nil) do |uid|
+      raise LdapFluff::ActiveDirectory::MemberService::UIDNotFoundException if uid == 'john'
+    end
+    @ad.member_service = md
+
+    refute @ad.user_in_groups?('john', [nil])
+  end
+
+  def test_invalid_users_for_group
+    service_bind
+
+    group = Net::LDAP::Entry.new('foremaners').tap { |g| g[:uniquemember] = ['testuser'] }
+    md.expect(:find_group, group, ['foremaners', false])
+
+    md.expect(:find_by_dn, nil) do |dn, only|
+      raise LdapFluff::ActiveDirectory::MemberService::UIDNotFoundException if dn == 'testuser' && only
+    end
+    @ad.member_service = md
+
+    assert_equal [], @ad.users_for_gid('foremaners')
   end
 end

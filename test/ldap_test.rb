@@ -58,4 +58,59 @@ class TestLDAP < MiniTest::Test
 
     refute(@fluff.valid_user?('johnny rotten'))
   end
+
+  def test_unknown_server_type
+    @fluff.ldap.config.instance_variable_set(:@server_type, nil)
+    assert_raises(RuntimeError) { @fluff.send(:create_provider, @fluff.ldap.config) }
+  end
+
+  def test_instrument
+    md.expect(:instrument, ret = nil) do |event, payload, &blk|
+      if event == 'test.ldap_fluff' && payload == {}
+        blk.call(payload)
+        payload.key?(:result)
+      end
+    end
+    @fluff.instrumentation_service = md
+
+    ldap.expect(:open, ret)
+    @fluff.ldap.ldap = ldap
+
+    assert_nil @fluff.test
+  end
+
+  def test_user_list
+    ldap.expect(:users_for_gid, %w[john], %w[bros])
+    @fluff.ldap = ldap
+
+    assert_equal %w[john], @fluff.user_list('bros')
+  end
+
+  def test_found_user
+    md.expect(:find_user, user = Object.new, ['john', true])
+    @fluff.ldap.member_service = md
+
+    assert_equal user, @fluff.find_user('john', true)
+  end
+
+  def test_found_group
+    md.expect(:find_group, group = [Object.new], ['bros', nil])
+    @fluff.ldap.member_service = md
+
+    assert_equal group, @fluff.find_group('bros')
+  end
+
+  # @deprecated
+  def test_includes_cn
+    service_bind ipa_user_bind('service')
+    ldap.expect(:search, [nil], [filter: group_filter('bros')])
+
+    assert @fluff.ldap.send(:includes_cn?, 'bros')
+  end
+
+  private
+
+  def test_instance_variable
+    @fluff.ldap
+  end
 end

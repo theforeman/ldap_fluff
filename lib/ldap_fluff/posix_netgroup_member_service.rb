@@ -5,7 +5,7 @@ class LdapFluff::Posix::NetgroupMemberService < LdapFluff::Posix::MemberService
   # @param [String] uid
   # @return [Array<String>] list of group CNs for a user
   def find_user_groups(uid)
-    groups = ldap.search(filter: Net::LDAP::Filter.eq('objectClass', 'nisNetgroup'), base: config.group_base)
+    groups = ldap.search(filter: class_filter('nisNetgroup'), base: config.group_base)
     return [] unless groups
 
     groups.map do |entry|

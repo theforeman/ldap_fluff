@@ -2,7 +2,7 @@
 
 class LdapFluff::FreeIPA::MemberService < LdapFluff::GenericMemberService
   # @param [Net::LDAP] ldap
-  # @param [Config] config
+  # @param [LdapFluff::Config] config
   def initialize(ldap, config)
     config.instance_variable_set(:@attr_login, 'uid') unless config.attr_login
     super
@@ -26,11 +26,11 @@ class LdapFluff::FreeIPA::MemberService < LdapFluff::GenericMemberService
   # @return [Array<String>] will be something like CN=bros,OU=bropeeps,DC=jomara,DC=redhat,DC=com
   def get_groups(grouplist)
     grouplist.map do |g|
-      if g =~ /.*?ipauniqueid=(.*?)/i
+      if g =~ /.*?\bipauniqueid=(.*?)/i
         search = (ldap.search(base: g.downcase) || []).first
         search ? search[:cn].first : nil
       else
-        g.downcase.sub(/.*?cn=(.*?),.*/, '\1')
+        g.downcase.sub(/.*?\bcn=(.*?),.*/, '\1')
       end
     end.compact
   end
