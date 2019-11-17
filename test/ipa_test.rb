@@ -175,7 +175,7 @@ class TestIPA < MiniTest::Test
   end
 
   def test_find_users_for_netgroup
-    config.instance_variable_set(:@use_netgroups, true)
+    config.use_netgroups = true
     @ipa.member_service.ldap = service_bind
 
     group = Net::LDAP::Entry.new('gid=foremaners').tap { |g| g[:nisnetgrouptriple] = %w[(,john,) (,joe,)] }

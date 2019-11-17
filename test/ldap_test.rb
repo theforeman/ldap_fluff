@@ -60,7 +60,7 @@ class TestLDAP < MiniTest::Test
   end
 
   def test_unknown_server_type
-    @fluff.ldap.config.instance_variable_set(:@server_type, nil)
+    @fluff.ldap.config.server_type = nil
     assert_raises(RuntimeError) { @fluff.send(:create_provider, @fluff.ldap.config) }
   end
 

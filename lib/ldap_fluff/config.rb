@@ -2,9 +2,8 @@
 
 class LdapFluff::Config
   ATTRIBUTES = [
-    :host, :port, :encryption, :base_dn, :group_base, :server_type, :service_user,
-    :service_pass, :anon_queries, :attr_login, :search_filter,
-    :instrumentation_service, :use_netgroups
+    :host, :port, :encryption, :base_dn, :group_base, :server_type, :service_user, :service_pass,
+    :anon_queries, :attr_login, :search_filter, :instrumentation_service, :use_netgroups
   ].freeze
 
   DEFAULT_CONFIG = {
@@ -14,37 +13,39 @@ class LdapFluff::Config
     group_base: 'dc=company,dc=com',
     server_type: :free_ipa,
     anon_queries: false,
+    attr_login: nil,
+    search_filter: nil,
     instrumentation_service: nil,
     use_netgroups: false
   }.freeze
 
-  # @!attribute [r] host
+  # @!attribute [rw] host
   #   @return [String]
-  # @!attribute [r] port
+  # @!attribute [rw] port
   #   @return [Integer]
-  # @!attribute [r] encryption
+  # @!attribute [rw] encryption
   #   @return [Symbol, Hash]
-  # @!attribute [r] base_dn
+  # @!attribute [rw] base_dn
   #   @return [String]
-  # @!attribute [r] group_base
+  # @!attribute [rw] group_base
   #   @return [String]
-  # @!attribute [r] server_type
+  # @!attribute [rw] server_type
   #   @return [Symbol]
-  # @!attribute [r] service_user
+  # @!attribute [rw] service_user
   #   @return [String]
-  # @!attribute [r] service_pass
+  # @!attribute [rw] service_pass
   #   @return [String]
-  # @!attribute [r] anon_queries
+  # @!attribute [rw] anon_queries
   #   @return [Boolean]
-  # @!attribute [r] attr_login
+  # @!attribute [rw] attr_login
   #   @return [String]
-  # @!attribute [r] search_filter
+  # @!attribute [rw] search_filter
   #   @return [String]
-  # @!attribute [r] instrumentation_service
+  # @!attribute [rw] instrumentation_service
   #   @return [#instrument]
-  # @!attribute [r] use_netgroups
+  # @!attribute [rw] use_netgroups
   #   @return [Boolean]
-  attr_reader(*ATTRIBUTES)
+  attr_accessor(*ATTRIBUTES)
 
   # @param [#to_hash] config
   # @raise [ArgumentError] if config is not a Hash

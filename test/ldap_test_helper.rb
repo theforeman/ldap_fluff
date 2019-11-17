@@ -14,9 +14,7 @@ module LdapTestHelper
     group_base: 'ou=group,dc=internet,dc=com',
     service_user: 'service',
     service_pass: 'pass',
-    server_type: :free_ipa,
-    attr_login: nil,
-    search_filter: nil
+    server_type: :free_ipa
   }.freeze
 
   MOCK_VARS = %w[ldap md user_result].freeze

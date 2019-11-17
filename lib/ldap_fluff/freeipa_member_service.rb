@@ -4,7 +4,7 @@ class LdapFluff::FreeIPA::MemberService < LdapFluff::GenericMemberService
   # @param [Net::LDAP] ldap
   # @param [LdapFluff::Config] config
   def initialize(ldap, config)
-    config.instance_variable_set(:@attr_login, 'uid') unless config.attr_login
+    config.attr_login ||= 'uid'
     super
   end
 

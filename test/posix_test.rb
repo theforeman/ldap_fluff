@@ -153,7 +153,7 @@ class TestPosix < MiniTest::Test
   end
 
   def test_find_users_in_netgroup
-    config.instance_variable_set(:@use_netgroups, true)
+    config.use_netgroups = true
 
     group, nested_group = bind_nested_groups(:nisnetgrouptriple)
     ldap.expect(:search, [nested_group], [base: group.dn, filter: group_class_filter('nisNetgroup')])

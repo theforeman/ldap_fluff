@@ -31,7 +31,7 @@ class ConfigTest < MiniTest::Test
   end
 
   def test_missing_keys
-    assert_raises(LdapFluff::Config::ConfigError) { LdapFluff.new(CONFIG_HASH.reject { |_, v| v.nil? }) }
+    assert_raises(LdapFluff::Config::ConfigError) { LdapFluff.new }
   end
 
   def test_unknown_keys
