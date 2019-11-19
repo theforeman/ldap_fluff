@@ -1,46 +1,48 @@
-class LdapFluff::FreeIPA < LdapFluff::Generic
+# frozen_string_literal: true
 
-  def bind?(uid = nil, password = nil, opts = {})
-    unless uid.include?(',')
-      unless opts[:search] == false
-        service_bind
-        user = @member_service.find_user(uid)
-      end
-      uid = user && user.first ? user.first.dn : "uid=#{uid},cn=users,cn=accounts,#{@base}"
-    end
-    @ldap.auth(uid, password)
-    @ldap.bind
+class LdapFluff::FreeIPA < LdapFluff::Generic
+  # @param [LdapFluff::Config] config
+  def initialize(config)
+    config.bind_dn_format ||= "uid=%s,cn=users,cn=accounts,#{config.base_dn}"
+    super
   end
 
+  # @param [String] uid
+  # @return [Array<String>]
+  # @raise [UnauthenticatedException]
   def groups_for_uid(uid)
-    begin
-      super
-    rescue MemberService::InsufficientQueryPrivilegesException
-      raise UnauthenticatedException, "Insufficient Privileges to query groups data"
-    end
+    super
+  rescue MemberService::InsufficientQueryPrivilegesException
+    raise UnauthenticatedException, 'Insufficient Privileges to query groups data'
   end
 
   private
 
+  # Member results come in the form uid=sampleuser,cn=users, etc.. or gid=samplegroup,cn=groups
+  # @param [Net::LDAP::Entry] search
+  # @param [Symbol] method
+  # @return [Array<String>]
   def users_from_search_results(search, method)
-    # Member results come in the form uid=sampleuser,cn=users, etc.. or gid=samplegroup,cn=groups
-    users = []
+    members = search.send method
 
-    members = search.send(method)
-
-    if method == :nisnetgrouptriple
-      users = @member_service.get_netgroup_users(members)
-    else
-      members.each do |member|
-        type = member.downcase.split(',')[1]
-        if type == 'cn=users'
-          users << @member_service.get_logins([member])
-        elsif type == 'cn=groups'
-          users << users_for_gid(member.split(',')[0].split('=')[1])
-        end
+    # @type [Array<String>]
+    users =
+      if method == :nisnetgrouptriple
+        member_service.get_netgroup_users(members)
+      else
+        members.map { |member| get_users_for_member(member) }
       end
-    end
 
-    users.flatten.uniq
+    users.flatten.compact.uniq
+  end
+
+  # @param [String] member DN
+  # @return [Array<String>, String]
+  def get_users_for_member(member)
+    if member =~ /,(cn|ou)=users(,|$)/i
+      member_service.get_logins([member])
+    elsif member =~ /,(cn|ou)=groups(,|$)/i
+      users_for_gid(member.sub(/^.*?=([^,]*).*/, '\1'))
+    end
   end
 end

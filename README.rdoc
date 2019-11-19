@@ -25,7 +25,7 @@ It exposes these methods:
   user_list(gid)
     returns the set of users that belong to an LDAP group
 
-  is_in_groups?(uid, grouplist)
+  user_in_groups?(uid, grouplist)
     returns true if the user provided is in all of the groups listed in grouplist
 
   valid_user?(uid)
@@ -34,10 +34,10 @@ It exposes these methods:
   valid_group?(uid)
     returns true if the group provided exists
 
-  find_user(uid)
+  find_user(uid, only = nil)
     returns the LDAP entry of the user if found, nil if not found
 
-  find_group(gid)
+  find_group(gid, only = nil)
     returns the LDAP entry of the group if found, nil if not found
 
 These methods are handy for using LDAP for both authentication and authorization.
@@ -49,12 +49,12 @@ Your global configuration must provide information about your LDAP host to funct
   host: # ip address or hostname
   port: # port
   encryption: # blank, :simple_tls, or :start_tls
-  base_dn: # base DN for LDAP auth, eg dc=redhat,dc=com
+  base_dn:    # base DN for LDAP auth, eg dc=redhat,dc=com
   group_base: # base DN for your LDAP groups, eg ou=Groups,dc=redhat,dc=com
   use_netgroups: # false by default, use true if you want to use netgroup triples,
                  # supported only for server type :free_ipa and :posix
-  server_type: # type of server. default == :posix. :active_directory, :posix, :free_ipa
-  ad_domain: # domain for your users if using active directory, eg redhat.com
+  server_type:  # type of server. default == :posix. :active_directory, :posix, :free_ipa
+  ad_domain:    # domain for your users if using active directory, eg redhat.com
   service_user: # service account for authenticating LDAP calls. required unless you enable anon
   service_pass: # service password for authenticating LDAP calls. required unless you enable anon
   anon_queries: # false by default, true if you don't want to use the service user
@@ -62,10 +62,12 @@ Your global configuration must provide information about your LDAP host to funct
 
 You can pass these arguments as a hash to LdapFluff to get a valid LdapFluff object.
 
-  ldap_config = { :host => "freeipa.localdomain", :port => 389, :encryption => nil, :base_dn => "DC=mydomain,DC=com",
-                  :group_base => "DC=groups,DC=mydomain,DC=com", :attr_login => "uid", :server_type => :free_ipa,
-                  :service_user => "admin", :search_filter => "(objectClass=*)", :service_pass => "mypass",
-                  :anon_queries => false }
+  ldap_config = {
+    :host => "freeipa.localdomain", :port => 389, :encryption => nil, :base_dn => "DC=mydomain,DC=com",
+    :group_base => "DC=groups,DC=mydomain,DC=com", :attr_login => "uid", :server_type => :free_ipa,
+    :service_user => "admin", :search_filter => "(objectClass=*)", :service_pass => "mypass",
+    :anon_queries => false
+  }
 
   fluff = LdapFluff.new(ldap_config)
   fluff.valid_user?("admin") # returns true
@@ -99,6 +101,13 @@ ActiveSupport::Notifications.  ldap_fluff will use this and also pass it to net-
 When using Rails, pass `:instrumentation_service => ActiveSupport::Notifications` and then subscribe to, and
 optionally log events (e.g. https://gist.github.com/mnutt/566725).
 
-=== License
+== Development
+
+After checking out the repo, run `bundle install` to install dependencies. Then, run `bundle exec rake` to run the tests.
+You can also run `irb -r bundler/setup -r ldap_fluff` for an interactive prompt that will allow you to experiment.
+
+To install this gem onto your local machine, run `bundle exec rake install`.
+
+== License
 
 ldap_fluff is licensed under the GPLv2. Please read LICENSE for more information.

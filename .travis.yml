@@ -1,12 +1,11 @@
 sudo: false
 language: ruby
+cache: bundler
 rvm:
-  - '1.9.3'
-  - '2.0.0'
-  - '2.0.0'
-  - '2.1.8'
-  - '2.2.4'
-  - '2.3.0'
-
-script:
-  - "./travis/ldapfluff_up_to_snuff.sh"
+  - 1.9.3
+  - 2.0
+  - 2.3
+  - ruby
+  - jruby
+before_script: bundle exec rubocop
+script: bundle exec rake

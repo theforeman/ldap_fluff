@@ -1,25 +1,66 @@
-require 'yaml'
-require 'active_support/core_ext/hash'
+# frozen_string_literal: true
 
 class LdapFluff::Config
-  ATTRIBUTES = %w[host port encryption base_dn group_base server_type service_user
-                    service_pass anon_queries attr_login search_filter
-                    instrumentation_service use_netgroups]
-  ATTRIBUTES.each { |attr| attr_reader attr.to_sym }
+  ATTRIBUTES = [
+    :host, :port, :encryption, :base_dn, :group_base, :server_type, :service_user, :service_pass,
+    :anon_queries, :attr_login, :search_filter, :instrumentation_service, :use_netgroups,
+    :bind_dn_format, :attr_member
+  ].freeze
 
-  DEFAULT_CONFIG = { 'port' => 389,
-                     'encryption' => nil,
-                     'base_dn' => 'dc=company,dc=com',
-                     'group_base' => 'dc=company,dc=com',
-                     'server_type' => :free_ipa,
-                     'anon_queries' => false,
-                     'instrumentation_service' => nil,
-                     'use_netgroups' => false }
+  DEFAULT_CONFIG = {
+    port: 389,
+    encryption: nil,
+    base_dn: 'dc=company,dc=com',
+    group_base: 'dc=company,dc=com',
+    server_type: :free_ipa,
+    anon_queries: false,
+    attr_login: nil,
+    search_filter: nil,
+    instrumentation_service: nil,
+    use_netgroups: false,
+    bind_dn_format: nil,
+    attr_member: nil
+  }.freeze
 
+  # @!attribute [rw] host
+  #   @return [String]
+  # @!attribute [rw] port
+  #   @return [Integer]
+  # @!attribute [rw] encryption
+  #   @return [Symbol, Hash]
+  # @!attribute [rw] base_dn
+  #   @return [String]
+  # @!attribute [rw] group_base
+  #   @return [String]
+  # @!attribute [rw] server_type
+  #   @return [Symbol]
+  # @!attribute [rw] service_user
+  #   @return [String]
+  # @!attribute [rw] service_pass
+  #   @return [String]
+  # @!attribute [rw] anon_queries
+  #   @return [Boolean]
+  # @!attribute [rw] attr_login
+  #   @return [String]
+  # @!attribute [rw] search_filter
+  #   @return [String]
+  # @!attribute [rw] instrumentation_service
+  #   @return [#instrument]
+  # @!attribute [rw] use_netgroups
+  #   @return [Boolean]
+  # @!attribute [rw] bind_dn_format
+  #   @return [String]
+  # @!attribute [rw] attr_member
+  #   @return [String]
+  attr_accessor(*ATTRIBUTES)
+
+  # @param [#to_hash] config
+  # @raise [ArgumentError] if config is not a Hash
+  # @raise [ConfigError] if config contains invalid keys
   def initialize(config)
     raise ArgumentError unless config.respond_to?(:to_hash)
-    config = validate(convert(config))
 
+    config = validate(convert(config))
     ATTRIBUTES.each do |attr|
       instance_variable_set(:"@#{attr}", config[attr])
     end
@@ -28,57 +69,71 @@ class LdapFluff::Config
   private
 
   # @param [#to_hash] config
+  # @return [Hash]
   def convert(config)
-    config.to_hash.with_indifferent_access.tap do |conf|
-      %w[encryption server_type method].each do |key|
-        conf[key] = conf[key].is_a?(Hash) ? convert(conf[key]) : conf[key].to_sym if conf[key]
+    Hash[
+      config.to_hash.map do |key, val|
+        key = key.to_sym if key.respond_to?(:to_sym)
+
+        if val && [:encryption, :server_type, :method].include?(key)
+          val = val.is_a?(Hash) ? convert(val) : val.to_sym
+        end
+
+        [key, val]
       end
-    end
+    ]
   end
 
-  def missing_keys?(config)
+  # @param [Hash] config
+  def check_missing_keys(config)
     missing_keys = ATTRIBUTES - config.keys
     raise ConfigError, "missing configuration for keys: #{missing_keys.join(',')}" unless missing_keys.empty?
   end
 
-  def unknown_keys?(config)
+  # @param [Hash] config
+  def check_unknown_keys(config)
     unknown_keys = config.keys - ATTRIBUTES
     raise ConfigError, "unknown configuration keys: #{unknown_keys.join(',')}" unless unknown_keys.empty?
   end
 
-  def all_required_keys?(config)
-    %w[host port base_dn group_base server_type].all? do |key|
-      raise ConfigError, "config key #{key} has to be set, it was nil" if config[key].nil?
+  # @param [Hash] config
+  def check_required_keys(config)
+    [:host, :port, :base_dn, :group_base, :server_type].each do |key|
+      raise ConfigError, "config key #{key} has to be set, it was nil" unless config[key]
     end
 
-    %w[service_user service_pass].all? do |key|
-      if !config['anon_queries'] && config[key].nil?
-        raise ConfigError, "config key #{key} has to be set, it was nil"
-      end
-    end
-  end
-
-  def anon_queries_set?(config)
-    unless [false, true].include?(config['anon_queries'])
-      raise ConfigError, "config key anon_queries has to be true or false but was #{config['anon_queries']}"
+    [:service_user, :service_pass].each do |key|
+      raise ConfigError, "config key #{key} has to be set, it was nil" unless config[:anon_queries] || config[key]
     end
   end
 
-  def correct_server_type?(config)
-    unless [:posix, :active_directory, :free_ipa].include?(config['server_type'])
-      raise ConfigError, 'config key server_type has to be :active_directory, :posix, :free_ipa ' +
-        "but was #{config['server_type']}"
-    end
+  # @param [Hash] config
+  def check_anon_queries_set(config)
+    return if [false, true].include?(config[:anon_queries])
+
+    raise ConfigError, "config key anon_queries has to be true or false but was #{config[:anon_queries]}"
   end
 
+  # @param [Hash] config
+  def check_server_type(config)
+    return if [:posix, :active_directory, :free_ipa].include?(config[:server_type])
+
+    raise ConfigError,
+          "config key server_type has to be :active_directory, :posix, :free_ipa but was #{config[:server_type]}"
+  end
+
+  # @param [Hash] config
+  # @return [Hash]
+  # @raise [ConfigError] if config contains invalid keys
   def validate(config)
     config = DEFAULT_CONFIG.merge(config)
+    config[:group_base] = config[:base_dn] if !config[:group_base] || config[:group_base].empty?
 
-    correct_server_type?(config)
-    missing_keys?(config)
-    unknown_keys?(config)
-    all_required_keys?(config)
-    anon_queries_set?(config)
+    check_server_type(config)
+    check_missing_keys(config)
+    check_unknown_keys(config)
+    check_required_keys(config)
+    check_anon_queries_set(config)
 
     config
   end
