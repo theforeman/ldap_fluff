@@ -17,7 +17,8 @@ class LdapFluff::GenericMemberService
     @ldap   = ldap
     @config = config
 
-    @search_filter = try_create_filter(config.search_filter)
+    @search_filter    = try_create_filter(config.search_filter)
+    @login_attributes = [config.attr_login, 'uid', 'cn']
   end
 
   # @param [String] filter
@@ -33,8 +34,6 @@ class LdapFluff::GenericMemberService
   # @return [Array<Net::LDAP::Entry>, Net::LDAP::Entry]
   # @raise [UIDNotFoundException]
   def find_user(uid, only = nil)
-    return find_by_dn(uid, only) if uid.include?(',')
-
     # @type [Array<Net::LDAP::Entry>]
     user = ldap.search(filter: name_filter(uid))
     raise self.class::UIDNotFoundException if !user || user.empty?
@@ -62,8 +61,6 @@ class LdapFluff::GenericMemberService
   # @return [Array<Net::LDAP::Entry>, Net::LDAP::Entry]
   # @raise [UIDNotFoundException]
   def find_group(gid, only = nil)
-    return find_by_dn(gid, only) if gid.include?(',')
-
     # @type [Array<Net::LDAP::Entry>]
     group = ldap.search(filter: group_filter(gid), base: config.group_base)
     raise self.class::GIDNotFoundException if !group || group.empty?
@@ -87,8 +84,8 @@ class LdapFluff::GenericMemberService
 
   # @param [String] gid
   # @return [Net::LDAP::Filter]
-  def group_filter(gid)
-    Net::LDAP::Filter.eq('cn', gid)
+  def group_filter(gid, attr = 'cn')
+    Net::LDAP::Filter.eq(attr, gid)
   end
 
   # @param [String] name
@@ -100,33 +97,26 @@ class LdapFluff::GenericMemberService
   # extract the group names from the LDAP style response,
   # @param [Array<String>] grouplist
   # @return [Array<String>] will be something like CN=bros,OU=bropeeps,DC=jomara,DC=redhat,DC=com
-  def get_groups(grouplist)
-    grouplist.map { |g| g.downcase.sub(/.*?\bcn=(.*?),.*/, '\1') }
+  def get_groups(grouplist, attr = 'cn')
+    grouplist.map { |g| g.sub(/.*?\b#{attr}=([^,]*).*/i, '\1') }
   end
 
   # @param [Array<String>] netgroup_triples
   # @return [Array<String>]
   def get_netgroup_users(netgroup_triples)
-    return [] unless netgroup_triples
-
-    netgroup_triples.map { |m| m.split(',')[1] }
+    netgroup_triples ? netgroup_triples.map { |m| m.split(',')[1] } : []
   end
 
   # @param [Array<String>] userlist
   # @return [Array<String>]
   def get_logins(userlist)
-    userlist.map!(&:downcase)
-
-    [config.attr_login, 'uid', 'cn'].map do |attribute|
-      logins = userlist.map { |g| g.sub(/.*?\b#{attribute}=(.*?),.*/, '\1') }
-      logins == userlist ? nil : logins
-    end.flatten.compact.uniq
+    userlist.map { |g| g.sub(/.*?\b(?:#{@login_attributes.join('|')})=([^,]*).*/i, '\1') }
   end
 
   # @param [Net::LDAP::Entry] entry
   # @return [String]
   def get_login_from_entry(entry)
-    [config.attr_login, 'uid', 'cn'].each do |attribute|
+    @login_attributes.each do |attribute|
       return entry.send(attribute) if entry.respond_to? attribute
     end
 

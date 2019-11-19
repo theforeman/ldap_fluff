@@ -1,19 +1,11 @@
 # frozen_string_literal: true
 
 class LdapFluff::ActiveDirectory < LdapFluff::Generic
-  # @param [String] uid
-  # @param [String] password
-  # @param [Hash] opts
-  # @return [Boolean]
-  def bind?(uid = nil, password = nil, opts = {})
-    if opts[:search] != false && uid && !(uid.include?(',') || uid.include?('\\'))
-      service_bind
-      user = member_service.find_user(uid, true)
-
-      uid = user.dn if user
-    end
-
-    super(uid, password)
+  # @param [LdapFluff::Config] config
+  def initialize(config)
+    config.bind_dn_format ||= "%s@#{config.base_dn.scan(/\bDC=([^,]*)/i).flatten.join('.')}"
+    super
+    @is_bind_dn = /(?<!\\),|\\[\w-]|[\w-]@/
   end
 
   # active directory stores group membership on a users model

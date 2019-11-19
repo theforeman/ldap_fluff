@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-require 'ldap_test_helper'
+require_relative 'ldap_test_helper'
 
 class TestIPA < MiniTest::Test
   include LdapTestHelper
@@ -10,34 +10,33 @@ class TestIPA < MiniTest::Test
     @ipa = LdapFluff::FreeIPA.new(config)
   end
 
-  # default setup for service bind users
-  def service_bind(user = 'service', pass = 'pass', ret = true)
-    super(ipa_user_bind(user), pass, ret)
+  def service_bind(user = nil, pass = nil, ret = true)
+    super(user || ipa_user_bind('service'), pass || 'pass', ret)
   end
 
   # looks up the uid's full DN via the service account
   def test_good_bind
-    user_result.expect(:dn, ipa_user_bind('internet'))
+    user_result.expect(:dn, uid = ipa_user_bind('internet'))
     md.expect(:find_user, user_result, ['internet', true])
     @ipa.member_service = md
 
     service_bind
-    service_bind('internet', 'password')
+    service_bind(uid.dup, 'password')
 
     assert @ipa.bind?('internet', 'password')
   end
 
   def test_good_bind_with_dn
     # no expectation on the service account
-    service_bind('internet', 'password')
+    service_bind(uid = ipa_user_bind('internet'), 'password')
 
-    assert @ipa.bind?(ipa_user_bind('internet'), 'password')
+    assert @ipa.bind?(uid.dup, 'password')
   end
 
   def test_bad_bind
-    service_bind('internet', 'password', false)
+    service_bind(uid = ipa_user_bind('internet'), 'password', false)
 
-    refute @ipa.bind?(ipa_user_bind('internet'), 'password')
+    refute @ipa.bind?(uid.dup, 'password')
   end
 
   def test_groups
@@ -59,7 +58,7 @@ class TestIPA < MiniTest::Test
   end
 
   def test_bad_service_user
-    service_bind('service', 'pass', false)
+    service_bind(nil, nil, false)
 
     assert_raises(LdapFluff::FreeIPA::UnauthenticatedException) do
       @ipa.groups_for_uid('john')

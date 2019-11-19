@@ -13,7 +13,8 @@ class LdapFluff::Generic
 
   # @param [LdapFluff::Config] config
   def initialize(config)
-    @config = config
+    @config     = config
+    @is_bind_dn = /(?<!\\),/
 
     @ldap           = create_ldap_client(config)
     @member_service = create_member_service(config)
@@ -100,14 +101,29 @@ class LdapFluff::Generic
 
   # @param [String] uid
   # @param [String] password
+  # @param [Hash] opts
   # @return [Boolean]
-  # @abstract
-  def bind?(uid = nil, password = nil, _ = {})
+  def bind?(uid = nil, password = nil, opts = {})
+    uid = get_bind_dn(uid, opts) if uid && !@is_bind_dn.match(uid)
+
     ldap.auth(uid, password)
     ldap.bind
   end
 
   private
+
+  # @param [String] uid
+  # @param [Hash] opts
+  # @return [String]
+  def get_bind_dn(uid, opts = {})
+    user =
+      if opts[:search] != false && uid != config.service_user
+        service_bind
+        member_service.find_user(uid, true)
+      end
+
+    user ? user.dn : format(config.bind_dn_format, uid)
+  end
 
   # @param [Net::LDAP::Entry] search_result
   # @return [Symbol]

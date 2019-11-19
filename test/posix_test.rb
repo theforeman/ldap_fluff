@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-require 'ldap_test_helper'
+require_relative 'ldap_test_helper'
 
 class TestPosix < MiniTest::Test
   include LdapTestHelper
@@ -8,6 +8,10 @@ class TestPosix < MiniTest::Test
   def setup
     super
     @posix = LdapFluff::Posix.new(config)
+  end
+
+  def service_bind(user = nil, pass = nil, ret = true)
+    super(user || "uid=service,ou=users,#{CONFIG_HASH[:base_dn]}", pass || 'pass', ret)
   end
 
   def test_groups

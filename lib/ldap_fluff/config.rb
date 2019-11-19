@@ -3,7 +3,7 @@
 class LdapFluff::Config
   ATTRIBUTES = [
     :host, :port, :encryption, :base_dn, :group_base, :server_type, :service_user, :service_pass,
-    :anon_queries, :attr_login, :search_filter, :instrumentation_service, :use_netgroups
+    :anon_queries, :attr_login, :search_filter, :instrumentation_service, :use_netgroups, :bind_dn_format
   ].freeze
 
   DEFAULT_CONFIG = {
@@ -16,7 +16,8 @@ class LdapFluff::Config
     attr_login: nil,
     search_filter: nil,
     instrumentation_service: nil,
-    use_netgroups: false
+    use_netgroups: false,
+    bind_dn_format: nil
   }.freeze
 
   # @!attribute [rw] host
@@ -45,6 +46,8 @@ class LdapFluff::Config
   #   @return [#instrument]
   # @!attribute [rw] use_netgroups
   #   @return [Boolean]
+  # @!attribute [rw] bind_dn_format
+  #   @return [String]
   attr_accessor(*ATTRIBUTES)
 
   # @param [#to_hash] config

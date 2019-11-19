@@ -1,19 +1,10 @@
 # frozen_string_literal: true
 
 class LdapFluff::Posix < LdapFluff::Generic
-  # @param [String] uid
-  # @param [String] password
-  # @param [Hash] opts
-  # @return [Boolean]
-  def bind?(uid = nil, password = nil, opts = {})
-    if opts[:search] != false && uid && !uid.include?(',')
-      service_bind
-      user = member_service.find_user(uid, true)
-
-      uid = user.dn if user
-    end
-
-    super(uid, password)
+  # @param [LdapFluff::Config] config
+  def initialize(config)
+    config.bind_dn_format ||= "uid=%s,ou=users,#{config.base_dn}"
+    super
   end
 
   private

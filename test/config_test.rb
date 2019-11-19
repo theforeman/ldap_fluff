@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-require 'ldap_test_helper'
+require_relative 'ldap_test_helper'
 
 class ConfigTest < MiniTest::Test
   include LdapTestHelper

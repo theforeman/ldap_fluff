@@ -1,22 +1,10 @@
 # frozen_string_literal: true
 
 class LdapFluff::FreeIPA < LdapFluff::Generic
-  # @param [String] uid
-  # @param [String] password
-  # @param [Hash] opts
-  # @return [Boolean]
-  def bind?(uid = nil, password = nil, opts = {})
-    unless !uid || uid.include?(',')
-      user =
-        if opts[:search] != false
-          service_bind
-          member_service.find_user(uid, true)
-        end
-
-      uid = user ? user.dn : "uid=#{uid},cn=users,cn=accounts,#{config.base_dn}"
-    end
-
-    super(uid, password)
+  # @param [LdapFluff::Config] config
+  def initialize(config)
+    config.bind_dn_format ||= "uid=%s,cn=users,cn=accounts,#{config.base_dn}"
+    super
   end
 
   # @param [String] uid
@@ -51,12 +39,10 @@ class LdapFluff::FreeIPA < LdapFluff::Generic
   # @param [String] member DN
   # @return [Array<String>, String]
   def get_users_for_member(member)
-    type = member.downcase.split(',')[1]
-
-    if type == 'cn=users'
+    if member =~ /,(cn|ou)=users(,|$)/i
       member_service.get_logins([member])
-    elsif type == 'cn=groups'
-      users_for_gid(member.split(',').first.split('=')[1])
+    elsif member =~ /,(cn|ou)=groups(,|$)/i
+      users_for_gid(member.sub(/^.*?=([^,]*).*/, '\1'))
     end
   end
 end

@@ -26,11 +26,11 @@ class LdapFluff::FreeIPA::MemberService < LdapFluff::GenericMemberService
   # @return [Array<String>] will be something like CN=bros,OU=bropeeps,DC=jomara,DC=redhat,DC=com
   def get_groups(grouplist)
     grouplist.map do |g|
-      if g =~ /.*?\bipauniqueid=(.*?)/i
-        search = (ldap.search(base: g.downcase) || []).first
+      if g =~ /.*?\bipaUniqueID=/i
+        search = (ldap.search(base: g) || []).first
         search ? search[:cn].first : nil
       else
-        g.downcase.sub(/.*?\bcn=(.*?),.*/, '\1')
+        g.sub(/.*?\bCN=([^,]*).*/i, '\1')
       end
     end.compact
   end

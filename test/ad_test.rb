@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-require 'ldap_test_helper'
+require_relative 'ldap_test_helper'
 
 class TestAD < MiniTest::Test
   include LdapTestHelper
@@ -8,6 +8,10 @@ class TestAD < MiniTest::Test
   def setup
     super
     @ad = LdapFluff::ActiveDirectory.new(config)
+  end
+
+  def service_bind(user = nil, pass = nil, ret = true)
+    super(user || "service@#{CONFIG_HASH[:host]}", pass || 'pass', ret)
   end
 
   def test_good_bind
@@ -61,7 +65,7 @@ class TestAD < MiniTest::Test
   end
 
   def test_bad_service_user
-    service_bind('service', 'pass', false)
+    service_bind(nil, nil, false)
 
     assert_raises(LdapFluff::ActiveDirectory::UnauthenticatedException) do
       @ad.groups_for_uid('john')
