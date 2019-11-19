@@ -82,16 +82,6 @@ class LdapFluff::Generic
     all ? (intersection.sort == gids.sort) : !intersection.empty?
   end
 
-  # @param [String] cn
-  # @return [Boolean]
-  # @deprecated
-  def includes_cn?(cn)
-    service_bind
-    search = ldap.search(filter: Net::LDAP::Filter.eq('cn', cn))
-    # NOTE: present?
-    !(search.respond_to?(:empty?) ? search.empty? : !search)
-  end
-
   # @raise [UnauthenticatedException]
   def service_bind
     return if config.anon_queries || bind?(config.service_user, config.service_pass, search: false)

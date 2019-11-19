@@ -77,8 +77,8 @@ class LdapFluff::GenericMemberService
 
   # @param [String] uid
   # @return [Net::LDAP::Filter]
-  def name_filter(uid, attr = nil)
-    filter = Net::LDAP::Filter.eq(attr || config.attr_login, uid)
+  def name_filter(uid, attr = config.attr_login)
+    filter = Net::LDAP::Filter.eq(attr, uid)
     search_filter ? (filter & search_filter) : filter
   end
 

@@ -65,8 +65,8 @@ module LdapTestHelper
     basic_user(%w[bros broskies])
   end
 
-  def group_filter(cn)
-    Net::LDAP::Filter.eq('cn', cn)
+  def group_filter(cn, attr = 'cn')
+    Net::LDAP::Filter.eq(attr, cn)
   end
 
   def group_class_filter(name = 'group')
@@ -79,7 +79,7 @@ module LdapTestHelper
   #   @return [Net::LDAP::Filter]
   # @!method ipa_name_filter
   #   @return [Net::LDAP::Filter]
-  { ad: 'samaccountname', posix: 'memberuid', ipa: 'uid' }.each do |key, attr|
+  { ad: 'samaccountname', posix: 'uid', ipa: 'uid' }.each do |key, attr|
     define_method("#{key}_name_filter".to_sym) { |name| Net::LDAP::Filter.eq(attr, name) }
   end
 

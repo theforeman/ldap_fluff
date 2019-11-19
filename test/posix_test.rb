@@ -130,7 +130,7 @@ class TestPosix < MiniTest::Test
     group[attr] = ['katellers']
 
     nested_group = Net::LDAP::Entry.new('CN=katellers,CN=foremaners,DC=example,DC=com')
-    nested_group[attr] = [attr == :member ? 'memberuid=testuser,' : 'testuser']
+    nested_group[attr] = [attr == :member ? 'uid=testuser,' : 'testuser']
 
     [group, nested_group]
   end

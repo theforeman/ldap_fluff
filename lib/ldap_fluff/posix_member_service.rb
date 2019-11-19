@@ -5,7 +5,8 @@ class LdapFluff::Posix::MemberService < LdapFluff::GenericMemberService
   # @param [Net::LDAP] ldap
   # @param [LdapFluff::Config] config
   def initialize(ldap, config)
-    config.attr_login ||= 'memberuid'
+    config.attr_login ||= 'uid'
+    config.attr_member ||= 'memberuid'
     super
   end
 
@@ -31,22 +32,10 @@ class LdapFluff::Posix::MemberService < LdapFluff::GenericMemberService
   # @return [Array<String>] an LDAP user with groups attached
   # @note this method is not particularly fast for large LDAP systems
   def find_user_groups(uid)
-    groups = ldap.search(filter: name_filter(uid), base: config.group_base)
+    groups = ldap.search(filter: group_filter(uid, config.attr_member), base: config.group_base)
     return [] unless groups
 
     groups.map { |entry| entry[:cn].first }
-  end
-
-  # @param [String] uid
-  # @param [Array<String>] gids
-  # @deprecated
-  def times_in_groups(uid, gids, all = false)
-    filters       = gids.map { |cn| group_filter(cn) }
-    # AND or OR all of the filters together
-    group_filters = filters.reduce(all ? :& : :|)
-    filter        = name_filter(uid) & group_filters
-
-    (ldap.search(base: config.group_base, filter: filter) || []).size
   end
 
   class UIDNotFoundException < LdapFluff::Error

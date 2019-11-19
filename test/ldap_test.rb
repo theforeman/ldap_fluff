@@ -99,18 +99,4 @@ class TestLDAP < MiniTest::Test
 
     assert_equal group, @fluff.find_group('bros')
   end
-
-  # @deprecated
-  def test_includes_cn
-    service_bind ipa_user_bind('service')
-    ldap.expect(:search, [nil], [filter: group_filter('bros')])
-
-    assert @fluff.ldap.send(:includes_cn?, 'bros')
-  end
-
-  private
-
-  def test_instance_variable
-    @fluff.ldap
-  end
 end
