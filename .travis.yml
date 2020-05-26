@@ -1,12 +1,9 @@
-sudo: false
 language: ruby
 rvm:
-  - '1.9.3'
-  - '2.0.0'
-  - '2.0.0'
-  - '2.1.8'
-  - '2.2.4'
-  - '2.3.0'
+  - '2.4'
+  - '2.5'
+  - '2.6'
+  - '2.7'
 
 script:
   - "./travis/ldapfluff_up_to_snuff.sh"
