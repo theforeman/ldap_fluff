@@ -15,7 +15,7 @@ Gem::Specification.new do |s|
   s.author   = ['Jordan O\'Mara', 'Daniel Lobato', 'Petr Chalupa', 'Adam Price', 'Marek Hulan', 'Dominic Cleal']
   s.email    = %w(jomara@redhat.com elobatocs@gmail.com pchalupa@redhat.com komidore64@gmail.com mhulan@redhat.com dominic@cleal.org)
 
-  s.required_ruby_version = ">= 1.9.3"
+  s.required_ruby_version = ">= 2.4.0"
 
   s.add_dependency('net-ldap', '>= 0.3.1')
   s.add_dependency('activesupport')
