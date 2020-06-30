@@ -142,7 +142,7 @@ class TestADMemberService < MiniTest::Test
   end
 
   def test_find_by_dn_missing_entry
-    @ldap.expect(:search, nil, [:base => 'cn=Foo Bar,dc=example,dc=com', :scope => Net::LDAP::SearchScope_BaseObject])
+    @ldap.expect(:search, nil, [:filter => Net::LDAP::Filter.eq('cn', 'Bar Foo'), :base => 'dc=example,dc=com'])
     @adms.ldap = @ldap
     assert_raises(LdapFluff::ActiveDirectory::MemberService::UIDNotFoundException) do
       @adms.find_by_dn('cn=Foo Bar,dc=example,dc=com')
