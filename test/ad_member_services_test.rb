@@ -135,6 +135,9 @@ class TestADMemberService < MiniTest::Test
     # returned by the server in answer to a group membership query with
     # backslashes before the commas in the CNs. Such escaped commas should not
     # be used when splitting the DN.
+    #
+    # Is this still required? DN won't be split anymore.
+    #
     @ldap.expect(:search, [:result], [:base => 'cn=Bar\, Foo,dc=example,dc=com', :scope => Net::LDAP::SearchScope_BaseObject])
     @adms.ldap = @ldap
     assert_equal([:result], @adms.find_by_dn('cn=Bar\, Foo,dc=example,dc=com'))
@@ -142,7 +145,7 @@ class TestADMemberService < MiniTest::Test
   end
 
   def test_find_by_dn_missing_entry
-    @ldap.expect(:search, nil, [:filter => Net::LDAP::Filter.eq('cn', 'Bar Foo'), :base => 'dc=example,dc=com'])
+    @ldap.expect(:search, nil, [:base => 'cn=Foo Bar,dc=example,dc=com', :scope => Net::LDAP::SearchScope_BaseObject'])
     @adms.ldap = @ldap
     assert_raises(LdapFluff::ActiveDirectory::MemberService::UIDNotFoundException) do
       @adms.find_by_dn('cn=Foo Bar,dc=example,dc=com')
