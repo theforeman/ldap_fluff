@@ -23,7 +23,6 @@ class LdapFluff::GenericMemberService
   end
 
   def find_by_dn(dn)
-    dn = dn.gsub('\,', ',')
     user = @ldap.search(:base => dn, :scope => Net::LDAP::SearchScope_BaseObject)
     raise self.class::UIDNotFoundException if (user.nil? || user.empty?)
     user
