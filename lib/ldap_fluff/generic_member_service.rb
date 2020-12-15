@@ -11,7 +11,7 @@ class LdapFluff::GenericMemberService
     @search_filter = nil
     begin
       @search_filter = Net::LDAP::Filter.construct(config.search_filter) unless (config.search_filter.nil? || config.search_filter.empty?)
-    rescue Net::LDAP::LdapError => error
+    rescue Net::LDAP::Error => error
       puts "Search filter unavailable - #{error}"
     end
   end
