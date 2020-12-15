@@ -17,7 +17,7 @@ Gem::Specification.new do |s|
 
   s.required_ruby_version = ">= 2.4.0"
 
-  s.add_dependency('net-ldap', '>= 0.3.1')
+  s.add_dependency('net-ldap', '>= 0.11')
   s.add_dependency('activesupport')
   s.add_development_dependency('rake')
   s.add_development_dependency('minitest')
