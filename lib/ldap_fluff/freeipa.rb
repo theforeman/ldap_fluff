@@ -1,23 +1,20 @@
 class LdapFluff::FreeIPA < LdapFluff::Generic
-
   def bind?(uid = nil, password = nil, opts = {})
     unless uid.include?(',')
       unless opts[:search] == false
         service_bind
         user = @member_service.find_user(uid)
       end
-      uid = user && user.first ? user.first.dn : "uid=#{uid},cn=users,cn=accounts,#{@base}"
+      uid = user&.first ? user.first.dn : "uid=#{uid},cn=users,cn=accounts,#{@base}"
     end
     @ldap.auth(uid, password)
     @ldap.bind
   end
 
   def groups_for_uid(uid)
-    begin
-      super
-    rescue MemberService::InsufficientQueryPrivilegesException
-      raise UnauthenticatedException, "Insufficient Privileges to query groups data"
-    end
+    super
+  rescue MemberService::InsufficientQueryPrivilegesException
+    raise UnauthenticatedException, "Insufficient Privileges to query groups data"
   end
 
   private

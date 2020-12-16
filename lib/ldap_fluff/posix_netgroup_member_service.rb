@@ -2,7 +2,6 @@ require 'net/ldap'
 
 # handles the naughty bits of posix ldap
 class LdapFluff::Posix::NetgroupMemberService < LdapFluff::Posix::MemberService
-
   # return list of group CNs for a user
   def find_user_groups(uid)
     groups = []
@@ -12,5 +11,4 @@ class LdapFluff::Posix::NetgroupMemberService < LdapFluff::Posix::MemberService
     end
     groups
   end
-
 end

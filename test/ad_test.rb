@@ -5,12 +5,12 @@ class TestAD < MiniTest::Test
 
   def setup
     super
-    @ad   = LdapFluff::ActiveDirectory.new(@config)
+    @ad = LdapFluff::ActiveDirectory.new(@config)
   end
 
   # default setup for service bind users
   def service_bind
-    @ldap.expect(:auth, nil, %w(service pass))
+    @ldap.expect(:auth, nil, %w[service pass])
     super
   end
 
@@ -37,7 +37,7 @@ class TestAD < MiniTest::Test
     @md = MiniTest::Mock.new
     user_result = MiniTest::Mock.new
     user_result.expect(:dn, ad_user_dn('Internet User'))
-    @md.expect(:find_user, [user_result], %w(internet))
+    @md.expect(:find_user, [user_result], %w[internet])
     @ad.member_service = @md
     service_bind
     @ldap.expect(:auth, nil, [ad_user_dn('Internet User'), "password"])
@@ -47,7 +47,7 @@ class TestAD < MiniTest::Test
   end
 
   def test_bad_bind
-    @ldap.expect(:auth, nil, %w(EXAMPLE\\internet password))
+    @ldap.expect(:auth, nil, %w[EXAMPLE\\internet password])
     @ldap.expect(:bind, false)
     @ad.ldap = @ldap
     assert_equal(@ad.bind?("EXAMPLE\\internet", "password"), false)
@@ -57,14 +57,14 @@ class TestAD < MiniTest::Test
   def test_groups
     service_bind
     basic_user
-    assert_equal(@ad.groups_for_uid('john'), %w(bros))
+    assert_equal(@ad.groups_for_uid('john'), %w[bros])
   end
 
   def test_bad_user
     service_bind
     md = MiniTest::Mock.new
-    md.expect(:find_user_groups, nil, %w(john))
-    def md.find_user_groups(*args)
+    md.expect(:find_user_groups, nil, %w[john])
+    def md.find_user_groups(*_args)
       raise LdapFluff::ActiveDirectory::MemberService::UIDNotFoundException
     end
     @ad.member_service = md
@@ -72,7 +72,7 @@ class TestAD < MiniTest::Test
   end
 
   def test_bad_service_user
-    @ldap.expect(:auth, nil, %w(service pass))
+    @ldap.expect(:auth, nil, %w[service pass])
     @ldap.expect(:bind, false)
     @ad.ldap = @ldap
     assert_raises(LdapFluff::ActiveDirectory::UnauthenticatedException) do
@@ -83,39 +83,39 @@ class TestAD < MiniTest::Test
   def test_is_in_groups
     service_bind
     basic_user
-    assert_equal(@ad.is_in_groups("john", %w(bros), false), true)
+    assert_equal(@ad.is_in_groups("john", %w[bros], false), true)
   end
 
   def test_is_some_groups
     service_bind
     basic_user
-    assert_equal(@ad.is_in_groups("john", %w(bros buds), false), true)
+    assert_equal(@ad.is_in_groups("john", %w[bros buds], false), true)
   end
 
   def test_isnt_in_all_groups
     service_bind
     basic_user
-    assert_equal(@ad.is_in_groups("john", %w(bros buds), true), false)
+    assert_equal(@ad.is_in_groups("john", %w[bros buds], true), false)
   end
 
   def test_isnt_in_groups
     service_bind
     basic_user
-    assert_equal(@ad.is_in_groups("john", %w(broskies), false), false)
+    assert_equal(@ad.is_in_groups("john", %w[broskies], false), false)
   end
 
   def test_group_subset
     service_bind
     bigtime_user
-    assert_equal(@ad.is_in_groups("john", %w(broskies), true), true)
+    assert_equal(@ad.is_in_groups("john", %w[broskies], true), true)
   end
 
   def test_subgroups_in_groups_are_ignored
-    group        = Net::LDAP::Entry.new('foremaners')
+    group = Net::LDAP::Entry.new('foremaners')
     md = MiniTest::Mock.new
     2.times { md.expect(:find_group, [group], ['foremaners']) }
     2.times { service_bind }
-    def md.find_by_dn(dn)
+    def md.find_by_dn(_dn)
       raise LdapFluff::ActiveDirectory::MemberService::UIDNotFoundException
     end
     @ad.member_service = md
@@ -125,7 +125,7 @@ class TestAD < MiniTest::Test
 
   def test_user_exists
     md = MiniTest::Mock.new
-    md.expect(:find_user, 'notnilluser', %w(john))
+    md.expect(:find_user, 'notnilluser', %w[john])
     @ad.member_service = md
     service_bind
     assert(@ad.user_exists?('john'))
@@ -133,8 +133,8 @@ class TestAD < MiniTest::Test
 
   def test_missing_user
     md = MiniTest::Mock.new
-    md.expect(:find_user, nil, %w(john))
-    def md.find_user(uid)
+    md.expect(:find_user, nil, %w[john])
+    def md.find_user(_uid)
       raise LdapFluff::ActiveDirectory::MemberService::UIDNotFoundException
     end
     @ad.member_service = md
@@ -144,7 +144,7 @@ class TestAD < MiniTest::Test
 
   def test_group_exists
     md = MiniTest::Mock.new
-    md.expect(:find_group, 'notnillgroup', %w(broskies))
+    md.expect(:find_group, 'notnillgroup', %w[broskies])
     @ad.member_service = md
     service_bind
     assert(@ad.group_exists?('broskies'))
@@ -152,8 +152,8 @@ class TestAD < MiniTest::Test
 
   def test_missing_group
     md = MiniTest::Mock.new
-    md.expect(:find_group, nil, %w(broskies))
-    def md.find_group(uid)
+    md.expect(:find_group, nil, %w[broskies])
+    def md.find_group(_uid)
       raise LdapFluff::ActiveDirectory::MemberService::GIDNotFoundException
     end
     @ad.member_service = md
@@ -194,7 +194,7 @@ class TestAD < MiniTest::Test
     nested_group[:cn] = ['katellers']
     nested_group[:objectclass] = ['organizationalunit']
     nested_group[:memberof] = ['CN=foremaners,DC=corp,DC=windows,DC=com']
-    nested_user[:objectclass]  = ['person']
+    nested_user[:objectclass] = ['person']
 
     md = MiniTest::Mock.new
     2.times { md.expect(:find_group, [group], ['foremaners']) }
@@ -208,5 +208,4 @@ class TestAD < MiniTest::Test
     assert_equal @ad.users_for_gid('foremaners'), ['testuser']
     md.verify
   end
-
 end

@@ -1,92 +1,75 @@
-LineLength:
-  Max: 120
+inherit_from: .rubocop_todo.yml
 
-ParameterLists:
-  Max: 5
+inherit_gem:
+  theforeman-rubocop:
+    - rules/base.yml
+    - rules/ruby_target.yml
+    - rules/style.yml
+    - rules/performance.yml
 
-MethodLength:
+AllCops:
+  TargetRubyVersion: 2.4
+  Exclude:
+    - 'vendor/bundle/**/*'
+
+Metrics/BlockNesting:
+  Enabled: false # remove me
+
+Metrics/MethodLength:
   Max: 15
 
-CollectionMethods:
+Metrics/ParameterLists:
+  Max: 5
+
+Layout/LineLength:
+  Max: 120
+
+Layout/LeadingCommentSpace:
+  Enabled: false
+
+Layout/ParameterAlignment:
+  Enabled: false # don't care if parameters are not aligned
+
+Layout/ParenthesesAroundCondition:
+  Enabled: false
+
+Layout/SpaceInsideHashLiteralBraces:
+  Enabled: false # allow spaces (eg { :a => 1 })
+
+
+Style/CollectionMethods:
   # remove this once we pick either map or collect, inject or reduce, etc
   PreferredMethods: {}
 
-StringLiterals:
+Style/StringLiterals:
   Enabled: false
 
-SpaceAroundBraces:
-  Enabled: false # remove me
-
-RedundantSelf:
-  Enabled: false # remove me
-
-Encoding:
+Style/Encoding:
   Enabled: false # remove me?
 
-RedundantReturn:
+Style/Documentation:
   Enabled: false # remove me
 
-SpaceInsideHashLiteralBraces:
-  Enabled: false # remove me
-
-Void:
-  Enabled: false # remove me
-
-BlockNesting:
-  Enabled: false # remove me
-
-AvoidPerlBackrefs:
-  Enabled: false # remove me
-
-Documentation:
-  Enabled: false # remove me
-
-# end TODO
-
-# AllCops:
-#   Excludes:
-
-SpaceInsideHashLiteralBraces:
-  EnforcedStyleIsWithSpaces: false
-
-HashSyntax:
+Style/HashSyntax:
   Enabled: false # don't force 1.9 hash syntax
 
-SpaceInsideHashLiteralBraces:
-  Enabled: false # allow spaces (eg { :a => 1 })
-
-LeadingCommentSpace:
+Style/IfUnlessModifier:
   Enabled: false
 
-IfUnlessModifier:
+Style/RescueModifier:
   Enabled: false
 
-RescueModifier:
+Style/AssignmentInCondition:
   Enabled: false
 
-AssignmentInCondition:
+Style/WhileUntilModifier:
   Enabled: false
 
-FavorUnlessOverNegatedIf:
+Style/DotPosition:
   Enabled: false
 
-WhileUntilModifier:
-  Enabled: false
-
-AlignParameters:
-  Enabled: false # don't care if parameters are not aligned
-
-ParenthesesAroundCondition:
-  Enabled: false
-
-DotPosition:
-  Enabled: false
-
-Lambda:
+Style/Lambda:
   Enabled: false # don't require -> for single line lambdas
 
-HashMethods:
-  Enabled: false
-
-ReduceArguments:
+Style/FrozenStringLiteralComment:
   Enabled: false

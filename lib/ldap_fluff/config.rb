@@ -3,8 +3,8 @@ require 'active_support/core_ext/hash'
 
 class LdapFluff::Config
   ATTRIBUTES = %w[host port encryption base_dn group_base server_type service_user
-                    service_pass anon_queries attr_login search_filter
-                    instrumentation_service use_netgroups]
+                  service_pass anon_queries attr_login search_filter
+                  instrumentation_service use_netgroups].freeze
   ATTRIBUTES.each { |attr| attr_reader attr.to_sym }
 
   DEFAULT_CONFIG = { 'port' => 389,
@@ -14,7 +14,7 @@ class LdapFluff::Config
                      'server_type' => :free_ipa,
                      'anon_queries' => false,
                      'instrumentation_service' => nil,
-                     'use_netgroups' => false }
+                     'use_netgroups' => false }.freeze
 
   def initialize(config)
     raise ArgumentError unless config.respond_to?(:to_hash)
@@ -65,9 +65,9 @@ class LdapFluff::Config
   end
 
   def correct_server_type?(config)
-    unless [:posix, :active_directory, :free_ipa].include?(config['server_type'])
+    unless %i[posix active_directory free_ipa].include?(config['server_type'])
       raise ConfigError, 'config key server_type has to be :active_directory, :posix, :free_ipa ' +
-        "but was #{config['server_type']}"
+                         "but was #{config['server_type']}"
     end
   end
 
