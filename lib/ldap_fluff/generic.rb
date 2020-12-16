@@ -7,9 +7,9 @@ class LdapFluff::Generic
                           :port => config.port,
                           :encryption => config.encryption,
                           :instrumentation_service => config.instrumentation_service)
-    @bind_user  = config.service_user
-    @bind_pass  = config.service_pass
-    @anon       = config.anon_queries
+    @bind_user = config.service_user
+    @bind_pass = config.service_pass
+    @anon = config.anon_queries
     @attr_login = config.attr_login
     @base       = config.base_dn
     @group_base = (config.group_base.empty? ? config.base_dn : config.group_base)
@@ -37,7 +37,7 @@ class LdapFluff::Generic
     service_bind
     @member_service.find_user_groups(uid)
   rescue self.class::MemberService::UIDNotFoundException
-    return []
+    []
   end
 
   def users_for_gid(gid)
@@ -60,9 +60,9 @@ class LdapFluff::Generic
     groups = @member_service.find_user_groups(uid).sort
     gids = gids.sort
     if all
-      return groups & gids == gids
+      groups & gids == gids
     else
-      return (groups & gids).any?
+      (groups & gids).any?
     end
   end
 
@@ -74,16 +74,17 @@ class LdapFluff::Generic
   def service_bind
     unless @anon || bind?(@bind_user, @bind_pass, :search => false)
       raise UnauthenticatedException,
-            "Could not bind to #{class_name} user #{@bind_user}"
+        "Could not bind to #{class_name} user #{@bind_user}"
     end
   end
 
   private
+
   def select_member_method(search_result)
     if @use_netgroups
       :nisnetgrouptriple
     else
-      [:member, :memberuid, :uniquemember].find { |m| search_result.respond_to? m }
+      %i[member memberuid uniquemember].find { |m| search_result.respond_to? m }
     end
   end
 
@@ -114,4 +115,3 @@ class LdapFluff::Generic
   class UnauthenticatedException < LdapFluff::Error
   end
 end
-

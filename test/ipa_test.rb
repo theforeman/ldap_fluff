@@ -19,7 +19,7 @@ class TestIPA < MiniTest::Test
     @md = MiniTest::Mock.new
     user_result = MiniTest::Mock.new
     user_result.expect(:dn, ipa_user_bind('internet'))
-    @md.expect(:find_user, [user_result], %w(internet))
+    @md.expect(:find_user, [user_result], %w[internet])
     @ipa.member_service = @md
     service_bind
     @ldap.expect(:auth, nil, [ipa_user_bind('internet'), "password"])
@@ -48,14 +48,14 @@ class TestIPA < MiniTest::Test
   def test_groups
     service_bind
     basic_user
-    assert_equal(@ipa.groups_for_uid('john'), %w(bros))
+    assert_equal(@ipa.groups_for_uid('john'), %w[bros])
   end
 
   def test_bad_user
     service_bind
     @md = MiniTest::Mock.new
-    @md.expect(:find_user_groups, nil, %w(john))
-    def @md.find_user_groups(*args)
+    @md.expect(:find_user_groups, nil, %w[john])
+    def @md.find_user_groups(*_args)
       raise LdapFluff::FreeIPA::MemberService::UIDNotFoundException
     end
     @ipa.member_service = @md
@@ -74,42 +74,42 @@ class TestIPA < MiniTest::Test
   def test_is_in_groups
     service_bind
     basic_user
-    assert_equal(@ipa.is_in_groups("john", %w(bros), false), true)
+    assert_equal(@ipa.is_in_groups("john", %w[bros], false), true)
   end
 
   def test_is_some_groups
     service_bind
     basic_user
-    assert_equal(@ipa.is_in_groups("john", %w(bros buds), false), true)
+    assert_equal(@ipa.is_in_groups("john", %w[bros buds], false), true)
   end
 
   def test_is_in_all_groupss
     service_bind
     bigtime_user
-    assert_equal(true, @ipa.is_in_groups("john", %w(broskies bros), true))
+    assert_equal(true, @ipa.is_in_groups("john", %w[broskies bros], true))
   end
 
   def test_isnt_in_all_groups
     service_bind
     basic_user
-    assert_equal(@ipa.is_in_groups("john", %w(bros buds), true), false)
+    assert_equal(@ipa.is_in_groups("john", %w[bros buds], true), false)
   end
 
   def test_isnt_in_groups
     service_bind
     basic_user
-    assert_equal(@ipa.is_in_groups("john", %w(broskies), false), false)
+    assert_equal(@ipa.is_in_groups("john", %w[broskies], false), false)
   end
 
   def test_group_subset
     service_bind
     bigtime_user
-    assert_equal(@ipa.is_in_groups('john', %w(broskies), true), true)
+    assert_equal(@ipa.is_in_groups('john', %w[broskies], true), true)
   end
 
   def test_user_exists
     @md = MiniTest::Mock.new
-    @md.expect(:find_user, 'notnilluser', %w(john))
+    @md.expect(:find_user, 'notnilluser', %w[john])
     @ipa.member_service = @md
     service_bind
     assert(@ipa.user_exists?('john'))
@@ -117,8 +117,8 @@ class TestIPA < MiniTest::Test
 
   def test_missing_user
     @md = MiniTest::Mock.new
-    @md.expect(:find_user, nil, %w(john))
-    def @md.find_user(uid)
+    @md.expect(:find_user, nil, %w[john])
+    def @md.find_user(_uid)
       raise LdapFluff::FreeIPA::MemberService::UIDNotFoundException
     end
     @ipa.member_service = @md
@@ -128,7 +128,7 @@ class TestIPA < MiniTest::Test
 
   def test_group_exists
     @md = MiniTest::Mock.new
-    @md.expect(:find_group, 'notnillgroup', %w(broskies))
+    @md.expect(:find_group, 'notnillgroup', %w[broskies])
     @ipa.member_service = @md
     service_bind
     assert(@ipa.group_exists?('broskies'))
@@ -136,8 +136,8 @@ class TestIPA < MiniTest::Test
 
   def test_missing_group
     @md = MiniTest::Mock.new
-    @md.expect(:find_group, nil, %w(broskies))
-    def @md.find_group(uid)
+    @md.expect(:find_group, nil, %w[broskies])
+    def @md.find_group(_uid)
       raise LdapFluff::FreeIPA::MemberService::GIDNotFoundException
     end
     @ipa.member_service = @md
@@ -162,6 +162,4 @@ class TestIPA < MiniTest::Test
     assert_equal @ipa.users_for_gid('foremaners'), ['testuser']
     md.verify
   end
-
 end
-

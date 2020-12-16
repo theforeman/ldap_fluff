@@ -64,5 +64,4 @@ class TestIPANetgroupMemberService < MiniTest::Test
       @ipams.find_group('broze')
     end
   end
-
 end

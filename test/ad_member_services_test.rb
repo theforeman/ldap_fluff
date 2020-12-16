@@ -20,7 +20,7 @@ class TestADMemberService < MiniTest::Test
 
   def nest_deep(n)
     # add all the expects
-    1.upto(n-1) do |i|
+    1.upto(n - 1) do |i|
       @ldap.expect(:search, ad_parent_payload(i + 1), [:base => ad_group_dn("bros#{i}"), :scope => 0, :attributes => ['memberof']])
     end
     # terminate or we loop FOREVER
@@ -43,7 +43,7 @@ class TestADMemberService < MiniTest::Test
     basic_user
     @ldap.expect(:search, [], [:base => ad_group_dn('bros1'), :scope => 0, :attributes => ['memberof']])
     @adms.ldap = @ldap
-    assert_equal(%w(group bros1), @adms.find_user_groups("john"))
+    assert_equal(%w[group bros1], @adms.find_user_groups("john"))
     @ldap.verify
   end
 
@@ -53,7 +53,7 @@ class TestADMemberService < MiniTest::Test
     # now make 'bros1' be memberof 'group' again
     @ldap.expect(:search, ad_user_payload, [:base => ad_group_dn('bros1'), :scope => 0, :attributes => ['memberof']])
     @adms.ldap = @ldap
-    assert_equal(%w(group bros1), @adms.find_user_groups("john"))
+    assert_equal(%w[group bros1], @adms.find_user_groups("john"))
     @ldap.verify
   end
 
@@ -160,5 +160,4 @@ class TestADMemberService < MiniTest::Test
     entry = Net::LDAP::Entry.new('Example User')
     assert_nil(@adms.get_login_from_entry(entry))
   end
-
 end

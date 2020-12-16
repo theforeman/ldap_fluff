@@ -2,7 +2,6 @@ require 'net/ldap'
 
 # handles the naughty bits of posix ldap
 class LdapFluff::Posix::MemberService < LdapFluff::GenericMemberService
-
   def initialize(ldap, config)
     @attr_login = (config.attr_login || 'memberuid')
     super
@@ -41,7 +40,7 @@ class LdapFluff::Posix::MemberService < LdapFluff::GenericMemberService
       filters[1..(filters.size - 1)].each do |gfilter|
         filter = (all ? filter & gfilter : filter | gfilter)
       end
-      return filter
+      filter
     end
   end
 
@@ -50,5 +49,4 @@ class LdapFluff::Posix::MemberService < LdapFluff::GenericMemberService
 
   class GIDNotFoundException < LdapFluff::Error
   end
-
 end

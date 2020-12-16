@@ -1,7 +1,6 @@
 require 'net/ldap'
 
 class LdapFluff::GenericMemberService
-
   attr_accessor :ldap
 
   def initialize(ldap, config)
@@ -11,8 +10,8 @@ class LdapFluff::GenericMemberService
     @search_filter = nil
     begin
       @search_filter = Net::LDAP::Filter.construct(config.search_filter) unless (config.search_filter.nil? || config.search_filter.empty?)
-    rescue Net::LDAP::Error => error
-      puts "Search filter unavailable - #{error}"
+    rescue Net::LDAP::Error => e
+      puts "Search filter unavailable - #{e}"
     end
   end
 
@@ -81,5 +80,4 @@ class LdapFluff::GenericMemberService
     end
     nil
   end
-
 end

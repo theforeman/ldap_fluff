@@ -7,17 +7,16 @@ module LdapTestHelper
   attr_accessor :group_base, :class_filter, :user
 
   def config_hash
-    { :host          => "internet.com",
-      :port          => "387",
-      :encryption    => :start_tls,
-      :base_dn       => "dc=internet,dc=com",
-      :group_base    => "ou=group,dc=internet,dc=com",
-      :service_user  => "service",
-      :service_pass  => "pass",
-      :server_type   => :free_ipa,
-      :attr_login    => nil,
-      :search_filter => nil
-    }
+    { :host => "internet.com",
+      :port => "387",
+      :encryption => :start_tls,
+      :base_dn => "dc=internet,dc=com",
+      :group_base => "ou=group,dc=internet,dc=com",
+      :service_user => "service",
+      :service_pass => "pass",
+      :server_type => :free_ipa,
+      :attr_login => nil,
+      :search_filter => nil }
   end
 
   def setup
@@ -40,13 +39,13 @@ module LdapTestHelper
 
   def basic_user
     @md = MiniTest::Mock.new
-    @md.expect(:find_user_groups, %w(bros), %w(john))
+    @md.expect(:find_user_groups, %w[bros], %w[john])
     get_test_instance_variable.member_service = @md
   end
 
   def bigtime_user
     @md = MiniTest::Mock.new
-    @md.expect(:find_user_groups, %w(bros broskies), %w(john))
+    @md.expect(:find_user_groups, %w[bros broskies], %w[john])
     get_test_instance_variable.member_service = @md
   end
 
@@ -82,7 +81,7 @@ module LdapTestHelper
     "CN=#{name},CN=Users,#{@config.base_dn}"
   end
 
-  def ad_group_dn(name='group')
+  def ad_group_dn(name = 'group')
     "cn=#{name},#{@config.group_base}"
   end
 
@@ -110,7 +109,7 @@ module LdapTestHelper
     [{ :cn => ["broze"] }]
   end
 
-  def posix_netgroup_payload(cn, netgroups=[])
+  def posix_netgroup_payload(cn, netgroups = [])
     [{ :cn => [cn], :nisnetgrouptriple => netgroups }]
   end
 
@@ -120,7 +119,7 @@ module LdapTestHelper
       entry_1['cn'] = 'John'
       entry_2 = Net::LDAP::Entry.new
       entry_2['memberof'] = ['cn=group,dc=internet,dc=com', 'cn=bros,dc=internet,dc=com']
-      [ entry_1, entry_2 ]
+      [entry_1, entry_2]
     end
   end
 
@@ -128,7 +127,7 @@ module LdapTestHelper
     [{ :cn => 'group' }, { :memberof => ['cn=group,dc=internet,dc=com', 'cn=bros,dc=internet,dc=com'] }]
   end
 
-  def ipa_netgroup_payload(cn, netgroups=[])
+  def ipa_netgroup_payload(cn, netgroups = [])
     [{ :cn => [cn], :nisnetgrouptriple => netgroups }]
   end
 

@@ -12,7 +12,7 @@ class TestPosixNetgroupMemberService < MiniTest::Test
   def test_find_user
     user = posix_user_payload
     @ldap.expect(:search, user, [:filter => @ms.name_filter('john'),
-                                 :base   => config.base_dn])
+                                 :base => config.base_dn])
     @ms.ldap = @ldap
     assert_equal posix_user_payload, @ms.find_user('john')
     @ldap.verify
@@ -41,7 +41,7 @@ class TestPosixNetgroupMemberService < MiniTest::Test
   def test_user_exists
     user = posix_user_payload
     @ldap.expect(:search, user, [:filter => @ms.name_filter('john'),
-                                 :base   => config.base_dn])
+                                 :base => config.base_dn])
     @ms.ldap = @ldap
     assert @ms.find_user('john')
     @ldap.verify
@@ -49,7 +49,7 @@ class TestPosixNetgroupMemberService < MiniTest::Test
 
   def test_user_doesnt_exists
     @ldap.expect(:search, nil, [:filter => @ms.name_filter('john'),
-                                :base   => config.base_dn])
+                                :base => config.base_dn])
     @ms.ldap = @ldap
     assert_raises(LdapFluff::Posix::MemberService::UIDNotFoundException) { @ms.find_user('john') }
     @ldap.verify
@@ -58,7 +58,7 @@ class TestPosixNetgroupMemberService < MiniTest::Test
   def test_group_exists
     group = posix_netgroup_payload('broze')
     @ldap.expect(:search, group, [:filter => @ms.group_filter('broze'),
-                                  :base   => config.group_base])
+                                  :base => config.group_base])
     @ms.ldap = @ldap
     assert @ms.find_group('broze')
     @ldap.verify
@@ -66,7 +66,7 @@ class TestPosixNetgroupMemberService < MiniTest::Test
 
   def test_group_doesnt_exists
     @ldap.expect(:search, nil, [:filter => @ms.group_filter('broze'),
-                                :base   => config.group_base])
+                                :base => config.group_base])
     @ms.ldap = @ldap
     assert_raises(LdapFluff::Posix::MemberService::GIDNotFoundException) { @ms.find_group('broze') }
     @ldap.verify
