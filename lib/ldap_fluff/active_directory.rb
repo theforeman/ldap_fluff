@@ -44,6 +44,13 @@ class LdapFluff::ActiveDirectory < LdapFluff::Generic
       end
     end
 
+    # In AD, the relationship between a user account and the "Primary Group" for that account
+    #    is not included in the member and memberof attributes.
+    if search.respond_to? 'primarygrouptoken'
+      primary_users = @ldap.search(:base => @ldap.base, :filter => Net::LDAP::Filter.eq('primarygroupid',search['primarygrouptoken'].first))
+      users += primary_users.map { |user| @member_service.get_login_from_entry(user) }
+    end
+
     users.flatten.uniq
   end
 

@@ -209,4 +209,25 @@ class TestAD < MiniTest::Test
     md.verify
   end
 
+  def test_find_user_from_primary_group
+    prim_group  = Net::LDAP::Entry.new('p_group')
+    test_user   = Net::LDAP::Entry.new('t_user')
+
+    prim_group[:cn]                 = ['p_group']
+    prim_group[:primarygrouptoken]  = ['12345']
+    prim_group[:member]             = []
+    test_user[:primarygroupid]      = ['12345']
+    test_user[:samaccountname]      = ['tuser']
+
+    @ldap.expect(:auth, nil, %w(service pass))
+    @ldap.expect(:bind, true)
+    2.times { @ldap.expect(:search, [prim_group], [:filter => ad_group_filter('p_group'), :base => @config.group_base, :attributes=>["*", "primaryGroupToken"]]) }
+    @ldap.expect(:search, [test_user], [:base => @config.base_dn, :filter => Net::LDAP::Filter.eq('primarygroupid','12345')])
+    @ldap.expect(:base, @config.base_dn)
+
+    @ad.ldap = @ldap
+    @ad.member_service.ldap = @ldap
+    assert_equal(@ad.users_for_gid('p_group'), ['tuser'])
+  end
+
 end
