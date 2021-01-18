@@ -99,6 +99,10 @@ ActiveSupport::Notifications.  ldap_fluff will use this and also pass it to net-
 When using Rails, pass `:instrumentation_service => ActiveSupport::Notifications` and then subscribe to, and
 optionally log events (e.g. https://gist.github.com/mnutt/566725).
 
-=== License
+== Contributing
+
+Feel free to file PR against our github repository.
+
+== License
 
 ldap_fluff is licensed under the GPLv2. Please read LICENSE for more information.
