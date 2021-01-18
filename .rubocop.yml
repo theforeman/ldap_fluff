@@ -16,13 +16,13 @@ Metrics/BlockNesting:
   Enabled: false # remove me
 
 Metrics/MethodLength:
-  Max: 15
+  Max: 30
 
 Metrics/ParameterLists:
   Max: 5
 
 Layout/LineLength:
-  Max: 120
+  Max: 190
 
 Layout/LeadingCommentSpace:
   Enabled: false
