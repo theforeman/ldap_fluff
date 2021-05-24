@@ -83,6 +83,8 @@ ldap_fluff does not support searching/binding global catalogs
 
 service_user (formatted as "ad_domain/username") and service_pass OR anon_queries are required for AD support
 
+Group membership searches will use "msds-memberOfTransitive" where possible, and will fall back to a recursive lookup
+
 === A note on FreeIPA
 
 ldap_fluff appends cn=groups,cn=accounts to the beginning of all BIND calls. You do not need to
