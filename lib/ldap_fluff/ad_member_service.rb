@@ -11,29 +11,23 @@ class LdapFluff::ActiveDirectory::MemberService < LdapFluff::GenericMemberServic
   # try to use msds-memberOfTransitive if it is supported, otherwise do a recursive loop
   def find_user_groups(uid)
     user_data = find_user(uid).first
+    domain_functionality = 0
 
-    begin
-      search = @ldap.search(:base => "", :scope => Net::LDAP::SearchScope_BaseObject, :attributes => ['domainFunctionality'])
-      if !search.nil? && !search.first.nil?
-        domainFunctionality = search.first['domainfunctionality'].first
-        if domainFunctionality.to_i >= 6
-          user_dn = user_data[:distinguishedname].first
-          search = @ldap.search(:base => user_dn, :scope => Net::LDAP::SearchScope_BaseObject, :attributes => ['msds-memberOfTransitive'])
-          if !search.nil? && !search.first.nil?
-            get_groups(search.first['msds-memberoftransitive'])
-          else
-            raise "Transitive query failed"
-          end
-        else
-          raise "Transitive properties not supported"
-        end
-      else
-        raise "Domain functionality query failed"
-      end
-    rescue
-      # If any exceptions are raised, fall back to recursive lookup
-      _groups_from_ldap_data(user_data)
+    search = @ldap.search(:base => "", :scope => Net::LDAP::SearchScope_BaseObject, :attributes => ['domainFunctionality'])
+    if !search.nil? && !search.first.nil?
+      domain_functionality = search.first['domainfunctionality'].first.to_i
     end
+
+    if domain_functionality >= 6
+      user_dn = user_data[:distinguishedname].first
+      search = @ldap.search(:base => user_dn, :scope => Net::LDAP::SearchScope_BaseObject, :attributes => ['msds-memberOfTransitive'])
+      if !search.nil? && !search.first.nil?
+        return get_groups(search.first['msds-memberoftransitive'])
+      end
+    end
+
+    # Fall back to recursive lookup
+    _groups_from_ldap_data(user_data)
   end
 
   # return the :memberof attrs + parents, recursively
