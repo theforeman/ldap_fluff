@@ -30,7 +30,7 @@ class LdapFluff::ActiveDirectory::MemberService < LdapFluff::GenericMemberServic
 
     search = @ldap.search(:base => "", :scope => Net::LDAP::SearchScope_BaseObject, :attributes => ['domainFunctionality'])
     if !search.nil? && !search.first.nil?
-      domain_functionality = search.first['domainfunctionality'].first.to_i
+      domain_functionality = search.first[:domainfunctionality].first.to_i
     end
 
     domain_functionality
