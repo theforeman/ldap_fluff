@@ -26,14 +26,16 @@ class LdapFluff::ActiveDirectory::MemberService < LdapFluff::GenericMemberServic
 
   # return the domain functionality level, default to 0
   def _get_domain_func_level
-    domain_functionality = 0
+    return @domain_functionality unless @domain_functionality.nil?
+
+    @domain_functionality = 0
 
     search = @ldap.search(:base => "", :scope => Net::LDAP::SearchScope_BaseObject, :attributes => ['domainFunctionality'])
     if !search.nil? && !search.first.nil?
-      domain_functionality = search.first[:domainfunctionality].first.to_i
+      @domain_functionality = search.first[:domainfunctionality].first.to_i
     end
 
-    domain_functionality
+    @domain_functionality
   end
 
   # return the :memberof attrs + parents, recursively
