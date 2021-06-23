@@ -85,8 +85,12 @@ module LdapTestHelper
     "cn=#{name},#{@config.group_base}"
   end
 
-  def ad_user_payload(name)
-    [{ :memberof => [ad_group_dn], :distinguishedname => [ad_user_dn(name)] }]
+  def ad_user_payload(name = nil)
+    unless name.nil?
+      return [{ :memberof => [ad_group_dn], :distinguishedname => [ad_user_dn(name)] }]
+    end
+
+    [{ :memberof => [ad_group_dn] }]
   end
 
   def ad_group_payload

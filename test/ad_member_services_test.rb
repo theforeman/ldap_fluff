@@ -10,7 +10,7 @@ class TestADMemberService < MiniTest::Test
   end
 
   def basic_user
-    @ldap.expect(:search, ad_user_payload("john"), [:filter => ad_name_filter("john")])
+    @ldap.expect(:search, ad_user_payload, [:filter => ad_name_filter("john")])
     @ldap.expect(:search, [{ :domainfunctionality => ['5'] }], [:base => "", :scope => 0, :attributes => ['domainFunctionality']])
     @ldap.expect(:search, ad_parent_payload(1), [:base => ad_group_dn, :scope => 0, :attributes => ['memberof']])
   end
@@ -60,7 +60,7 @@ class TestADMemberService < MiniTest::Test
     basic_user
     # basic user is memberof 'group'... and 'group' is memberof 'bros1'
     # now make 'bros1' be memberof 'group' again
-    @ldap.expect(:search, ad_user_payload('john'), [:base => ad_group_dn('bros1'), :scope => 0, :attributes => ['memberof']])
+    @ldap.expect(:search, ad_user_payload, [:base => ad_group_dn('bros1'), :scope => 0, :attributes => ['memberof']])
     @adms.ldap = @ldap
     assert_equal(%w[group bros1], @adms.find_user_groups("john"))
     @ldap.verify
@@ -114,7 +114,7 @@ class TestADMemberService < MiniTest::Test
   def test_find_good_user
     basic_user
     @adms.ldap = @ldap
-    assert_equal(ad_user_payload('john'), @adms.find_user('john'))
+    assert_equal(ad_user_payload, @adms.find_user('john'))
   end
 
   def test_find_missing_user
