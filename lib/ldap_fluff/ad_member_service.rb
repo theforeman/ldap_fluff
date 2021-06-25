@@ -8,10 +8,34 @@ class LdapFluff::ActiveDirectory::MemberService < LdapFluff::GenericMemberServic
   end
 
   # get a list [] of ldap groups for a given user
-  # in active directory, this means a recursive lookup
+  # try to use msds-memberOfTransitive if it is supported, otherwise do a recursive loop
   def find_user_groups(uid)
-    data = find_user(uid)
-    _groups_from_ldap_data(data.first)
+    user_data = find_user(uid).first
+
+    if _get_domain_func_level >= 6
+      user_dn = user_data[:distinguishedname].first
+      search = @ldap.search(:base => user_dn, :scope => Net::LDAP::SearchScope_BaseObject, :attributes => ['msds-memberOfTransitive'])
+      if !search.nil? && !search.first.nil?
+        return get_groups(search.first['msds-memberoftransitive'])
+      end
+    end
+
+    # Fall back to recursive lookup
+    _groups_from_ldap_data(user_data)
+  end
+
+  # return the domain functionality level, default to 0
+  def _get_domain_func_level
+    return @domain_functionality unless @domain_functionality.nil?
+
+    @domain_functionality = 0
+
+    search = @ldap.search(:base => "", :scope => Net::LDAP::SearchScope_BaseObject, :attributes => ['domainFunctionality'])
+    if !search.nil? && !search.first.nil?
+      @domain_functionality = search.first[:domainfunctionality].first.to_i
+    end
+
+    @domain_functionality
   end
 
   # return the :memberof attrs + parents, recursively

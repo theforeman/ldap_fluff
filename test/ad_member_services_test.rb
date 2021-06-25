@@ -11,6 +11,7 @@ class TestADMemberService < MiniTest::Test
 
   def basic_user
     @ldap.expect(:search, ad_user_payload, [:filter => ad_name_filter("john")])
+    @ldap.expect(:search, [{ :domainfunctionality => ['5'] }], [:base => "", :scope => 0, :attributes => ['domainFunctionality']])
     @ldap.expect(:search, ad_parent_payload(1), [:base => ad_group_dn, :scope => 0, :attributes => ['memberof']])
   end
 
@@ -37,6 +38,14 @@ class TestADMemberService < MiniTest::Test
     (n - 1).downto(1) do |j|
       @ldap.expect(:search, [], [:base => ad_group_dn("broskies#{j + 1}"), :scope => 0, :attributes => ['memberof']])
     end
+  end
+
+  def transitive_user
+    ad_transitive_payload = [{ 'msds-memberoftransitive' => [ad_group_dn("bros#1"), ad_group_dn("bros#2"), ad_group_dn("bros#3"), ad_group_dn("bros#4"), ad_group_dn("bros#5")] }]
+
+    @ldap.expect(:search, ad_user_payload('john'), [:filter => ad_name_filter("john")])
+    @ldap.expect(:search, [{ :domainfunctionality => ['6'] }], [:base => "", :scope => 0, :attributes => ['domainFunctionality']])
+    @ldap.expect(:search, ad_transitive_payload, [:base => ad_user_dn("john"), :scope => 0, :attributes => ['msds-memberOfTransitive']])
   end
 
   def test_find_user
@@ -79,6 +88,13 @@ class TestADMemberService < MiniTest::Test
     double_nested(5)
     @adms.ldap = @ldap
     assert_equal(10, @adms.find_user_groups('john').size)
+    @ldap.verify
+  end
+
+  def test_transitive_groups
+    transitive_user
+    @adms.ldap = @ldap
+    assert_equal(5, @adms.find_user_groups('john').size)
     @ldap.verify
   end
 
