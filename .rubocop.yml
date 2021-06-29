@@ -10,66 +10,14 @@ inherit_gem:
 AllCops:
   TargetRubyVersion: 2.4
   Exclude:
+    - 'test/**/*'
     - 'vendor/bundle/**/*'
 
-Metrics/BlockNesting:
-  Enabled: false # remove me
-
-Metrics/MethodLength:
-  Max: 30
-
-Metrics/ParameterLists:
-  Max: 5
-
-Layout/LineLength:
-  Max: 190
-
-Layout/LeadingCommentSpace:
+Metrics:
   Enabled: false
 
-Layout/ParameterAlignment:
-  Enabled: false # don't care if parameters are not aligned
-
-Layout/ParenthesesAroundCondition:
+Layout:
   Enabled: false
 
-Layout/SpaceInsideHashLiteralBraces:
-  Enabled: false # allow spaces (eg { :a => 1 })
-
-
-Style/CollectionMethods:
-  # remove this once we pick either map or collect, inject or reduce, etc
-  PreferredMethods: {}
-
-Style/StringLiterals:
-  Enabled: false
-
-Style/Encoding:
-  Enabled: false # remove me?
-
-Style/Documentation:
-  Enabled: false # remove me
-
-Style/HashSyntax:
-  Enabled: false # don't force 1.9 hash syntax
-
-Style/IfUnlessModifier:
-  Enabled: false
-
-Style/RescueModifier:
-  Enabled: false
-
-Style/AssignmentInCondition:
-  Enabled: false
-
-Style/WhileUntilModifier:
-  Enabled: false
-
-Style/DotPosition:
-  Enabled: false
-
-Style/Lambda:
-  Enabled: false # don't require -> for single line lambdas
-
-Style/FrozenStringLiteralComment:
+Style:
   Enabled: false
