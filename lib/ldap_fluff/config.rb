@@ -65,8 +65,8 @@ class LdapFluff::Config
   end
 
   def correct_server_type?(config)
-    unless %i[posix active_directory free_ipa].include?(config['server_type'])
-      raise ConfigError, 'config key server_type has to be :active_directory, :posix, :free_ipa ' +
+    unless %i[posix active_directory free_ipa netiq].include?(config['server_type'])
+      raise ConfigError, 'config key server_type has to be :active_directory, :posix, :free_ipa, :netiq ' +
                          "but was #{config['server_type']}"
     end
   end

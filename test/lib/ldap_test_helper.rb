@@ -105,6 +105,21 @@ module LdapTestHelper
     [{ :memberof => [ad_group_dn("bros#{num}"), ad_group_dn("broskies#{num}")] }]
   end
 
+  def netiq_user_payload
+    [{ :uid => ["john"],
+       # necessary, because Net::LDAP::Entry would allow both
+       'uid' => ["john"],
+       :dn => ["cn=42,ou=usr,o=employee"],
+       :workeforceid => ["42"] }]
+  end
+
+  def netiq_group_payload
+    [{ :cn => ["broze"],
+       :dn => ["cn=broze,ou=mygroup,ou=apps,o=global"],
+       :member => ["cn=42,ou=usr,o=employee"],
+       :workforceid => ["21"] }]
+  end
+
   def posix_user_payload
     [{ :cn => ["john"] }]
   end
