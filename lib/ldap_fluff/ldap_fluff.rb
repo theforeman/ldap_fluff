@@ -13,6 +13,8 @@ class LdapFluff
       @ldap = ActiveDirectory.new(config)
     when :free_ipa
       @ldap = FreeIPA.new(config)
+    when :netiq
+      @ldap = NetIQ.new(config)
     else
       raise 'unknown server_type'
     end
