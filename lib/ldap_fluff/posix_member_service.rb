@@ -16,9 +16,11 @@ class LdapFluff::Posix::MemberService < LdapFluff::GenericMemberService
   # return an ldap user with groups attached
   # note : this method is not particularly fast for large ldap systems
   def find_user_groups(uid)
-    groups = []
-    @ldap.search(:filter => Net::LDAP::Filter.eq('memberuid', uid), :base => @group_base).each do |entry|
-      groups << entry[:cn][0]
+    group_search = @ldap.search(:filter => Net::LDAP::Filter.eq('memberuid', uid), :base => @group_base)
+    if group_search
+      group_search.each do |entry|
+        groups << entry[:cn][0]
+      end
     end
     groups
   end
