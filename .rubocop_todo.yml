@@ -42,3 +42,8 @@ Naming/PredicateName:
 Performance/CollectionLiteralInLoop:
   Exclude:
     - 'lib/ldap_fluff/active_directory.rb'
+
+Layout:
+  Exclude:
+    - 'lib/ldap_fluff/ad_member_service.rb'
+    - 'lib/ldap_fluff/generic_member_service.rb'
