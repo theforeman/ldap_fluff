@@ -18,10 +18,12 @@ class LdapFluff::Posix::MemberService < LdapFluff::GenericMemberService
   def find_user_groups(uid)
     groups = []
     @ldap.search(
-      :filter => Net::LDAP::Filter.eq('memberuid', uid),
+      :filter => Net::LDAP::Filter.eq(@attr_login, uid),
       :base => @group_base, :attributes => ["cn"]
     ).each do |entry|
-      groups << entry[:cn][0]
+      entry[:memberof].each do |grp|
+        groups << grp.sub(/.*?cn=(.*?),.*/, '\1')
+      end
     end
     groups
   end
