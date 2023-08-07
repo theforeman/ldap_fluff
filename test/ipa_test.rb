@@ -1,6 +1,6 @@
 require 'lib/ldap_test_helper'
 
-class TestIPA < MiniTest::Test
+class TestIPA < Minitest::Test
   include LdapTestHelper
 
   def setup
@@ -16,8 +16,8 @@ class TestIPA < MiniTest::Test
 
   def test_good_bind
     # looks up the uid's full DN via the service account
-    @md = MiniTest::Mock.new
-    user_result = MiniTest::Mock.new
+    @md = Minitest::Mock.new
+    user_result = Minitest::Mock.new
     user_result.expect(:dn, ipa_user_bind('internet'))
     @md.expect(:find_user, [user_result], %w[internet])
     @ipa.member_service = @md
@@ -53,7 +53,7 @@ class TestIPA < MiniTest::Test
 
   def test_bad_user
     service_bind
-    @md = MiniTest::Mock.new
+    @md = Minitest::Mock.new
     @md.expect(:find_user_groups, nil, %w[john])
     def @md.find_user_groups(*_args)
       raise LdapFluff::FreeIPA::MemberService::UIDNotFoundException
@@ -108,7 +108,7 @@ class TestIPA < MiniTest::Test
   end
 
   def test_user_exists
-    @md = MiniTest::Mock.new
+    @md = Minitest::Mock.new
     @md.expect(:find_user, 'notnilluser', %w[john])
     @ipa.member_service = @md
     service_bind
@@ -116,7 +116,7 @@ class TestIPA < MiniTest::Test
   end
 
   def test_missing_user
-    @md = MiniTest::Mock.new
+    @md = Minitest::Mock.new
     @md.expect(:find_user, nil, %w[john])
     def @md.find_user(_uid)
       raise LdapFluff::FreeIPA::MemberService::UIDNotFoundException
@@ -127,7 +127,7 @@ class TestIPA < MiniTest::Test
   end
 
   def test_group_exists
-    @md = MiniTest::Mock.new
+    @md = Minitest::Mock.new
     @md.expect(:find_group, 'notnillgroup', %w[broskies])
     @ipa.member_service = @md
     service_bind
@@ -135,7 +135,7 @@ class TestIPA < MiniTest::Test
   end
 
   def test_missing_group
-    @md = MiniTest::Mock.new
+    @md = Minitest::Mock.new
     @md.expect(:find_group, nil, %w[broskies])
     def @md.find_group(_uid)
       raise LdapFluff::FreeIPA::MemberService::GIDNotFoundException
@@ -151,7 +151,7 @@ class TestIPA < MiniTest::Test
     nested_group = Net::LDAP::Entry.new('gid=katellers,cn=Groups,cn=accounts,dc=localdomain')
     nested_group[:member] = ['uid=testuser,cn=users,cn=accounts,dc=localdomain']
 
-    md = MiniTest::Mock.new
+    md = Minitest::Mock.new
     2.times { md.expect(:find_group, [group], ['foremaners']) }
     2.times { md.expect(:find_group, [nested_group], ['katellers']) }
     2.times { service_bind }

@@ -1,6 +1,6 @@
 require 'lib/ldap_test_helper'
 
-class ConfigTest < MiniTest::Test
+class ConfigTest < Minitest::Test
   include LdapTestHelper
 
   def test_unsupported_type

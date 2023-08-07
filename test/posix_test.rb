@@ -1,6 +1,6 @@
 require 'lib/ldap_test_helper'
 
-class TestPosix < MiniTest::Test
+class TestPosix < Minitest::Test
   include LdapTestHelper
 
   def setup
@@ -20,7 +20,7 @@ class TestPosix < MiniTest::Test
   end
 
   def test_missing_user
-    md = MiniTest::Mock.new
+    md = Minitest::Mock.new
     md.expect(:find_user_groups, [], %w[john])
     @posix.member_service = md
     assert_equal([], @posix.groups_for_uid('john'))
@@ -46,8 +46,8 @@ class TestPosix < MiniTest::Test
 
   def test_good_bind
     # looks up the uid's full DN via the service account
-    @md = MiniTest::Mock.new
-    user_result = MiniTest::Mock.new
+    @md = Minitest::Mock.new
+    user_result = Minitest::Mock.new
     user_result.expect(:dn, 'uid=internet,dn=example')
     @md.expect(:find_user, [user_result], %w[internet])
     @posix.member_service = @md
@@ -75,7 +75,7 @@ class TestPosix < MiniTest::Test
 
   def test_user_exists
     service_bind
-    md = MiniTest::Mock.new
+    md = Minitest::Mock.new
     md.expect(:find_user, 'notnilluser', %w[john])
     @posix.member_service = md
     assert(@posix.user_exists?('john'))
@@ -83,7 +83,7 @@ class TestPosix < MiniTest::Test
 
   def test_missing_user
     service_bind
-    md = MiniTest::Mock.new
+    md = Minitest::Mock.new
     md.expect(:find_user, nil, %w[john])
     def md.find_user(_uid)
       raise LdapFluff::Posix::MemberService::UIDNotFoundException
@@ -94,7 +94,7 @@ class TestPosix < MiniTest::Test
 
   def test_group_exists
     service_bind
-    md = MiniTest::Mock.new
+    md = Minitest::Mock.new
     md.expect(:find_group, 'notnillgroup', %w[broskies])
     @posix.member_service = md
     assert(@posix.group_exists?('broskies'))
@@ -102,7 +102,7 @@ class TestPosix < MiniTest::Test
 
   def test_missing_group
     service_bind
-    md = MiniTest::Mock.new
+    md = Minitest::Mock.new
     md.expect(:find_group, nil, %w[broskies])
     def md.find_group(_uid)
       raise LdapFluff::Posix::MemberService::GIDNotFoundException
@@ -127,7 +127,7 @@ class TestPosix < MiniTest::Test
                     Net::LDAP::Filter.eq('objectClass', 'groupOfNames')}])
     @posix.ldap = @ldap
 
-    md = MiniTest::Mock.new
+    md = Minitest::Mock.new
     2.times { md.expect(:find_group, [group], ['foremaners']) }
     @posix.member_service = md
 

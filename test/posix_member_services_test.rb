@@ -1,6 +1,6 @@
 require 'lib/ldap_test_helper'
 
-class TestPosixMemberService < MiniTest::Test
+class TestPosixMemberService < Minitest::Test
   include LdapTestHelper
 
   def setup

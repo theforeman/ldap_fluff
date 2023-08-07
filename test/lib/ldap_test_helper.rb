@@ -21,7 +21,7 @@ module LdapTestHelper
 
   def setup
     config
-    @ldap = MiniTest::Mock.new
+    @ldap = Minitest::Mock.new
   end
 
   def config
@@ -38,13 +38,13 @@ module LdapTestHelper
   end
 
   def basic_user
-    @md = MiniTest::Mock.new
+    @md = Minitest::Mock.new
     @md.expect(:find_user_groups, %w[bros], %w[john])
     get_test_instance_variable.member_service = @md
   end
 
   def bigtime_user
-    @md = MiniTest::Mock.new
+    @md = Minitest::Mock.new
     @md.expect(:find_user_groups, %w[bros broskies], %w[john])
     get_test_instance_variable.member_service = @md
   end
