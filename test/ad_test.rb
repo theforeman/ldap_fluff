@@ -1,6 +1,6 @@
 require 'lib/ldap_test_helper'
 
-class TestAD < MiniTest::Test
+class TestAD < Minitest::Test
   include LdapTestHelper
 
   def setup
@@ -34,8 +34,8 @@ class TestAD < MiniTest::Test
 
   def test_good_bind_with_account_name
     # looks up the account name's full DN via the service account
-    @md = MiniTest::Mock.new
-    user_result = MiniTest::Mock.new
+    @md = Minitest::Mock.new
+    user_result = Minitest::Mock.new
     user_result.expect(:dn, ad_user_dn('Internet User'))
     @md.expect(:find_user, [user_result], %w[internet])
     @ad.member_service = @md
@@ -62,7 +62,7 @@ class TestAD < MiniTest::Test
 
   def test_bad_user
     service_bind
-    md = MiniTest::Mock.new
+    md = Minitest::Mock.new
     md.expect(:find_user_groups, nil, %w[john])
     def md.find_user_groups(*_args)
       raise LdapFluff::ActiveDirectory::MemberService::UIDNotFoundException
@@ -112,7 +112,7 @@ class TestAD < MiniTest::Test
 
   def test_subgroups_in_groups_are_ignored
     group = Net::LDAP::Entry.new('foremaners')
-    md = MiniTest::Mock.new
+    md = Minitest::Mock.new
     2.times { md.expect(:find_group, [group], ['foremaners']) }
     2.times { service_bind }
     def md.find_by_dn(_dn)
@@ -124,7 +124,7 @@ class TestAD < MiniTest::Test
   end
 
   def test_user_exists
-    md = MiniTest::Mock.new
+    md = Minitest::Mock.new
     md.expect(:find_user, 'notnilluser', %w[john])
     @ad.member_service = md
     service_bind
@@ -132,7 +132,7 @@ class TestAD < MiniTest::Test
   end
 
   def test_missing_user
-    md = MiniTest::Mock.new
+    md = Minitest::Mock.new
     md.expect(:find_user, nil, %w[john])
     def md.find_user(_uid)
       raise LdapFluff::ActiveDirectory::MemberService::UIDNotFoundException
@@ -143,7 +143,7 @@ class TestAD < MiniTest::Test
   end
 
   def test_group_exists
-    md = MiniTest::Mock.new
+    md = Minitest::Mock.new
     md.expect(:find_group, 'notnillgroup', %w[broskies])
     @ad.member_service = md
     service_bind
@@ -151,7 +151,7 @@ class TestAD < MiniTest::Test
   end
 
   def test_missing_group
-    md = MiniTest::Mock.new
+    md = Minitest::Mock.new
     md.expect(:find_group, nil, %w[broskies])
     def md.find_group(_uid)
       raise LdapFluff::ActiveDirectory::MemberService::GIDNotFoundException
@@ -172,7 +172,7 @@ class TestAD < MiniTest::Test
     nested_group[:objectclass] = ['organizationalunit']
     nested_user[:objectclass]  = ['person']
 
-    md = MiniTest::Mock.new
+    md = Minitest::Mock.new
     2.times { md.expect(:find_group, [group], ['foremaners']) }
     2.times { md.expect(:find_group, [nested_group], ['katellers']) }
     2.times { service_bind }
@@ -196,7 +196,7 @@ class TestAD < MiniTest::Test
     nested_group[:memberof] = ['CN=foremaners,DC=corp,DC=windows,DC=com']
     nested_user[:objectclass] = ['person']
 
-    md = MiniTest::Mock.new
+    md = Minitest::Mock.new
     2.times { md.expect(:find_group, [group], ['foremaners']) }
     2.times { md.expect(:find_group, [nested_group], ['katellers']) }
     2.times { service_bind }

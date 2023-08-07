@@ -1,6 +1,6 @@
 require 'lib/ldap_test_helper'
 
-class TestIPAMemberService < MiniTest::Test
+class TestIPAMemberService < Minitest::Test
   include LdapTestHelper
 
   def setup

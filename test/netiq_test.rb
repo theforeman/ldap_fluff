@@ -1,6 +1,6 @@
 require 'lib/ldap_test_helper'
 
-class TestNetIQ < MiniTest::Test
+class TestNetIQ < Minitest::Test
   include LdapTestHelper
 
   def setup
@@ -24,7 +24,7 @@ class TestNetIQ < MiniTest::Test
   end
 
   def test_missing_user
-    md = MiniTest::Mock.new
+    md = Minitest::Mock.new
     md.expect(:find_user_groups, [], %w[john])
     @netiq.member_service = md
     @ldap.expect(:bind, true)
@@ -52,8 +52,8 @@ class TestNetIQ < MiniTest::Test
 
   def test_good_bind
     # looks up the uid's full DN via the service account
-    @md = MiniTest::Mock.new
-    user_result = MiniTest::Mock.new
+    @md = Minitest::Mock.new
+    user_result = Minitest::Mock.new
     user_result.expect(:dn, 'uid=internet,dn=example')
     @md.expect(:find_user, [user_result], %w[internet])
     @netiq.member_service = @md
@@ -81,7 +81,7 @@ class TestNetIQ < MiniTest::Test
 
   def test_user_exists
     service_bind
-    md = MiniTest::Mock.new
+    md = Minitest::Mock.new
     md.expect(:find_user, 'notnilluser', %w[john])
     @netiq.member_service = md
     assert(@netiq.user_exists?('john'))
@@ -89,7 +89,7 @@ class TestNetIQ < MiniTest::Test
 
   def test_user_not_exists
     service_bind
-    md = MiniTest::Mock.new
+    md = Minitest::Mock.new
     md.expect(:find_user, nil, %w[john])
     def md.find_user(_uid)
       raise LdapFluff::NetIQ::MemberService::UIDNotFoundException
@@ -100,7 +100,7 @@ class TestNetIQ < MiniTest::Test
 
   def test_group_exists
     service_bind
-    md = MiniTest::Mock.new
+    md = Minitest::Mock.new
     md.expect(:find_group, 'notnillgroup', %w[broskies])
     @netiq.member_service = md
     assert(@netiq.group_exists?('broskies'))
@@ -108,7 +108,7 @@ class TestNetIQ < MiniTest::Test
 
   def test_missing_group
     service_bind
-    md = MiniTest::Mock.new
+    md = Minitest::Mock.new
     md.expect(:find_group, nil, %w[broskies])
     def md.find_group(_uid)
       raise LdapFluff::NetIQ::MemberService::GIDNotFoundException
@@ -133,7 +133,7 @@ class TestNetIQ < MiniTest::Test
                     Net::LDAP::Filter.eq('objectClass', 'groupOfNames') }])
     @netiq.ldap = @ldap
 
-    md = MiniTest::Mock.new
+    md = Minitest::Mock.new
     2.times { md.expect(:find_group, [group], ['foremaners']) }
     @netiq.member_service = md
 
