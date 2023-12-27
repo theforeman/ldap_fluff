@@ -8,7 +8,7 @@ inherit_gem:
     - rules/performance.yml
 
 AllCops:
-  TargetRubyVersion: 2.4
+  TargetRubyVersion: '2.7'
   Exclude:
     - 'test/**/*'
     - 'vendor/bundle/**/*'
@@ -21,3 +21,6 @@ Layout:
 
 Style:
   Enabled: false
+
+Gemspec/RequiredRubyVersion:
+  Enabled: true
