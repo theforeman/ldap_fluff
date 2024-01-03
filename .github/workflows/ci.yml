@@ -1,32 +1,23 @@
-name: CI testing
+name: CI
+
 on:
   pull_request:
   push:
     branches:
       - master
+
+concurrency:
+  group: ${{ github.ref_name }}
+  cancel-in-progress: true
+     
 jobs:
   rubocop:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v2
-      - uses: ruby/setup-ruby@v1
-        with:
-          ruby-version: 2.4
-          bundler-cache: true
-      - name: Run rubocop
-        run: bundle exec rubocop -P
-  tests:
-    runs-on: ubuntu-latest
+    name: Rubocop
+    uses: theforeman/actions/.github/workflows/rubocop.yml@v0
+  
+  test:
+    name: Tests
     needs: rubocop
-    strategy:
-      fail-fast: true
-      matrix:
-        ruby-version: [2.4, 2.7]
-    steps:
-      - uses: actions/checkout@v2
-      - uses: ruby/setup-ruby@v1
-        with:
-          ruby-version: ${{ matrix.ruby-version }}
-          bundler-cache: true
-      - name: Run tests
-        run: bundle exec rake MT_KWARGS_HACK=1
+    uses: theforeman/actions/.github/workflows/test-gem.yml@v0
+    with:
+      command: bundle exec rake MT_KWARGS_HACK=1
