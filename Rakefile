@@ -12,3 +12,11 @@ Rake::TestTask.new('test') do |t|
   t.test_files = FileList['test/**/*.rb']
   t.verbose    = true
 end
+
+begin
+  require 'rubocop/rake_task'
+rescue LoadError
+  # Test group disabled
+else
+  RuboCop::RakeTask.new
+end
