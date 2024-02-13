@@ -15,16 +15,34 @@ class LdapFluff::Posix::MemberService < LdapFluff::GenericMemberService
 
   # return an ldap user with groups attached
   # note : this method is not particularly fast for large ldap systems
+  # This group will check all the groups and will match the user. MemberOf plugin
+  # it's not required for this operation, once this plugin it's optional in ldap.
   def find_user_groups(uid)
     groups = []
-    @ldap.search(
-      :filter => Net::LDAP::Filter.eq('memberuid', uid),
-      :base => @group_base, :attributes => ["cn"]
-    ).each do |entry|
-      groups << entry[:cn][0]
+
+    search_filter = Net::LDAP::Filter.eq('objectClass', 'groupOfNames')
+    results_attr = ["cn", "member"]
+
+    ldap.search(:filter => search_filter, :attributes => results_attr).each do |grp_info|
+
+      grp_info[:member].each do |login|
+        only_uid = login.split(',')[0].split('=')[1]
+
+        if only_uid.include?(uid)
+          groups << grp_info[:cn]
+        end
+      end
     end
-    groups
+
+    if groups.length > 0
+      groups.flatten!
+    else
+      groups = []
+    end
   end
+
+
+
 
   def times_in_groups(uid, gids, all)
     filters = []
