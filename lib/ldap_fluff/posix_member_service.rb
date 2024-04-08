@@ -17,7 +17,7 @@ class LdapFluff::Posix::MemberService < LdapFluff::GenericMemberService
   # note : this method is not particularly fast for large ldap systems
   def find_user_groups(uid)
     @ldap.search(
-      :filter => Net::LDAP::Filter.eq('memberuid', uid),
+      :filter => user_group_filter(uid),
       :base => @group_base, :attributes => ["cn"]
     ).map { |entry| entry[:cn][0] }
   end
@@ -26,5 +26,13 @@ class LdapFluff::Posix::MemberService < LdapFluff::GenericMemberService
   end
 
   class GIDNotFoundException < LdapFluff::Error
+  end
+
+  private
+
+  def user_group_filter(uid)
+    unique_filter = Net::LDAP::Filter.eq('uniquemember', "uid=#{uid},#{@base}") &
+                    Net::LDAP::Filter.eq('objectClass', 'groupOfUniqueNames')
+    Net::LDAP::Filter.eq('memberuid', uid) | unique_filter
   end
 end
