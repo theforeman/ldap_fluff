@@ -16,8 +16,9 @@ class LdapFluff::Posix::MemberService < LdapFluff::GenericMemberService
   # return an ldap user with groups attached
   # note : this method is not particularly fast for large ldap systems
   def find_user_groups(uid)
+    user = find_user(uid).first
     @ldap.search(
-      :filter => user_group_filter(uid),
+      :filter => user_group_filter(uid, user[:dn].first),
       :base => @group_base, :attributes => ["cn"]
     ).map { |entry| entry[:cn][0] }
   end
@@ -30,8 +31,8 @@ class LdapFluff::Posix::MemberService < LdapFluff::GenericMemberService
 
   private
 
-  def user_group_filter(uid)
-    unique_filter = Net::LDAP::Filter.eq('uniquemember', "uid=#{uid},#{@base}") &
+  def user_group_filter(uid, user_dn)
+    unique_filter = Net::LDAP::Filter.eq('uniquemember', user_dn) &
                     Net::LDAP::Filter.eq('objectClass', 'groupOfUniqueNames')
     Net::LDAP::Filter.eq('memberuid', uid) | unique_filter
   end

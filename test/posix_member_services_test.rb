@@ -18,10 +18,14 @@ class TestPosixMemberService < Minitest::Test
   end
 
   def test_find_user_groups
-    user = posix_group_payload
+    group = posix_group_payload
+    user = posix_user_payload
     username = 'john'
-    filter = @ms.send(:user_group_filter, username)
-    @ldap.expect(:search, user, [:filter => filter,
+
+    @ldap.expect(:search, user, [:filter => @ms.name_filter(username),
+                                 :base => config.base_dn])
+    filter = @ms.send(:user_group_filter, username, user.first[:dn].first)
+    @ldap.expect(:search, group, [:filter => filter,
                                  :base => config.group_base,
                                  :attributes => ["cn"]])
     @ms.ldap = @ldap
@@ -30,8 +34,11 @@ class TestPosixMemberService < Minitest::Test
   end
 
   def test_find_no_groups
+    user = posix_user_payload
     username = 'john'
-    filter = @ms.send(:user_group_filter, username)
+    @ldap.expect(:search, user, [:filter => @ms.name_filter(username),
+                                 :base => config.base_dn])
+    filter = @ms.send(:user_group_filter, username, user.first[:dn].first)
     @ldap.expect(:search, [], [:filter => filter,
                                :base => config.group_base,
                                :attributes => ["cn"]])
@@ -72,13 +79,5 @@ class TestPosixMemberService < Minitest::Test
     @ms.ldap = @ldap
     assert_raises(LdapFluff::Posix::MemberService::GIDNotFoundException) { @ms.find_group('broze') }
     @ldap.verify
-  end
-
-  def test_user_group_filter
-    username = 'john'
-    unique_filter = Net::LDAP::Filter.eq('uniquemember', "uid=#{username},#{config.base_dn}") &
-                    Net::LDAP::Filter.eq('objectClass', 'groupOfUniqueNames')
-    expected = @ms.name_filter(username) | unique_filter
-    assert_equal expected, @ms.send(:user_group_filter, username)
   end
 end
