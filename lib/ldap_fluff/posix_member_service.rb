@@ -26,27 +26,6 @@ class LdapFluff::Posix::MemberService < LdapFluff::GenericMemberService
     groups
   end
 
-  def times_in_groups(uid, gids, all)
-    filters = []
-    gids.each do |cn|
-      filters << group_filter(cn)
-    end
-    group_filters = merge_filters(filters, all)
-    filter        = name_filter(uid) & group_filters
-    @ldap.search(:base => @group_base, :filter => filter).size
-  end
-
-  # AND or OR all of the filters together
-  def merge_filters(filters = [], all = false)
-    if !filters.nil? && filters.size >= 1
-      filter = filters[0]
-      filters[1..(filters.size - 1)].each do |gfilter|
-        filter = (all ? filter & gfilter : filter | gfilter)
-      end
-      filter
-    end
-  end
-
   class UIDNotFoundException < LdapFluff::Error
   end
 
