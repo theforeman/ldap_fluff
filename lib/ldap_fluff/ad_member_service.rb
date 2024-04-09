@@ -57,7 +57,7 @@ class LdapFluff::ActiveDirectory::MemberService < LdapFluff::GenericMemberServic
       next unless !search.nil? && !search.first.nil?
       groups = search.first[:memberof] - known_groups
       known_groups                += groups
-      next_level, new_known_groups = _walk_group_ancestry(groups, known_groups)
+      next_level, _new_known_groups = _walk_group_ancestry(groups, known_groups)
       set                         += next_level
       set                         += groups
       known_groups                += next_level
