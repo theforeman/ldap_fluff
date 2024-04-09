@@ -121,7 +121,7 @@ module LdapTestHelper
   end
 
   def posix_user_payload
-    [{ :cn => ["john"] }]
+    [{ :cn => ["john"], :dn => ["cn=john,ou=people,dc=internet,dc=com"] }]
   end
 
   def posix_group_payload
