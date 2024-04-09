@@ -19,7 +19,8 @@ class TestPosix < Minitest::Test
     assert_equal(@posix.groups_for_uid("john"), %w[bros])
   end
 
-  def test_missing_user
+  def test_groups_missing_user
+    service_bind
     md = Minitest::Mock.new
     md.expect(:find_user_groups, [], %w[john])
     @posix.member_service = md
