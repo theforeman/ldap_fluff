@@ -26,7 +26,7 @@ class LdapFluff::ActiveDirectory::MemberService < LdapFluff::GenericMemberServic
 
   # return the domain functionality level, default to 0
   def _get_domain_func_level
-    return @domain_functionality unless @domain_functionality.nil?
+    return @domain_functionality if defined?(@domain_functionality)
 
     @domain_functionality = 0
 
