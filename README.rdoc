@@ -53,6 +53,8 @@ Your global configuration must provide information about your LDAP host to funct
   group_base: # base DN for your LDAP groups, eg ou=Groups,dc=redhat,dc=com
   use_netgroups: # false by default, use true if you want to use netgroup triples,
                  # supported only for server type :free_ipa and :posix
+  use_rfc4519_group_membership: # false by default, use true if you want to use group membership extensions from RFC4519. Typically you may want to use this if your LDAP server is based on 389DS.
+                                # supported only for server type :posix
   server_type: # type of server. default == :posix. :active_directory, :posix, :free_ipa
   ad_domain: # domain for your users if using active directory, eg redhat.com
   service_user: # service account for authenticating LDAP calls. required unless you enable anon
