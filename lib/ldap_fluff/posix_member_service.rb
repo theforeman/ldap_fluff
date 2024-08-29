@@ -16,21 +16,14 @@ class LdapFluff::Posix::MemberService < LdapFluff::GenericMemberService
   # return an ldap user with groups attached
   # note : this method is not particularly fast for large ldap systems
   def find_user_groups(uid)
-    groups = []
     @ldap.search(
       :filter => Net::LDAP::Filter.eq('memberuid', uid),
       :base => @group_base, :attributes => ["cn"]
-    ).each do |entry|
-      groups << entry[:cn][0]
-    end
-    groups
+    ).map { |entry| entry[:cn][0] }
   end
 
   def times_in_groups(uid, gids, all)
-    filters = []
-    gids.each do |cn|
-      filters << group_filter(cn)
-    end
+    gids.map { |cn| group_filter(cn) }
     group_filters = merge_filters(filters, all)
     filter        = name_filter(uid) & group_filters
     @ldap.search(:base => @group_base, :filter => filter).size
@@ -38,12 +31,10 @@ class LdapFluff::Posix::MemberService < LdapFluff::GenericMemberService
 
   # AND or OR all of the filters together
   def merge_filters(filters = [], all = false)
-    if !filters.nil? && filters.size >= 1
-      filter = filters[0]
-      filters[1..(filters.size - 1)].each do |gfilter|
-        filter = (all ? filter & gfilter : filter | gfilter)
-      end
-      filter
+    if all
+      filters&.reduce(:&)
+    else
+      filters&.reduce(:|)
     end
   end
 
