@@ -19,7 +19,8 @@ class LdapFluff::Posix < LdapFluff::Generic
     filter = if @use_netgroups
                Net::LDAP::Filter.eq('objectClass', 'nisNetgroup')
              else
-               filter = Net::LDAP::Filter.eq('objectClass', 'posixGroup')
+               filter = Net::LDAP::Filter.eq('objectClass', 'posixGroup') |
+                        Net::LDAP::Filter.eq('objectClass', 'organizationalunit')
                if @use_rfc4519_group_membership
                  filter = filter |
                           Net::LDAP::Filter.eq('objectClass', 'groupOfUniqueNames') |
