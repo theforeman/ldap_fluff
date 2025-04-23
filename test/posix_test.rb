@@ -135,4 +135,33 @@ class TestPosix < Minitest::Test
     md.verify
     @ldap.verify
   end
+
+  def test_find_users_in_nested_groups_with_rfc4519
+    @posix.instance_variable_set('@use_rfc4519_group_membership', true)
+
+    service_bind
+    group = Net::LDAP::Entry.new('CN=foremaners,DC=example,DC=com')
+    group[:memberuid] = ['katellers']
+    nested_group = Net::LDAP::Entry.new('CN=katellers,CN=foremaners,DC=example,DC=com')
+    nested_group[:memberuid] = ['testuser']
+
+    @ldap.expect(:search,
+      [nested_group],
+      [{ :base => group.dn,
+         :filter => Net::LDAP::Filter.eq('objectClass', 'posixGroup') |
+                    Net::LDAP::Filter.eq('objectClass', 'organizationalunit') |
+                    Net::LDAP::Filter.eq('objectClass', 'groupOfUniqueNames') |
+                    Net::LDAP::Filter.eq('objectClass', 'groupOfNames')
+       }])
+    @posix.ldap = @ldap
+
+    md = Minitest::Mock.new
+    2.times { md.expect(:find_group, [group], ['foremaners']) }
+    @posix.member_service = md
+
+    assert_equal @posix.users_for_gid('foremaners'), ['testuser']
+
+    md.verify
+    @ldap.verify
+  end
 end
