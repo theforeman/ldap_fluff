@@ -14,6 +14,7 @@ class LdapFluff::Generic
     @base       = config.base_dn
     @group_base = (config.group_base.empty? ? config.base_dn : config.group_base)
     @use_netgroups = config.use_netgroups
+    @use_rfc4519_group_membership = config.use_rfc4519_group_membership
     @member_service = create_member_service(config)
   end
 

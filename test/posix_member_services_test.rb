@@ -18,21 +18,54 @@ class TestPosixMemberService < Minitest::Test
   end
 
   def test_find_user_groups
-    user = posix_group_payload
-    @ldap.expect(:search, user, [:filter => @ms.name_filter('john'),
+    group = posix_group_payload
+    user = posix_user_payload
+    username = 'john'
+
+    @ldap.expect(:search, user, [:filter => @ms.name_filter(username),
+                                 :base => config.base_dn])
+    filter = Net::LDAP::Filter.eq('memberuid', username)
+    @ldap.expect(:search, group, [:filter => filter,
                                  :base => config.group_base,
                                  :attributes => ["cn"]])
     @ms.ldap = @ldap
-    assert_equal ['broze'], @ms.find_user_groups('john')
+    assert_equal ['broze'], @ms.find_user_groups(username)
+    @ldap.verify
+  end
+
+  def test_find_user_groups_rfc4519
+    @ms.instance_variable_set('@use_rfc4519_group_membership', true)
+
+    group = posix_group_payload
+    user = posix_user_payload
+    username = 'john'
+
+    @ldap.expect(:search, user, [:filter => @ms.name_filter(username),
+                                 :base => config.base_dn])
+    filter = [Net::LDAP::Filter.eq('memberuid', username),
+              Net::LDAP::Filter.eq('member', user.first[:dn].first) & Net::LDAP::Filter.eq('objectClass', 'groupOfNames'),
+              Net::LDAP::Filter.eq('uniquemember', user.first[:dn].first) & Net::LDAP::Filter.eq('objectClass', 'groupOfUniqueNames')
+             ].reduce(&:|)
+
+    @ldap.expect(:search, group, [:filter => filter,
+                                 :base => config.group_base,
+                                 :attributes => ["cn"]])
+    @ms.ldap = @ldap
+    assert_equal ['broze'], @ms.find_user_groups(username)
     @ldap.verify
   end
 
   def test_find_no_groups
-    @ldap.expect(:search, [], [:filter => @ms.name_filter("john"),
+    user = posix_user_payload
+    username = 'john'
+    @ldap.expect(:search, user, [:filter => @ms.name_filter(username),
+                                 :base => config.base_dn])
+    filter = @ms.send(:user_group_filter, username, user.first[:dn].first)
+    @ldap.expect(:search, [], [:filter => filter,
                                :base => config.group_base,
                                :attributes => ["cn"]])
     @ms.ldap = @ldap
-    assert_equal [], @ms.find_user_groups('john')
+    assert_equal [], @ms.find_user_groups(username)
     @ldap.verify
   end
 

@@ -128,9 +128,7 @@ class TestNetIQ < Minitest::Test
       [nested_group],
       [{ :base => group.dn,
          :filter => Net::LDAP::Filter.eq('objectClass', 'posixGroup') |
-                    Net::LDAP::Filter.eq('objectClass', 'organizationalunit') |
-                    Net::LDAP::Filter.eq('objectClass', 'groupOfUniqueNames') |
-                    Net::LDAP::Filter.eq('objectClass', 'groupOfNames') }])
+                    Net::LDAP::Filter.eq('objectClass', 'organizationalunit') }])
     @netiq.ldap = @ldap
 
     md = Minitest::Mock.new

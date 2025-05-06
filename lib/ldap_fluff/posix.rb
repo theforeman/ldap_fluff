@@ -19,10 +19,14 @@ class LdapFluff::Posix < LdapFluff::Generic
     filter = if @use_netgroups
                Net::LDAP::Filter.eq('objectClass', 'nisNetgroup')
              else
-               Net::LDAP::Filter.eq('objectClass', 'posixGroup') |
-                 Net::LDAP::Filter.eq('objectClass', 'organizationalunit') |
-                 Net::LDAP::Filter.eq('objectClass', 'groupOfUniqueNames') |
-                 Net::LDAP::Filter.eq('objectClass', 'groupOfNames')
+               filter = Net::LDAP::Filter.eq('objectClass', 'posixGroup') |
+                        Net::LDAP::Filter.eq('objectClass', 'organizationalunit')
+               if @use_rfc4519_group_membership
+                 filter = filter |
+                          Net::LDAP::Filter.eq('objectClass', 'groupOfUniqueNames') |
+                          Net::LDAP::Filter.eq('objectClass', 'groupOfNames')
+               end
+               filter
              end
     groups = @ldap.search(:base => search.dn, :filter => filter)
     members = groups.map { |group| group.send(method) }.flatten.uniq
