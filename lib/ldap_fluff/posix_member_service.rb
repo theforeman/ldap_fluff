@@ -18,10 +18,16 @@ class LdapFluff::Posix::MemberService < LdapFluff::GenericMemberService
   # note : this method is not particularly fast for large ldap systems
   def find_user_groups(uid)
     user = find_user(uid).first
-    @ldap.search(
+    results = @ldap.search(
       :filter => user_group_filter(uid, user[:dn].first),
       :base => @group_base, :attributes => ["cn"]
-    ).map { |entry| entry[:cn][0] }
+    )
+
+    if results
+      results.map { |entry| entry[:cn][0] }
+    else
+      raise Net::LDAP::Error, @ldap.get_operation_result[:error_message].to_s
+    end
   end
 
   class UIDNotFoundException < LdapFluff::Error

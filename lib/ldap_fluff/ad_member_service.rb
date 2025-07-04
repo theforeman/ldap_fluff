@@ -15,7 +15,9 @@ class LdapFluff::ActiveDirectory::MemberService < LdapFluff::GenericMemberServic
     if _get_domain_func_level >= 6
       user_dn = user_data[:distinguishedname].first
       search = @ldap.search(:base => user_dn, :scope => Net::LDAP::SearchScope_BaseObject, :attributes => ['msds-memberOfTransitive'])
-      if !search.nil? && !search.first.nil?
+      if search.nil?
+        raise Net::LDAP::Error, @ldap.get_operation_result[:error_message].to_s
+      elsif !search.first.nil?
         return get_groups(search.first['msds-memberoftransitive'])
       end
     end

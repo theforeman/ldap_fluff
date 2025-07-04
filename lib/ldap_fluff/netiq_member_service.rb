@@ -34,10 +34,15 @@ class LdapFluff::NetIQ::MemberService < LdapFluff::Posix::MemberService
       # do nothing
     end
 
-    @ldap.search(
+    results = @ldap.search(
       :filter => filter,
       :base => @group_base,
       :attributes => ['cn']
-    ).map { |entry| entry[:cn][0] }
+    )
+    if results
+      results.map { |entry| entry[:cn][0] }
+    else
+      raise Net::LDAP::Error, @ldap.get_operation_result[:error_message].to_s
+    end
   end
 end
