@@ -21,3 +21,14 @@ jobs:
     uses: theforeman/actions/.github/workflows/test-gem.yml@v0
     with:
       command: bundle exec rake MT_KWARGS_HACK=1
+
+  ruby4:
+    name: Ruby 4.0 on Ubuntu 26.04
+    runs-on: ubuntu-26.04
+    steps:
+      - uses: actions/checkout@v5
+      - uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: '4.0.7'
+          bundler-cache: true
+      - run: bundle exec rake MT_KWARGS_HACK=1
